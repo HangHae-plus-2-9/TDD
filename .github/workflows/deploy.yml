@@ -1,0 +1,144 @@
+name: ci-cd-pipeline
+
+on:
+  pull_request:
+    branches:
+      - stage
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ECR_REPOSITORY_NESTJS: 'hhp-nestjs'
+  ECS_SERVICE_NAME: 'hhp-nestjs'
+  ECS_CLUSTER_NAME: 'hhp-cluster'
+  DATABASE_CONNECTION: ${{ secrets.DATABASE_CONNECTION }}
+  DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+  DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+  DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+  DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+
+jobs:
+  test:
+    name: test nestjs
+    runs-on: ubuntu-22.04
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: ${{ env.DATABASE_USERNAME }}
+          POSTGRES_PASSWORD: ${{ env.DATABASE_PASSWORD }}
+          POSTGRES_DB: ${{ env.DATABASE_NAME }}
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.0.0
+
+      - name: setup node
+        uses: actions/setup-node@v3.8.1
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Cache node modules
+        uses: actions/cache@v3.3.2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: install dependencies
+        run: npm install
+
+      - name: run lint
+        run: npm run lint
+
+      - name: run tests
+        run: npm run test
+
+      - name: run e2e tests
+        env:
+          GITHUB_ACTIONS: true
+          DATABASE_CONNECTION: 'postgres'
+        run: npm run test:e2e
+
+      - name: Notify Slack on Failure
+        if: failure()
+        uses: 8398a7/action-slack@v3.15.1
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+          author_name: ${{ github.actor }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
+          username: ${{ secrets.SLACK_USERNAME }}
+          text: 'Tests failed! :x:'
+        env: 
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+
+  build_and_deploy:
+    name: build docker image and ecs deploy
+    runs-on: ubuntu-22.04
+    needs: test
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.0.0
+
+      - name: configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-region: ap-northeast-2
+          role-to-assume: arn:aws:iam::332034673285:role/MyGithubOIDC
+          role-session-name: MyGithubOIDC
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and push NestJS
+        uses: docker/build-push-action@v5.0.0
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_NESTJS }}:${{ github.sha }}
+          build-args: |
+            NODE_ENV=production
+            DATABASE_CONNECTION=${{ env.DATABASE_CONNECTION }}
+            DATABASE_HOST=${{ env.DATABASE_HOST }}
+            DATABASE_PORT=${{ env.DATABASE_PORT }}
+            DATABASE_USERNAME=${{ env.DATABASE_USERNAME }}
+            DATABASE_PASSWORD=${{ env.DATABASE_PASSWORD }}
+            DATABASE_NAME=${{ env.DATABASE_NAME }}
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.ECR_REPOSITORY_NESTJS }}
+          image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_NESTJS }}:${{ github.sha }}
+
+      - name: configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-region: ap-northeast-2
+          role-to-assume: arn:aws:iam::332034673285:role/MyGithubOIDC
+          role-session-name: MyGithubOIDC
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE_NAME }}
+          cluster: ${{ env.ECS_CLUSTER_NAME }}
+          wait-for-service-stability: false

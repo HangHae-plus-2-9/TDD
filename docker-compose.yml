@@ -1,0 +1,38 @@
+version: "3"
+services:
+  app:
+    env_file:
+      - .env.development
+    environment:
+      - DATABASE_HOST=postgres
+    container_name: hhp-nestjs-app
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    links:
+      - postgres
+    volumes:
+      - ./:/usr/src/app
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/data/postgres
+      - ./init-data.sh:/docker-entrypoint-initdb.d/init-data.sh
+    env_file:
+      - .env.development
+
+volumes:
+  app:
+    driver: local
+  postgres:
+    driver: local
