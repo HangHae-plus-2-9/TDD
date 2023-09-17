@@ -93,6 +93,8 @@ jobs:
           channel: ${{ secrets.SLACK_CHANNEL }}
           username: ${{ secrets.SLACK_USERNAME }}
           text: 'Tests passed! :white_check_mark:'
+        env: 
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 
   build_and_deploy:
