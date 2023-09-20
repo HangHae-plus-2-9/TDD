@@ -12,7 +12,7 @@ permissions:
 
 env:
   ECR_REPOSITORY_NESTJS: 'hhp-nestjs'
-  ECS_SERVICE_NAME: 'hhp-nestjs'
+  ECS_SERVICE_NAME: 'nestjs'
   ECS_CLUSTER_NAME: 'hhp-cluster'
   DATABASE_CONNECTION: ${{ secrets.DATABASE_CONNECTION }}
   DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
