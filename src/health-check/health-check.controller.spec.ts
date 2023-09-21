@@ -2,29 +2,32 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HealthCheckController } from './health-check.controller';
 import { SampleHealthIndicator } from './indicators/sample.indicator';
 import {
+  HealthCheckResult,
   HealthCheckService,
+  HealthIndicatorFunction,
+  HealthIndicatorResult,
   HttpHealthIndicator,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
 
 describe('HealthCheckController', () => {
   let controller: HealthCheckController;
-  let healthCheckService: Partial<HealthCheckService>;
-  let httpHealthIndicator: Partial<HttpHealthIndicator>;
-  let typeOrmHealthIndicator: Partial<TypeOrmHealthIndicator>;
-  let sampleHealthIndicator: Partial<SampleHealthIndicator>;
+  let health: Partial<HealthCheckService>;
+  let http: Partial<HttpHealthIndicator>;
+  let typeOrm: Partial<TypeOrmHealthIndicator>;
+  let sample: Partial<SampleHealthIndicator>;
 
   beforeEach(async () => {
-    healthCheckService = {
+    health = {
       check: jest.fn(),
     };
-    httpHealthIndicator = {
+    http = {
       pingCheck: jest.fn(),
     };
-    typeOrmHealthIndicator = {
+    typeOrm = {
       pingCheck: jest.fn(),
     };
-    sampleHealthIndicator = {
+    sample = {
       isHealthy: jest.fn(),
     };
     const module: TestingModule = await Test.createTestingModule({
@@ -32,19 +35,19 @@ describe('HealthCheckController', () => {
       providers: [
         {
           provide: HealthCheckService,
-          useValue: healthCheckService,
+          useValue: health,
         },
         {
           provide: HttpHealthIndicator,
-          useValue: httpHealthIndicator,
+          useValue: http,
         },
         {
           provide: TypeOrmHealthIndicator,
-          useValue: typeOrmHealthIndicator,
+          useValue: typeOrm,
         },
         {
           provide: SampleHealthIndicator,
-          useValue: sampleHealthIndicator,
+          useValue: sample,
         },
       ],
     }).compile();
@@ -58,8 +61,50 @@ describe('HealthCheckController', () => {
 
   it('should call health check service', () => {
     const check = jest.fn();
-    healthCheckService.check = check;
+    health.check = check;
     controller.check();
     expect(check).toBeCalled();
+  });
+
+  it('should run general health checks', async () => {
+    // Arrange
+    const httpResult = { status: 'up' };
+    const dbResult = { status: 'up' };
+    const sampleResult = { status: 'up' };
+
+    const httpSpy = jest
+      .spyOn(http, 'pingCheck')
+      .mockResolvedValue(httpResult as unknown as HealthIndicatorResult);
+    const dbSpy = jest
+      .spyOn(typeOrm, 'pingCheck')
+      .mockResolvedValue(dbResult as unknown as HealthIndicatorResult);
+    const sampleSpy = jest
+      .spyOn(sample, 'isHealthy')
+      .mockResolvedValue(sampleResult as any);
+
+    const healthSpy = jest
+      .spyOn(health, 'check')
+      .mockImplementation(
+        async (healthIndicators: HealthIndicatorFunction[]) => {
+          const results = await Promise.all(healthIndicators.map((cb) => cb()));
+          return {
+            status: 'up',
+            info: results,
+          } as unknown as HealthCheckResult;
+        },
+      );
+
+    // Act
+    const result = await controller.check();
+
+    // Assert
+    expect(healthSpy).toHaveBeenCalled();
+    expect(httpSpy).toHaveBeenCalledWith('google', 'https://google.com');
+    expect(dbSpy).toHaveBeenCalledWith('database', { timeout: 300 });
+    expect(sampleSpy).toHaveBeenCalledWith('sample');
+    expect(result).toEqual({
+      status: 'up',
+      info: [httpResult, dbResult, sampleResult],
+    });
   });
 });
