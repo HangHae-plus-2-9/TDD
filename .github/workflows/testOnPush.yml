@@ -1,4 +1,4 @@
-name: Test on Pushed
+name: ci-cd-pipeline
 
 on:
   push:
@@ -61,12 +61,6 @@ jobs:
 
       - name: run tests
         run: npm run test
-
-      - name: Comment with Test Coverage
-        uses: dkershner6/jest-coverage-commenter-action@v1
-        with:
-          github_token: "${{ secrets.GITHUB_TOKEN }}"
-          test_command: "npm run test:cov"
 
       - name: run e2e tests
         env:
