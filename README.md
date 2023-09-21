@@ -145,3 +145,4 @@ curl --location 'http://localhost:3000/health-check'
 - GET /api/v1/products/:id
 - PATCH /api/v1/products/:id
 - DELETE /api/v1/products/:id
+
