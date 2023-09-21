@@ -9,6 +9,7 @@ on:
 permissions:
   id-token: write
   contents: read
+  pull-requests: write
 
 env:
   ECR_REPOSITORY_NESTJS: 'hhp-nestjs'
