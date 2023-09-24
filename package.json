@@ -11,6 +11,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "cross-env NODE_ENV=production nest start",
     "start:dev": "npm run prebuild && cross-env NODE_ENV=development nest start --watch",
+    "start:dev:docker": "docker-compose up --build",
     "start:debug": "nest start --debug --watch",
     "start:stage": "cross-env NODE_ENV=stage node dist/main",
     "start:prod": "cross-env NODE_ENV=production node dist/main",
@@ -20,7 +21,13 @@
     "test:cov": "cross-env NODE_ENV=test jest --coverage --maxWorkers=1 --forceExit",
     "test:debug": "cross-env NODE_ENV=test node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand  --forceExit",
     "test:e2e": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json --maxWorkers=1  --forceExit --detectOpenHandles",
-    "test:e2e:docker": "docker-compose -f ./docker-compose.test.yml up --build --exit-code-from app"
+    "test:e2e:docker": "docker-compose -f ./docker-compose.test.yml up --build --exit-code-from app",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js --dataSource ./src/database/data-source.ts",
+    "migration:create": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:create ./src/database/migrations/Migration",
+    "migration:generate": "npm run typeorm migration:generate ./src/database/migrations/Migration",
+    "migration:run": "npm run typeorm migration:run",
+    "migration:revert": "npm run typeorm migration:revert",
+    "seed": "ts-node -r tsconfig-paths/register ./node_modules/typeorm-extension/bin/cli.cjs seed:run -d ./src/database/data-source.ts"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.0",
@@ -29,14 +36,18 @@
     "@nestjs/core": "^9.0.0",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/swagger": "^7.1.12",
     "@nestjs/terminus": "^10.0.1",
     "@nestjs/typeorm": "^10.0.0",
     "cross-env": "^7.0.3",
+    "express-basic-auth": "^1.2.1",
+    "nest-winston": "^1.9.4",
     "pg": "^8.11.3",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^5.0.1",
     "rxjs": "^7.2.0",
-    "typeorm": "^0.3.17"
+    "typeorm": "^0.3.17",
+    "winston": "^3.10.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",
@@ -79,6 +90,10 @@
       "!main.ts"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@storage/(.*)$": "storage/$1",
+      "^@/(.*)$": "<rootDir>/$1"
+    }
   }
 }
