@@ -145,6 +145,9 @@ jobs:
             DATABASE_USERNAME=${{ env.DATABASE_USERNAME }}
             DATABASE_PASSWORD=${{ env.DATABASE_PASSWORD }}
             DATABASE_NAME=${{ env.DATABASE_NAME }}
+            SWAGGER_URL=${{ env.SWAGGER_URL }}
+            API_AUTH_USER=${{ env.API_AUTH_USER }}
+            API_AUTH_PASSWORD=${{ env.API_AUTH_PASSWORD }}
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
