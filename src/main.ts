@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http.exception.filter';
-import { TransformInterceptor } from './common/interceptors/transform.interceptors';
+import { TransformInterceptor } from './common/interceptors';
 import { WinstonLogger, setupApiAuth, setupSwagger } from './config';
 
 async function bootstrap() {

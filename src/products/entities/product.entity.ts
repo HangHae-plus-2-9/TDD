@@ -1,8 +1,8 @@
 import { CommonColumns } from '@/common/entities/common-columns';
-import { Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
-@Entity('products')
+@Entity({ name: 'products' })
 export class ProductEntity extends CommonColumns {
-  @PrimaryColumn()
-  id: number;
+  @Column()
+  name: string;
 }
