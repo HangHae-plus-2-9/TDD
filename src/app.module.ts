@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { HealthCheckModule } from './health-check/health-check.module';
+import { HealthCheckModule } from './modules/health-check/health-check.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
-import { ProductsModule } from './products/products.module';
+import { ProductsModule } from './modules/products/products.module';
 
 @Module({
   imports: [

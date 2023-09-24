@@ -5,11 +5,8 @@
 /dist
 /node_modules
 
-# test
-/test
-/coverage
-
 # etc
+/coverage
 .prettierrc
 .gitignore
 .eslintrc.js
