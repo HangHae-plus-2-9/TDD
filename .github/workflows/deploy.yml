@@ -23,6 +23,9 @@ env:
   DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
   DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
   DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+  SWAGGER_URL: ${{ secrets.SWAGGER_URL }}
+  API_AUTH_USER: ${{ secrets.API_AUTH_USER }}
+  API_AUTH_PASSWORD: ${{ secrets.API_AUTH_PASSWORD }}
 
 jobs:
   test:
