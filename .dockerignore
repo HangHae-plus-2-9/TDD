@@ -1,0 +1,28 @@
+# github
+/.github
+
+# build
+/dist
+/node_modules
+
+# test
+/test
+/coverage
+
+# etc
+.prettierrc
+.gitignore
+.eslintrc.js
+task-definition.json
+init-data.sh
+README.md
+
+# docker
+Dockerfile
+Dockerfile.dev
+Dockerfile.test
+docker-compose.yml
+docker-compose.test.yml
+
+# logs
+/storage
