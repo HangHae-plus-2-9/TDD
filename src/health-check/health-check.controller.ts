@@ -5,8 +5,10 @@ import {
   HttpHealthIndicator,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
+import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { SampleHealthIndicator } from './indicators/sample.indicator';
 
+@ApiTags('health-check')
 @Controller({ version: '1', path: 'health-check' })
 export class HealthCheckController {
   constructor(
@@ -17,6 +19,8 @@ export class HealthCheckController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Health check 🫀' })
+  @ApiProperty({ type: String })
   @HealthCheck()
   check() {
     return this.health.check([
