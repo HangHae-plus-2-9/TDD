@@ -9,12 +9,29 @@ import {
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiProperty,
+  ApiCreatedResponse,
+  ApiResponse,
+} from '@nestjs/swagger';
 
-@Controller('products')
+@ApiTags('products')
+@Controller({ version: '1', path: 'products' })
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
+  @ApiOperation({ summary: '상품 등록' })
+  @ApiProperty({ type: String })
+  @ApiCreatedResponse({
+    description: 'The record has been successfully created.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal Server Error',
+  })
   create(@Body() createProductDto: CreateProductDto) {
     // 유저 인풋 검증
     return this.productsService.create_with_component(createProductDto);
