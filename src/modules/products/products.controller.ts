@@ -12,7 +12,6 @@ import { CreateProductDto } from './dto/create-product.dto';
 import {
   ApiTags,
   ApiOperation,
-  ApiProperty,
   ApiCreatedResponse,
   ApiResponse,
 } from '@nestjs/swagger';
@@ -24,7 +23,6 @@ export class ProductsController {
 
   @Post()
   @ApiOperation({ summary: '상품 등록' })
-  @ApiProperty({ type: String })
   @ApiCreatedResponse({
     description: 'The record has been successfully created.',
   })
