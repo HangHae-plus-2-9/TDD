@@ -20,7 +20,13 @@
     "test:cov": "cross-env NODE_ENV=test jest --coverage --maxWorkers=1 --forceExit",
     "test:debug": "cross-env NODE_ENV=test node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand  --forceExit",
     "test:e2e": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json --maxWorkers=1  --forceExit --detectOpenHandles",
-    "test:e2e:docker": "docker-compose -f ./docker-compose.test.yml up --build --exit-code-from app"
+    "test:e2e:docker": "docker-compose -f ./docker-compose.test.yml up --build --exit-code-from app",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js --dataSource ./src/database/data-source.ts",
+    "migration:create": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:create ./src/database/migrations/Migration",
+    "migration:generate": "npm run typeorm migration:generate ./src/database/migrations/Migration",
+    "migration:run": "npm run typeorm migration:run",
+    "migration:revert": "npm run typeorm migration:revert",
+    "seed": "ts-node -r tsconfig-paths/register ./node_modules/typeorm-extension/bin/cli.cjs seed:run -d ./src/database/data-source.ts"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.0",
@@ -83,6 +89,10 @@
       "!main.ts"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@storage/(.*)$": "storage/$1",
+      "^@/(.*)$": "<rootDir>/$1"
+    }
   }
 }
