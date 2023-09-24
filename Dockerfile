@@ -27,8 +27,6 @@ COPY . .
 ENV NPM_CONFIG_LOGLEVEL warn
 ENV NODE_ENV=production
 
-RUN mkdir -p storage/logs && chown -R node:node storage
-
 # for devDependencies
 RUN NODE_ENV=development npm ci 
 RUN NODE_ENV=production npm run build
