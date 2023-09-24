@@ -22,4 +22,4 @@ docker-compose.yml
 docker-compose.test.yml
 
 # logs
-/storage/logs/*.log
+*.log
