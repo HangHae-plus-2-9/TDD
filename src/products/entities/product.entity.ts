@@ -1,7 +1,8 @@
+import { CommonColumns } from '@/common/entities/common-columns';
 import { Entity, PrimaryColumn } from 'typeorm';
 
-@Entity()
-export class ProductEntity {
+@Entity('products')
+export class ProductEntity extends CommonColumns {
   @PrimaryColumn()
   id: number;
 }
