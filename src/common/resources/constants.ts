@@ -1,1 +1,5 @@
-export const TEST = 'test';
+export enum ROLE_TYPE {
+  ADMIN = 'ADMIN',
+  CUSTOMER = 'CUSTOMER',
+  SELLER = 'SELLER',
+}
