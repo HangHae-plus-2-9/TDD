@@ -1,6 +1,6 @@
 import { config } from 'dotenv';
 import { DataSource } from 'typeorm';
-import databaseConfig from '@/config/database.config';
+import { databaseConfig } from '@/config/database.config';
 
 config({ path: '.env.development' });
 

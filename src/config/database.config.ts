@@ -7,7 +7,9 @@ import { required } from '.';
 const isGithubActions = process.env.GITHUB_ACTIONS === 'true';
 const isProduction = process.env.NODE_ENV === 'production';
 
-export default (config?: ConfigService): TypeOrmModuleOptions => ({
+export const databaseConfig = (
+  config?: ConfigService,
+): TypeOrmModuleOptions => ({
   type: required('DATABASE_CONNECTION', config, 'postgres') as any,
   host: required('DATABASE_HOST', config, 'postgres') as string,
   port: parseInt(required('DATABASE_PORT', config, '5432') as string),

@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from './products.service';
 import { ProductsRepositoryInterface } from './interfaces/product-repository.interface';
 import { ProductsComponent } from './products.component';
-import { ProductsRepository } from './products.repository';
 
 describe('ProductsService', () => {
   let service: ProductsService;
