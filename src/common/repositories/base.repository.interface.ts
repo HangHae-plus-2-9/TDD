@@ -5,9 +5,9 @@ export interface BaseRepositoryInterface<T> {
 
   createMany(data: T[]): Promise<T[]>;
 
-  all(columns: [], relations: []): Promise<T[]>;
+  all(columns?: [], relations?: []): Promise<T[]>;
 
-  findById(id: number, columns: [], relations: []): Promise<T>;
+  findById(id: number, columns?: [], relations?: []): Promise<T>;
 
   update(id: number, data: Partial<T>): Promise<T>;
 
