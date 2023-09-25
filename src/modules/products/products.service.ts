@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsComponent } from './products.component';
-import { ProductsRepository } from './products.repository';
+import { ProductsRepositoryInterface } from './interfaces/product-repository.interface';
 
 /**
  * 가상의 서비스
@@ -12,7 +12,8 @@ import { ProductsRepository } from './products.repository';
 export class ProductsService {
   constructor(
     private readonly comp: ProductsComponent,
-    private readonly repo: ProductsRepository,
+    @Inject('ProductsRepositoryInterface')
+    private readonly repo: ProductsRepositoryInterface,
   ) {}
 
   // 기존에 트랙젝션을 사용하기 위해 사용했왔던 방식 - 이번에는 지양하기로.

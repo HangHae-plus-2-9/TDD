@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
-import { ProductsRepository } from './products.repository';
+import { ProductsRepositoryInterface } from './interfaces/product-repository.interface';
 
 @Injectable()
 export class ProductsComponent {
-  constructor(private readonly repo: ProductsRepository) {}
+  constructor(
+    @Inject('ProductsRepositoryInterface')
+    private readonly repo: ProductsRepositoryInterface,
+  ) {}
 
   /**
    * Business Logic상 원자적으로 항상 묶여야하는 로직을 작성

@@ -6,8 +6,8 @@ import { ProductsRepository } from './products.repository';
 
 describe('ProductsService', () => {
   let service: ProductsService;
-  let comp: Partial<ProductsComponent>;
-  let repo: ProductsRepositoryInterface;
+  let comp: Partial<ProductsComponent>; // 가짜 컴포넌트 - partial 사용
+  let repo: ProductsRepositoryInterface; // 가짜 레포지토리 - interface 사용
 
   beforeEach(async () => {
     comp = {};
