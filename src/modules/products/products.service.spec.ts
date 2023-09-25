@@ -24,7 +24,7 @@ describe('ProductsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProductsService,
-        { provide: ProductsRepository, useValue: repo },
+        { provide: 'ProductsRepositoryInterface', useValue: repo },
         { provide: ProductsComponent, useValue: comp },
       ],
     }).compile();
