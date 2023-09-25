@@ -12,9 +12,9 @@ export class ProductsComponent {
   createSomethingAndOther(createProductDto: CreateProductDto) {
     // @Transaction()
     // 3. 게시글을 트랜젝션으로 생성한다.
-    const newSomething = this.repo.create();
+    const newSomething = this.repo.create(createProductDto);
     // 4. 댓글을 트랜젝션으로 생성한다.
-    const newOtherThing = this.repo.create(); // 위와 다르다고 가정
+    const newOtherThing = this.repo.create(createProductDto); // 위와 다르다고 가정
     // @Commit()
     // 커밋
     // @Rollback()

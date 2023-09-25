@@ -11,7 +11,7 @@ import { ProductsRepository } from './products.repository';
 @Injectable()
 export class ProductsService {
   constructor(
-    private readonly prdComp: ProductsComponent,
+    private readonly comp: ProductsComponent,
     private readonly repo: ProductsRepository,
   ) {}
 
@@ -24,9 +24,9 @@ export class ProductsService {
 
     // @Transaction()
     // 3. 게시글을 트랜젝션으로 생성한다.
-    const newSomething = this.repo.create();
+    const newSomething = this.repo.create(createProductDto);
     // 4. 댓글을 트랜젝션으로 생성한다.
-    const newOtherThing = this.repo.create(); // 위와 다르다고 가정
+    const newOtherThing = this.repo.create(createProductDto); // 위와 다르다고 가정
     // @Commit()
     // ~~
     // @Rollback()
@@ -50,18 +50,18 @@ export class ProductsService {
     this.some_validation_post();
     // 2. 다른 로직으로 댓글을 작성하고 검증한다.
     this.some_validation_comment();
-    return this.prdComp.createSomethingAndOther(createProductDto);
+    return this.comp.createSomethingAndOther(createProductDto);
   }
 
   /**
    * 이하 트랜젝션 없이 간단한 로직은 그냥 repository 직접 호출해서 사용
    */
   findAll() {
-    return this.repo.findAll();
+    return this.repo.all();
   }
 
   findOne(id: number) {
-    return this.repo.findOne(id);
+    return this.repo.findById(id);
   }
 
   update(id: number, updateProductDto: UpdateProductDto) {
