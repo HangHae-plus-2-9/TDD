@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from './products.service';
 import { ProductsRepositoryInterface } from './interfaces/product-repository.interface';
 import { ProductsComponent } from './products.component';
-import { ProductsRepository } from './products.repository';
 
 describe('ProductsService', () => {
   let service: ProductsService;
@@ -24,7 +23,7 @@ describe('ProductsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProductsService,
-        { provide: ProductsRepository, useValue: repo },
+        { provide: 'ProductsRepositoryInterface', useValue: repo },
         { provide: ProductsComponent, useValue: comp },
       ],
     }).compile();
