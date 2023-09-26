@@ -24,7 +24,6 @@ export class ProductsRepository
   }
 
   create(createProductDto: CreateProductDto): any {
-    console.log(createProductDto);
     return 'product created';
   }
 
@@ -37,7 +36,6 @@ export class ProductsRepository
   }
 
   update(id: number, updateProductDto: UpdateProductDto): any {
-    console.log(updateProductDto);
     return `product updated with id: ${id}`;
   }
 

@@ -18,6 +18,7 @@ export class UsersRepository
   }
 
   async findByEmail(email: string): Promise<UserEntity> {
+    if (!email) return null;
     return await this.model.findOne({
       where: { email },
     });

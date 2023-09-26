@@ -28,6 +28,7 @@ export class BaseRepository<T extends CommonColumns>
   }
 
   async findById(id: number, columns = [], relations = []): Promise<T> {
+    if (!id) return null;
     return await this._repo.findOne({
       select: columns,
       where: { id },

@@ -4,14 +4,13 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { TokenPayloadDto } from './dto/token-payload.dto';
+import { toSeconds } from '@/common/utils';
 
 @Injectable()
 export class AuthService {
   constructor(private jwtService: JwtService) {}
 
   async hashPassword(password: string): Promise<string> {
-    console.log('hashPassword');
-    console.log(password);
     return await bcrypt.hash(password, 12);
   }
 
@@ -27,7 +26,7 @@ export class AuthService {
     userId: number;
   }): Promise<TokenPayloadDto> {
     return new TokenPayloadDto({
-      expiresIn: parseInt(required('JWT_EXPIRES_IN') as string),
+      expiresIn: toSeconds(required('JWT_EXPIRES_IN') as string),
       accessToken: await this.jwtService.signAsync({
         userId: data.userId,
         type: TOKEN_TYPE.ACCESS_TOKEN,
@@ -38,12 +37,9 @@ export class AuthService {
 
   async verifyAccessToken(token: string): Promise<boolean> {
     try {
-      console.log('verifyAccessToken');
       const result = await this.jwtService.verify(token);
-      console.log(result);
       return result;
     } catch (err) {
-      console.log('here!!');
       throw new UnauthorizedException(messages.UNAUTHORIZED_EXCEPTION);
     }
   }

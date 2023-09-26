@@ -7,9 +7,11 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepositoryInterface } from './interfaces/user-repository.interface';
-import { messages } from '@/common/resources';
+import { ROLE_TYPE, TOKEN_TYPE, messages } from '@/common/resources';
 import { UserEntity } from './entities/user.entity';
 import { AuthService } from '../auth/auth.service';
+import { LoginUserDto } from './dto/login-user.dto';
+import { TokenPayloadDto } from '../auth/dto/token-payload.dto';
 
 @Injectable()
 export class UsersService {
@@ -36,8 +38,34 @@ export class UsersService {
     }
   }
 
-  async login() {
-    return 'This action login a user';
+  async login({ email, password }: LoginUserDto): Promise<TokenPayloadDto> {
+    try {
+      const user = await this.repo.findByEmail(email);
+      if (!user) {
+        throw new UnprocessableEntityException(
+          messages.USER_NOT_FOUND_EXCEPTION,
+        );
+      }
+
+      const isPasswordValid = await this.authService.comparePasswords(
+        password,
+        user.password,
+      );
+      if (!isPasswordValid) {
+        throw new UnprocessableEntityException(
+          messages.USER_NOT_FOUND_EXCEPTION,
+        );
+      }
+
+      const token = await this.authService.createAccessToken({
+        role: ROLE_TYPE.ADMIN,
+        userId: user.id,
+      });
+      return token;
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
   }
 
   create(createUserDto: CreateUserDto) {
@@ -49,7 +77,13 @@ export class UsersService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} user`;
+    try {
+      const user = this.repo.findById(undefined);
+      return user || [];
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
@@ -74,15 +108,12 @@ export class UsersService {
 
   private async saveUser(name: string, email: string, password: string) {
     try {
-      console.log('saveUser1');
       const user = UserEntity.create({
         name,
         email,
         password: await this.authService.hashPassword(password),
       });
-      console.log('saveUser2');
       await this.repo.create(user);
-      console.log('saveUser3');
       return user.toUserWithoutPassword();
     } catch (err) {
       this.logger.error(err);
