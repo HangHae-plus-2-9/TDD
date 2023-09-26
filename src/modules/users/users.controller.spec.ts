@@ -4,11 +4,18 @@ import { UsersService } from './users.service';
 
 describe('UsersController', () => {
   let controller: UsersController;
+  let service: Partial<UsersService>;
 
   beforeEach(async () => {
+    service = {};
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
-      providers: [UsersService],
+      providers: [
+        {
+          provide: UsersService,
+          useValue: service,
+        },
+      ],
     }).compile();
 
     controller = module.get<UsersController>(UsersController);

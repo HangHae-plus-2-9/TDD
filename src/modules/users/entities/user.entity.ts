@@ -1,7 +1,14 @@
 import { CommonColumns } from '@/common/entities/common-columns';
+import { USER_STATUS } from '@/common/resources';
 import { Column, Entity } from 'typeorm';
 
-@Entity()
+export interface UserWithoutPassword {
+  id: number;
+  name: string;
+  email: string;
+}
+
+@Entity('users')
 export class UserEntity extends CommonColumns {
   @Column()
   name: string;
@@ -12,12 +19,17 @@ export class UserEntity extends CommonColumns {
   @Column()
   password: string;
 
-  @Column()
+  @Column({ nullable: true })
   email_verified_at: Date;
 
-  @Column()
+  @Column({ nullable: true })
   phone: string;
 
-  @Column()
-  status: boolean;
+  @Column({ default: USER_STATUS.PENDING })
+  status: USER_STATUS;
+
+  public toUserWithoutPassword(): UserWithoutPassword {
+    const { id, name, email } = this;
+    return { id, name, email };
+  }
 }
