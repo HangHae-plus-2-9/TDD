@@ -6,13 +6,12 @@ import { AuthService } from '../auth/auth.service';
 
 describe('UsersService', () => {
   let service: UsersService;
-  let logger: Logger;
-  let authService: Partial<AuthService>;
-  let repo: UsersRepositoryInterface;
+  let mockAuthService: Partial<AuthService>;
+  let mockRepo: UsersRepositoryInterface;
 
   beforeEach(async () => {
-    authService = {};
-    repo = {
+    mockAuthService = {};
+    mockRepo = {
       create: jest.fn(),
       createMany: jest.fn(),
       all: jest.fn(),
@@ -28,11 +27,11 @@ describe('UsersService', () => {
         UsersService,
         {
           provide: AuthService,
-          useValue: authService,
+          useValue: mockAuthService,
         },
         {
           provide: 'UsersRepositoryInterface',
-          useValue: repo,
+          useValue: mockRepo,
         },
       ],
     }).compile();
