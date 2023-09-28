@@ -78,7 +78,7 @@ export class UsersService {
 
   findOne(id: number) {
     try {
-      const user = this.repo.findById(undefined);
+      const user = this.repo.findById(id);
       return user || [];
     } catch (err) {
       this.logger.error(err);

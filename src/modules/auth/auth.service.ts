@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { TokenPayloadDto } from './dto/token-payload.dto';
 import { toSeconds } from '@/common/utils';
+import { AccessTokenPayload } from './dto/access-token-payload.dto';
 
 @Injectable()
 export class AuthService {
@@ -31,11 +32,11 @@ export class AuthService {
         userId: data.userId,
         type: TOKEN_TYPE.ACCESS_TOKEN,
         role: data.role,
-      }),
+      } as AccessTokenPayload),
     });
   }
 
-  async verifyAccessToken(token: string): Promise<boolean> {
+  async verifyAccessToken(token: string): Promise<AccessTokenPayload> {
     try {
       const result = await this.jwtService.verify(token);
       return result;

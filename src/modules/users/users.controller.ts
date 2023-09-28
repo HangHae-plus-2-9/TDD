@@ -11,9 +11,9 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
-import { UserEntity } from './entities/user.entity';
 import { Auth, AuthUser } from '@/common/decorators';
 import { ROLE_TYPE } from '@/common/resources';
+import { AccessTokenPayload } from '../auth/dto/access-token-payload.dto';
 
 @Controller({ version: '1', path: 'users' })
 export class UsersController {
@@ -31,8 +31,8 @@ export class UsersController {
 
   @Get('/me')
   @Auth([ROLE_TYPE.ADMIN])
-  async me(@AuthUser() user: UserEntity) {
-    return await this.usersService.findOne(user.id);
+  async me(@AuthUser() tokenPayload: AccessTokenPayload) {
+    return await this.usersService.findOne(tokenPayload.userId);
   }
 
   @Post()

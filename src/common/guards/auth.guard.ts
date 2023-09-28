@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException(messages.UNAUTHORIZED_EXCEPTION);
     }
 
-    request.user = await this.authService.verifyAccessToken(jwtString);
+    request.tokenPayload = await this.authService.verifyAccessToken(jwtString);
     return true;
   }
 }
