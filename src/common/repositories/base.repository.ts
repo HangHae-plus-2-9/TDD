@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { CommonColumns } from '../entities/common-columns';
 import { PaginatedResult } from '../interfaces/paginated-result.interface';
 import { BaseRepositoryInterface } from './base.repository.interface';
@@ -28,6 +29,7 @@ export class BaseRepository<T extends CommonColumns>
   }
 
   async findById(id: number, columns = [], relations = []): Promise<T> {
+    if (!id) throw new BadRequestException();
     return await this._repo.findOne({
       select: columns,
       where: { id },

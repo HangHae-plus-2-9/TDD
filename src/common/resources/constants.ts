@@ -1,1 +1,16 @@
-export const TEST = 'test';
+export enum ROLE_TYPE {
+  ADMIN = 'ADMIN',
+  CUSTOMER = 'CUSTOMER',
+  SELLER = 'SELLER',
+}
+
+export enum TOKEN_TYPE {
+  ACCESS_TOKEN = 'ACCESS_TOKEN',
+  REFRESH_TOKEN = 'REFRESH_TOKEN',
+}
+
+export enum USER_STATUS {
+  PENDING = 1,
+  ACTIVE = 2,
+  INACTIVE = 3,
+}
