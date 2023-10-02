@@ -1,12 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OrdersService } from './orders.service';
-import { OrdersRepositoryInterface } from './interfaces/orders-repository.interface';
 import { OrdersComponent } from './orders.component';
+import { OrdersRepositoryInterface } from './interfaces/orders-repository.interface';
 
-describe('OrdersService', () => {
-  let service: OrdersService;
+describe('OrdersComponent', () => {
+  let component: OrdersComponent;
   let mockRepo: OrdersRepositoryInterface;
-  let mockComp: Partial<OrdersComponent>;
 
   beforeEach(async () => {
     mockRepo = {
@@ -19,25 +17,20 @@ describe('OrdersService', () => {
       createMany: jest.fn(),
       paginate: jest.fn(),
     };
-    mockComp = {};
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        OrdersService,
+        OrdersComponent,
         {
           provide: 'OrdersRepositoryInterface',
           useValue: mockRepo,
         },
-        {
-          provide: OrdersComponent,
-          useValue: mockComp,
-        },
       ],
     }).compile();
 
-    service = module.get<OrdersService>(OrdersService);
+    component = module.get<OrdersComponent>(OrdersComponent);
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(component).toBeDefined();
   });
 });
