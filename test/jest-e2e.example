@@ -1,0 +1,12 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],  // 모듈에서 인식할 파일 확장자 목록입니다.
+  "rootDir": ".",  // 모든 모듈 경로와 패턴의 기준이 될 루트 디렉토리를 정의합니다.
+  "testEnvironment": "node",  // 테스트 환경을 정의합니다. 여기서는 Node.js 환경을 사용합니다.
+  "testRegex": ".e2e-spec.ts$",  // 테스트로 간주될 파일들의 정규식 패턴입니다. ".e2e-spec.ts"로 끝나는 파일을 테스트 파일로 인식합니다.
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"  // ".ts"와 ".js"로 끝나는 모든 파일을 "ts-jest"를 사용하여 변환합니다.
+  },
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/../src/$1"  // 모듈 이름 매퍼를 정의합니다. "@/something" 경로를 "/path_to_your_src/something"으로 해석합니다.
+  }
+}

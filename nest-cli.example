@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",  // Nest CLI를 위한 JSON 스키마를 정의합니다. 이 스키마는 설정 파일의 형식을 검증합니다.
+  "collection": "@nestjs/schematics",  // 사용할 Schematics 컬렉션을 지정합니다. 여기서는 NestJS의 기본 Schematics를 사용합니다.
+  "sourceRoot": "src/modules",  // 소스 코드의 루트 디렉토리를 지정합니다. 이 경우, 모든 모듈은 "src/modules" 안에 위치해야 합니다.
+  "compilerOptions": {
+    "deleteOutDir": true  // 컴파일러 옵션 중, 컴파일 전에 출력 디렉토리(outDir)를 삭제할지 여부를 결정합니다. true로 설정하면, 컴파일 전에 outDir이 삭제됩니다.
+  }
+}
