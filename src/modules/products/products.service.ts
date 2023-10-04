@@ -35,8 +35,8 @@ export class ProductsService {
     return [newSomething, newOtherThing];
   }
 
-  private some_validation_post() {
-    return true;
+  private product_add_validation() {
+    return false;
   }
 
   private some_validation_comment() {
@@ -47,6 +47,16 @@ export class ProductsService {
    * 트랜젝션이 사용 될 때, 우리가 주로 사용하기로 한 방식
    */
   create_with_component(createProductDto: CreateProductDto) {
+
+    // 1. 어떤 로직으로 게시글을 작성하고 검증한다
+    this.some_validation_post();
+    // 2. 다른 로직으로 댓글을 작성하고 검증한다.
+    this.some_validation_comment();
+    return this.comp.createSomethingAndOther(createProductDto);
+  }
+  
+  create_with_component(createProductDto: CreateProductDto) {
+    
     // 1. 어떤 로직으로 게시글을 작성하고 검증한다
     this.some_validation_post();
     // 2. 다른 로직으로 댓글을 작성하고 검증한다.
