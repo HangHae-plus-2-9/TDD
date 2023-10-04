@@ -29,4 +29,14 @@ describe('AppController (e2e)', () => {
   it('GET /api/v1/products/1', () => {
     return request(app.getHttpServer()).get('/api/v1/products/1').expect(200);
   });
+
+  xit('POST /api/v1/orders', () => {
+    return request(app.getHttpServer())
+      .post('/api/v1/orders')
+      .send({
+        productId: 1,
+        quantity: 1,
+      })
+      .expect(201);
+  });
 });
