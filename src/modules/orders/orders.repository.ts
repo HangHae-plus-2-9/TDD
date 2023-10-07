@@ -23,7 +23,7 @@ export class OrdersRepository
     throw new Error('Method not implemented.');
   }
 
-  create(createUserDto: CreateOrderDto): any {
+  create(createUserDto: any): any {
     console.log(createUserDto);
     return 'create with model';
   }
@@ -36,7 +36,7 @@ export class OrdersRepository
     return `findById with model with id: ${id}`;
   }
 
-  update(id: number, updateUserDto: UpdateOrderDto): any {
+  update(id: number, updateUserDto: any): any {
     console.log(updateUserDto);
     return `update with model with id: ${id}`;
   }

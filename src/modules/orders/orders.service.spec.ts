@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersService } from './orders.service';
 import { OrdersRepositoryInterface } from './interfaces/orders-repository.interface';
 import { OrdersComponent } from './orders.component';
+import { CreateOrderDto } from './dto/create-order.dto';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -42,8 +43,46 @@ describe('OrdersService', () => {
   });
 
   describe('create', () => {
-    it('모든 값이 정상일 때, 주문이 생성되어야 한다.', async () => {
-      expect(true).toBe(true);
+    fit('모든 값이 정상일 때, 주문이 생성되어야 한다.', async () => {
+      // given
+      const orderItems = [
+        { productId: 1, quantity: 1 },
+        { productId: 2, quantity: 2 },
+      ];
+      const createOrderDto = {
+        customerId: 1,
+        orderItems,
+        payment: {
+          method: 'CREDIT_CARD',
+          amount: 10000,
+        },
+        shipping: {
+          address: '서울시 강남구',
+          receiver: '홍길동',
+          receiverPhone: '010-1234-5678',
+        },
+      } as CreateOrderDto;
+
+      // when
+      const result = await service.create(createOrderDto);
+
+      // then
+      console.log(result);
+      expect(result).toBeDefined();
+      expect(result.payment).toEqual(
+        expect.objectContaining({
+          method: 'CREDIT_CARD' || 'CASH',
+          amount: expect.any(Number),
+        }),
+      );
+      expect(result.shipping).toEqual(
+        expect.objectContaining({
+          address: expect.any(String),
+          receiver: expect.any(String),
+          receiverPhone: expect.any(String),
+        }),
+      );
+      expect(result.shipping).toBeDefined();
     });
 
     it('주문 상품의 ID를 찾을 수 없을 때, 주문이 생성되지 않아야 한다.', async () => {
