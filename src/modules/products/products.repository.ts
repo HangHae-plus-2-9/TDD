@@ -23,9 +23,9 @@ export class ProductsRepository
     throw new Error('Method not implemented.');
   }
 
-  create(createProductDto: CreateProductDto): any {
-    return 'product created';
-  }
+  // create(createProductDto: CreateProductDto): any {
+  //   return 'product created';
+  // }
 
   all(): any {
     return 'all products';

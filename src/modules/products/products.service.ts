@@ -10,30 +10,31 @@ import { ProductsRepositoryInterface } from './interfaces/product-repository.int
  */
 @Injectable()
 export class ProductsService {
+  comp: any;
   constructor(
-    private readonly comp: ProductsComponent,
+    // private readonly comp: ProductsComponent,
     @Inject('ProductsRepositoryInterface')
     private readonly repo: ProductsRepositoryInterface,
   ) {}
 
   // 기존에 트랙젝션을 사용하기 위해 사용했왔던 방식 - 이번에는 지양하기로.
-  create_without_component(createProductDto: CreateProductDto) {
-    // 1. 어떤 로직으로 게시글을 작성하고 검증한다
-    this.some_validation_post();
-    // 2. 다른 로직으로 댓글을 작성하고 검증한다.
-    this.some_validation_comment();
+  // create_without_component(createProductDto: CreateProductDto) {
+  //   // 1. 어떤 로직으로 게시글을 작성하고 검증한다
+  //   this.some_validation_comment();
+  //   // 2. 다른 로직으로 댓글을 작성하고 검증한다.
+  //   this.some_validation_comment();
 
-    // @Transaction()
-    // 3. 게시글을 트랜젝션으로 생성한다.
-    const newSomething = this.repo.create(createProductDto);
-    // 4. 댓글을 트랜젝션으로 생성한다.
-    const newOtherThing = this.repo.create(createProductDto); // 위와 다르다고 가정
-    // @Commit()
-    // ~~
-    // @Rollback()
-    // ~~
-    return [newSomething, newOtherThing];
-  }
+  //   // @Transaction()
+  //   // 3. 게시글을 트랜젝션으로 생성한다.
+  //   const newSomething = this.repo.create(createProductDto);
+  //   // 4. 댓글을 트랜젝션으로 생성한다.
+  //   const newOtherThing = this.repo.create(createProductDto); // 위와 다르다고 가정
+  //   // @Commit()
+  //   // ~~
+  //   // @Rollback()
+  //   // ~~
+  //   return [newSomething, newOtherThing];
+  // }
 
   private product_add_validation() {
     return false;
@@ -49,20 +50,20 @@ export class ProductsService {
   create_with_component(createProductDto: CreateProductDto) {
 
     // 1. 어떤 로직으로 게시글을 작성하고 검증한다
-    this.some_validation_post();
+    this.some_validation_comment();
     // 2. 다른 로직으로 댓글을 작성하고 검증한다.
     this.some_validation_comment();
     return this.comp.createSomethingAndOther(createProductDto);
   }
-  
-  create_with_component(createProductDto: CreateProductDto) {
-    
-    // 1. 어떤 로직으로 게시글을 작성하고 검증한다
-    this.some_validation_post();
-    // 2. 다른 로직으로 댓글을 작성하고 검증한다.
-    this.some_validation_comment();
-    return this.comp.createSomethingAndOther(createProductDto);
-  }
+
+  // create_with_component(createProductDto: CreateProductDto) {
+
+  //   // 1. 어떤 로직으로 게시글을 작성하고 검증한다
+  //   this.some_validation_comment();
+  //   // 2. 다른 로직으로 댓글을 작성하고 검증한다.
+  //   this.some_validation_comment();
+  //   return this.comp.createSomethingAndOther(createProductDto);
+  // }
 
   /**
    * 이하 트랜젝션 없이 간단한 로직은 그냥 repository 직접 호출해서 사용

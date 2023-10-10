@@ -33,7 +33,7 @@ export class ProductsController {
   create(@Body() createProductDto: CreateProductDto) {
     // 유저 인풋 검증
     return this.productsService.create_with_component(createProductDto);
-    return this.productsService.create_without_component(createProductDto);
+    // return this.productsService.create_without_component(createProductDto);
   }
 
   @Get()
