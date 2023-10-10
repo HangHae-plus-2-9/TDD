@@ -2,16 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderEntity } from './entities/order.entity';
-import { OrdersRepositoryInterface } from './interfaces/orders-repository.interface';
 import { BaseRepository } from '@/common/repositories/base.repository';
-import { UpdateOrderDto } from './dto/update-order.dto';
-import { CreateOrderDto } from './dto/create-order.dto';
+
+let ORDER_ENTITIES = [];
 
 @Injectable()
-export class OrdersRepository
-  extends BaseRepository<OrderEntity>
-  implements OrdersRepositoryInterface
-{
+export class OrdersRepository extends BaseRepository<OrderEntity> {
   constructor(
     @InjectRepository(OrderEntity)
     private readonly model: Repository<OrderEntity>,
@@ -19,29 +15,45 @@ export class OrdersRepository
     super(model);
   }
 
-  doSomethingForOrder(): void {
-    throw new Error('Method not implemented.');
-  }
-
-  create(createUserDto: any): any {
-    console.log(createUserDto);
-    return 'create with model';
+  create(orderModel: any): any {
+    const orderEntity = {
+      id: Math.floor(Math.random() * 1000000),
+      ...orderModel,
+      created_at: new Date(),
+      updated_at: new Date(),
+      deleted_at: null,
+    };
+    ORDER_ENTITIES.push({ ...orderEntity });
+    return orderEntity;
   }
 
   all(): any {
-    return 'all with model';
+    return ORDER_ENTITIES;
   }
 
   findById(id: number): any {
-    return `findById with model with id: ${id}`;
+    return ORDER_ENTITIES.find((order) => order.id === id);
   }
 
-  update(id: number, updateUserDto: any): any {
-    console.log(updateUserDto);
-    return `update with model with id: ${id}`;
+  update(id: number, newOrderModel: any): any {
+    const orderEntity = this.findById(id);
+    if (!orderEntity) {
+      throw new Error('Order not found');
+    }
+
+    const { orderItems, ...newOrderEntity } = newOrderModel;
+    const newOrderItems = orderItems;
+    ORDER_ENTITIES[id] = { ...orderEntity, ...newOrderEntity };
+    ORDER_ENTITIES[id].orderItems = newOrderItems;
+    return ORDER_ENTITIES[id];
   }
 
   remove(id: number): any {
-    return `remove with model with id: ${id}`;
+    const orderEntity = this.findById(id);
+    if (!orderEntity) {
+      throw new Error('Order not found');
+    }
+    ORDER_ENTITIES = ORDER_ENTITIES.filter((order) => order.id !== id);
+    return orderEntity;
   }
 }

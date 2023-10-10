@@ -1,77 +1,115 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { OrdersRepositoryInterface } from './interfaces/orders-repository.interface';
-import { OrderEntity } from './entities/order.entity';
 import { OrderNotFoundException } from '@/common/exceptions';
-import { OrderItemEntity } from './entities/order-item.entity';
+import { OrdersRepository } from './orders.repository';
+import { OrderItemsRepository } from './order-items.repository';
+import { OrdersMapper } from './orders.mapper';
+import { OrderEntity } from './entities/order.entity';
 
-let ORDERS: OrderEntity[] = [];
-let ORDER_ITEMS: OrderItemEntity[] = [];
+const DUMMY_PRODUCTS = [
+  { productId: 1, price: 10000, quantity: 10 },
+  { productId: 2, price: 20000, quantity: 10 },
+  { productId: 3, price: 30000, quantity: 10 },
+  { productId: 4, price: 40000, quantity: 10 },
+  { productId: 5, price: 50000, quantity: 10 },
+];
 
+const productService = {
+  findOne: (productId: number) => {
+    const productInfo = DUMMY_PRODUCTS.find(
+      (product) => product.productId === productId,
+    );
+    if (!productInfo) {
+      throw new Error('Product not found');
+    }
+    return productInfo;
+  },
+};
 @Injectable()
 export class OrdersService {
   constructor(
-    @Inject('OrdersRepositoryInterface')
-    private readonly repo: OrdersRepositoryInterface,
+    private readonly orderRepo: OrdersRepository,
+    private readonly orderItemRepo: OrderItemsRepository,
   ) {}
 
-  async create(createOrderDto: CreateOrderDto): Promise<any> {
-    const order = OrderEntity.create({
-      customer_id: createOrderDto.customerId,
-      payment_method: createOrderDto.paymentMethod,
-      paid_at: createOrderDto.paidAt,
-      canceled_at: createOrderDto.canceledAt,
-      courier_name: createOrderDto.courierName,
-      is_prepaid: createOrderDto.isPrepaid,
-      invoice_number: createOrderDto.invoiceNumber,
-      shipping_address: createOrderDto.shippingAddress,
-      shipping_receiver: createOrderDto.shippingReceiver,
-      shipping_receiver_phone: createOrderDto.shippingReceiverPhone,
-      shipping_fee: createOrderDto.shippingFee,
-      departed_at: createOrderDto.departedAt,
-      arrived_at: createOrderDto.arrivedAt,
-    });
-    ORDERS.push(order);
+  // TODO: Transaction, 함수분리 필요
+  async create(createOrderDto: CreateOrderDto) {
+    const { orderItems: orderItemModels, ...orderModel } = createOrderDto;
 
-    let totAmount = 0;
-    const orderItems = createOrderDto.orderItems.map((item) => {
-      // TODO: check product
-      // const product = this.productsService.findOne(item.productId);
-      totAmount += item.price * item.quantity;
-      return OrderItemEntity.create({
-        order_id: order.id,
-        product_id: item.productId,
-        quantity: item.quantity,
-        price: item.price,
-      });
+    const verifiedOrderItemModels = orderItemModels.map((item) => {
+      if (item.quantity < 1) {
+        throw new Error('Quantity must be greater than 0');
+      }
+      // orderItems 생성시 productId로 상품정보 조회해서 price 가져오기
+      const productInfo = productService.findOne(item.productId);
+      if (!productInfo) {
+        throw new Error('Product not found');
+      }
+      if (productInfo.quantity < item.quantity) {
+        throw new Error('Quantity must be less than product quantity');
+      }
+      return {
+        ...item,
+        price: productInfo.price,
+      };
     });
-    ORDER_ITEMS = ORDER_ITEMS.concat(orderItems);
+    orderModel.amount = verifiedOrderItemModels.reduce(
+      (acc, cur) => acc + cur.price * cur.quantity,
+      0,
+    );
 
-    order.amount = totAmount;
-    order.order_items = orderItems;
-    return await order;
-    // return this.comp.create(createOrderDto);
+    const orderEntity = await this.orderRepo.create(orderModel);
+    const orderItemEntities = await this.orderItemRepo.createManyWithOrderId(
+      orderEntity.id,
+      verifiedOrderItemModels,
+    );
+    orderEntity.orderItems = orderItemEntities;
+    return orderEntity;
   }
 
   async findAll() {
-    return await ORDERS;
-    // return this.repo.all();
+    return this.orderRepo.all();
   }
 
-  async findOne(id: number) {
-    return await ORDERS.find((order) => order.id === id);
-    // return this.repo.findById(id);
+  async findOne(id: number): Promise<OrderEntity> {
+    const orderEntity = await this.orderRepo.findById(id);
+    const orderItemEntities = await this.orderItemRepo.findByOrderId(id);
+    return { ...orderEntity, orderItems: orderItemEntities };
   }
 
+  // TODO: Transaction, 함수분리 필요
   async update(id: number, updateOrderDto: UpdateOrderDto) {
-    const order = this.findOne(id);
-    if (!order) {
+    const orderEntity = await this.findOne(id);
+    if (!orderEntity) {
       throw new OrderNotFoundException();
     }
-    Object.assign(order, updateOrderDto);
-    return await order;
-    // return this.repo.update(id, updateOrderDto);
+    const orderItemEntities = await this.orderItemRepo.findByOrderId(id);
+    if (orderItemEntities.length > 0) {
+      this.orderItemRepo.removeByOrderId(id);
+    }
+
+    // newOrderItemModels: 기존 orderItemEntities가 삭제된 후, 새로 등록될 orderItemModels
+    // updateOrderModel: 기존 orderEntity를 업데이트할 정보
+    const { orderItems: newOrderItemModels, ...updateOrderModel } =
+      updateOrderDto;
+
+    const newOrderModel = {
+      ...OrdersMapper.toModelFromEntity(orderEntity),
+      ...updateOrderModel,
+      amount: newOrderItemModels.reduce(
+        (acc, cur) => acc + cur.price * cur.quantity,
+        0,
+      ),
+    };
+
+    const newOrderItemEntities = await this.orderItemRepo.createManyWithOrderId(
+      id,
+      newOrderItemModels,
+    );
+    const newOrderEntity = this.orderRepo.update(id, newOrderModel);
+    newOrderEntity.orderItems = newOrderItemEntities;
+    return newOrderEntity;
   }
 
   async remove(id: number) {
@@ -79,8 +117,7 @@ export class OrdersService {
     if (!order) {
       throw new OrderNotFoundException();
     }
-    ORDERS = ORDERS.filter((order) => order.id !== id);
-    return await order;
-    // return this.repo.remove(id);
+    this.orderItemRepo.removeByOrderId(id);
+    return this.orderRepo.remove(id);
   }
 }
