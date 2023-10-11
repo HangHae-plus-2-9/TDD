@@ -4,14 +4,10 @@ import { ProductEntity } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { BaseRepository } from '@/common/repositories/base.repository';
-import { ProductsRepositoryInterface } from './interfaces/product-repository.interface';
 import { CreateProductDto } from './dto/create-product.dto';
 
 @Injectable()
-export class ProductsRepository
-  extends BaseRepository<ProductEntity>
-  implements ProductsRepositoryInterface
-{
+export class ProductsRepository extends BaseRepository<ProductEntity> {
   constructor(
     @InjectRepository(ProductEntity)
     private readonly model: Repository<ProductEntity>,
