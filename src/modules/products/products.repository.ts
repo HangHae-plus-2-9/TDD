@@ -15,27 +15,40 @@ export class ProductsRepository extends BaseRepository<ProductEntity> {
     super(model);
   }
 
-  doSomethingForProduct(): void {
-    throw new Error('Method not implemented.');
+  async create(createProductDto: CreateProductDto): Promise<ProductEntity> {
+    console.log('createProductDto', createProductDto);
+    return await this.model.save(createProductDto);
   }
 
-  create(createProductDto: CreateProductDto): any {
-    return 'product created';
+  async all(): Promise<ProductEntity[]> {
+    return await this.model.find();
   }
 
-  all(): any {
-    return 'all products';
+  async findById(id: number): Promise<ProductEntity> {
+    return await this.model.findOne({ where: { id } });
   }
 
-  findById(id: number): any {
-    return `product with id: ${id}`;
+  async update(
+    id: number,
+    updateProductDto: UpdateProductDto,
+  ): Promise<ProductEntity> {
+    const product = await this.findById(id);
+    if (!product) {
+      throw new Error('Product not found');
+    }
+    const updatedProduct = await this.model.save({
+      ...product,
+      ...updateProductDto,
+    });
+    return updatedProduct;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto): any {
-    return `product updated with id: ${id}`;
-  }
-
-  remove(id: number): any {
-    return `product deleted with id: ${id}`;
+  async remove(id: number): Promise<ProductEntity> {
+    const product = await this.findById(id);
+    if (!product) {
+      throw new Error('Product not found');
+    }
+    await this.model.remove(product);
+    return product;
   }
 }

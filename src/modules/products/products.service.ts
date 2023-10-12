@@ -2,33 +2,28 @@ import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsRepository } from './products.repository';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ProductEntity } from './entities/product.entity';
 
 @Injectable()
 export class ProductsService {
-  constructor(
-    @InjectRepository(ProductEntity)
-    private readonly repo: ProductsRepository,
-  ) {}
+  constructor(private readonly repo: ProductsRepository) {}
 
-  create(createProductDto: CreateProductDto) {
-    return true;
+  async create(createProductDto: CreateProductDto) {
+    return await this.repo.create(createProductDto);
   }
 
-  findAll() {
-    return this.repo.all();
+  async findAll() {
+    return await this.repo.all();
   }
 
-  findOne(id: number) {
-    return this.repo.findById(id);
+  async findOne(id: number) {
+    return await this.repo.findById(id);
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return this.repo.update(id, updateProductDto);
+  async update(id: number, updateProductDto: UpdateProductDto) {
+    return await this.repo.update(id, updateProductDto);
   }
 
-  remove(id: number) {
-    return this.repo.remove(id);
+  async remove(id: number) {
+    return await this.repo.remove(id);
   }
 }

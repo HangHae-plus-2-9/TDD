@@ -3,20 +3,21 @@ import { Column, Entity } from 'typeorm';
 
 @Entity({ name: 'products' })
 export class ProductEntity extends CommonColumns {
-  // @ManyToOne(() => UserEntity, (seller) => seller.products)
-  // @JoinColumn({ name: 'seller_id' }) // This sets up the foreign key
-  // @Column()
-  // seller: UserEntity;
+  @Column()
+  seller_id: number;
 
   @Column()
   name: string;
 
-  // @Column()
-  // price: string;
+  @Column()
+  category_name: string;
 
-  // @Column()
-  // quantity: number;
+  @Column({ type: 'text' })
+  description: string;
 
-  // @Column({ nullable: true })
-  // description?: string;
+  @Column()
+  price: number;
+
+  @Column()
+  stock: number;
 }
