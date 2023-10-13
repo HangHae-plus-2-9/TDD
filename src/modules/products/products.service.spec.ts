@@ -4,6 +4,7 @@ import { ProductsRepository } from './products.repository';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductModel } from './models/product.model';
 import { ProductNotFoundException } from '@/common/exceptions';
+import { IndexProductDto } from './dto/index-product.dto';
 
 describe('ProductsService', () => {
   let service: ProductsService;
@@ -71,6 +72,7 @@ describe('ProductsService', () => {
 
     it('상품이 하나 이상 있는 경우 상품 목록을 반환한다.', async () => {
       // given
+      const indexProductDto = new IndexProductDto();
       const product1 = {
         id: 1,
         sellerId: 1,
@@ -92,7 +94,7 @@ describe('ProductsService', () => {
       mockRepo.all = jest.fn().mockResolvedValue([product1, product2]);
 
       // when
-      const products = await service.findAll();
+      const products = await service.findAll(indexProductDto);
 
       // then
       expect(products).toEqual([product1, product2]);

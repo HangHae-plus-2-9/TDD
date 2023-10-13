@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsRepository } from './products.repository';
 import { ProductModel } from './models/product.model';
 import { ProductNotFoundException } from '@/common/exceptions';
+import { IndexProductDto } from './dto/index-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -12,8 +12,18 @@ export class ProductsService {
     return await this.repo.create(productModel);
   }
 
-  async findAll() {
-    return await this.repo.all();
+  async findAll(indexProductDto: IndexProductDto) {
+    const { page, perPage } = indexProductDto;
+    const { total, data } = await await this.repo.all(indexProductDto);
+    return {
+      total,
+      data,
+      current_page: page,
+      from: (page - 1) * perPage + 1,
+      to: (page - 1) * perPage + perPage,
+      last_page: Math.ceil(total / perPage),
+      per_page: perPage,
+    };
   }
 
   async findOne(id: number) {

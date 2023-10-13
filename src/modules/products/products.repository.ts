@@ -1,12 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { ProductModel } from './models/product.model';
+import { PaginatedResult } from '@/common/interfaces/paginated-result.interface';
 
 @Injectable()
 export class ProductsRepository {
   constructor(
+    @Inject(Logger) private readonly logger: Logger,
     @InjectRepository(ProductEntity)
     private readonly model: Repository<ProductEntity>,
   ) {}
@@ -16,9 +18,52 @@ export class ProductsRepository {
     return newProduct.toModel();
   }
 
-  async all(): Promise<ProductModel[]> {
-    const products = await this.model.find();
-    return products.map((product) => product.toModel());
+  async all(filters: any = {}): Promise<PaginatedResult<ProductModel>> {
+    console.log(filters);
+    const { searchText, startDate, endDate, perPage, page, orderBy, isDesc } =
+      filters;
+    const query = this.model.createQueryBuilder('product');
+    try {
+      if (searchText) {
+        query
+          .orWhere('product.name like :searchText', {
+            searchText: `%${searchText}%`,
+          })
+          .orWhere('product.category_name like :searchText', {
+            searchText: `%${searchText}%`,
+          })
+          .orWhere('product.description like :searchText', {
+            searchText: `%${searchText}%`,
+          });
+      }
+      if (startDate) {
+        query.andWhere('product.created_at >= :startDate', {
+          startDate,
+        });
+      }
+      if (endDate) {
+        query.andWhere('product.created_at <= :endDate', {
+          endDate,
+        });
+      }
+      if (orderBy) {
+        query.orderBy(`product.${orderBy}`, isDesc ? 'DESC' : 'ASC');
+      } else {
+        query.orderBy('product.created_at', 'DESC');
+      }
+      if (perPage && page) {
+        query.skip((page - 1) * perPage).take(perPage);
+      }
+      const total = await query.getCount();
+      const data = await query.getMany();
+      return {
+        total,
+        data: data.map((product) => product.toModel()),
+      };
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
   }
 
   async findById(id: number): Promise<ProductModel> {
