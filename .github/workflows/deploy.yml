@@ -80,7 +80,7 @@ jobs:
         env:
           GITHUB_ACTIONS: true
           DATABASE_CONNECTION: 'postgres'
-        run: npm run test:e2e
+        run: npm run migration:run && npm run test:e2e
 
       - name: Notify Slack on Failure
         if: failure()

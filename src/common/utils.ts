@@ -17,3 +17,34 @@ export const toSeconds = (input: string) => {
 
   return value * (units[unit] || 0);
 };
+
+export const camelToSnake = (str: string): string => {
+  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+};
+
+export const removeUndefinedKeys = (
+  obj: Record<string, any>,
+): Record<string, any> => {
+  Object.keys(obj).forEach((key) => {
+    if (obj[key] === undefined) {
+      delete obj[key];
+    }
+  });
+
+  return obj;
+};
+
+export const getStartOfDay = (date: Date) => {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+};
+
+export const getEndOfDay = (date: Date) => {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    23,
+    59,
+    59,
+  );
+};
