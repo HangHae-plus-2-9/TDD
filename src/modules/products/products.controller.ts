@@ -15,6 +15,8 @@ import {
   ApiCreatedResponse,
   ApiResponse,
 } from '@nestjs/swagger';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductModel } from './models/product.model';
 
 @ApiTags('products')
 @Controller({ version: '1', path: 'products' })
@@ -31,7 +33,7 @@ export class ProductsController {
     description: 'Internal Server Error',
   })
   create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+    return this.productsService.create(ProductModel.fromDto(createProductDto));
   }
 
   @Get()
@@ -45,8 +47,11 @@ export class ProductsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: any) {
-    return this.productsService.update(+id, updateProductDto);
+  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+    return this.productsService.update(
+      +id,
+      ProductModel.fromDto(updateProductDto),
+    );
   }
 
   @Delete(':id')

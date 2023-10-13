@@ -2,53 +2,52 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from './entities/product.entity';
 import { Repository } from 'typeorm';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { BaseRepository } from '@/common/repositories/base.repository';
-import { CreateProductDto } from './dto/create-product.dto';
+import { ProductModel } from './models/product.model';
 
 @Injectable()
-export class ProductsRepository extends BaseRepository<ProductEntity> {
+export class ProductsRepository {
   constructor(
     @InjectRepository(ProductEntity)
     private readonly model: Repository<ProductEntity>,
-  ) {
-    super(model);
+  ) {}
+
+  async create(productModel: ProductModel): Promise<ProductModel> {
+    const newProduct = await this.model.save(productModel.toEntity());
+    return newProduct.toModel();
   }
 
-  async create(createProductDto: CreateProductDto): Promise<ProductEntity> {
-    console.log('createProductDto', createProductDto);
-    return await this.model.save(createProductDto);
+  async all(): Promise<ProductModel[]> {
+    const products = await this.model.find();
+    return products.map((product) => product.toModel());
   }
 
-  async all(): Promise<ProductEntity[]> {
-    return await this.model.find();
-  }
-
-  async findById(id: number): Promise<ProductEntity> {
-    return await this.model.findOne({ where: { id } });
+  async findById(id: number): Promise<ProductModel> {
+    const product = await this.model.findOne({ where: { id } });
+    return product?.toModel();
   }
 
   async update(
     id: number,
-    updateProductDto: UpdateProductDto,
-  ): Promise<ProductEntity> {
-    const product = await this.findById(id);
-    if (!product) {
+    updatedProductModel: Partial<ProductModel>,
+  ): Promise<any> {
+    const productEntity = await this.model.findOne({ where: { id } });
+    if (!productEntity) {
       throw new Error('Product not found');
     }
-    const updatedProduct = await this.model.save({
-      ...product,
-      ...updateProductDto,
-    });
-    return updatedProduct;
+    Object.assign(productEntity, updatedProductModel.toEntity());
+    const updatedProduct = await this.model.save(productEntity);
+    return updatedProduct.toModel();
   }
 
-  async remove(id: number): Promise<ProductEntity> {
+  async remove(id: number): Promise<ProductModel> {
     const product = await this.findById(id);
     if (!product) {
       throw new Error('Product not found');
     }
-    await this.model.remove(product);
-    return product;
+    const deletedProduct = await this.model.save({
+      ...product,
+      deleted_at: new Date(),
+    });
+    return deletedProduct.toModel();
   }
 }
