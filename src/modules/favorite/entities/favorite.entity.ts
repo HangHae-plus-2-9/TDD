@@ -9,13 +9,13 @@ export interface Favorite {
   product_id: number;
 }
 
-@Entity('favorite')
+@Entity('favorites')
 export class FavoriteEntity extends CommonColumns {
-  @Column({ type: 'number', nullable: false })
+  @Column({ type: 'int', nullable: false })
   @ManyToOne(() => UserEntity, (user: UserEntity) => user.id)
   user_id: number;
 
-  @Column({ type: 'number', nullable: false })
+  @Column({ type: 'int', nullable: false })
   @ManyToOne(() => ProductEntity, (product: ProductEntity) => product.id)
   product_id: number;
 

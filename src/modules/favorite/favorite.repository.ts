@@ -1,10 +1,10 @@
-import { FavoriteProductDto } from './dto/favorite-request.dto';
 import { BaseRepository } from '@/common/repositories/base.repository';
 import { Injectable } from '@nestjs/common';
-import { FavoriteRepositoryInterface } from './interface/favorite-repository.interface';
 import { FavoriteEntity } from './entities/favorite.entity';
+import { FavoriteRepositoryInterface } from './interface/favorite-repository.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { FavoriteProductDto } from './dto/favorite-request.dto';
 
 @Injectable()
 export class FavoirteRepository
@@ -12,16 +12,14 @@ export class FavoirteRepository
   implements FavoriteRepositoryInterface
 {
   constructor(
-    @InjectRepository(FavoirteRepository)
+    @InjectRepository(FavoriteEntity)
     private readonly model: Repository<FavoriteEntity>,
   ) {
     super(model);
   }
 
-  async findAllFavoriteByUserId(userId: number): Promise<FavoriteEntity> {
+  async findAllFavoriteByUserId(userId: number): Promise<FavoriteEntity[]> {
     if (!userId) return null;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
     return await this.model.find({
       where: { user_id: userId },
     });
@@ -38,12 +36,7 @@ export class FavoirteRepository
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //@ts-ignore
-  async deleteFavoriteByUserId(
-    user_id: number,
-    { product_id }: FavoriteProductDto,
-  ) {
+  async deleteFavoriteByUserId(user_id: number, product_id: number) {
     return await this.model.delete({
       user_id,
       product_id,

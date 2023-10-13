@@ -1,10 +1,19 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Patch,
+} from '@nestjs/common';
 import { FavoriteService } from './favorite.service';
-import { CreateFavoriteDto } from './dto/create-favorite.dto';
 import { Auth, AuthUser } from '@/common/decorators';
 import { ROLE_TYPE } from '@/common/resources';
 import { AccessTokenPayload } from '../auth/dto/access-token-payload.dto';
 import { FavoriteProductDto } from './dto/favorite-request.dto';
+import { UpdateFavoriteDto } from './dto/update-favorite.dto';
+import { CreateFavoriteDto } from './dto/create-favorite.dto';
 
 @Controller({ version: '1', path: 'favorite' })
 export class FavoriteController {
@@ -44,10 +53,13 @@ export class FavoriteController {
     return this.favoriteService.findOne(+id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateFavoriteDto: UpdateFavoriteDto) {
-  //   return this.favoriteService.update(+id, updateFavoriteDto);
-  // }
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateFavoriteDto: UpdateFavoriteDto,
+  ) {
+    return this.favoriteService.update(+id, updateFavoriteDto);
+  }
 
   // @Delete(':id')
   // remove(@Param('id') id: string) {

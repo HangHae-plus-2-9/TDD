@@ -1,15 +1,14 @@
 import {
   Inject,
   Injectable,
+  Logger,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { UpdateFavoriteDto } from './dto/update-favorite.dto';
-import { Logger } from 'winston';
-import { FavoriteRepositoryInterface } from './interface/favorite-repository.interface';
 import { FavoriteProductDto } from './dto/favorite-request.dto';
 import { FavoriteEntity } from './entities/favorite.entity';
 import { messages } from '@/common/resources';
-import { UsersRepository } from '../users/users.repository';
+import { FavoriteRepositoryInterface } from './interface/favorite-repository.interface';
 
 @Injectable()
 export class FavoriteService {
@@ -17,7 +16,6 @@ export class FavoriteService {
     private readonly logger: Logger,
     @Inject('FavoriteRepositoryInterface')
     private readonly repo: FavoriteRepositoryInterface,
-    private readonly userRepo: UsersRepository,
   ) {}
 
   async getAllfavoriteList(id: number) {
@@ -32,12 +30,6 @@ export class FavoriteService {
 
   async upload(id: number, { product_id }: FavoriteProductDto) {
     try {
-      const user = await this.userRepo.findById(id);
-      if (!user) {
-        throw new UnprocessableEntityException(
-          messages.USER_NOT_FOUND_EXCEPTION,
-        );
-      }
       const favorite = await this.saveFavorite(id, product_id);
       return favorite;
     } catch (err) {
@@ -58,7 +50,7 @@ export class FavoriteService {
     return `This action updates a #${id} favorite`;
   }
 
-  public async saveFavorite(user_id: number, product_id: number) {
+  async saveFavorite(user_id: number, product_id: number) {
     try {
       const favorite = FavoriteEntity.create({
         user_id,
@@ -74,14 +66,8 @@ export class FavoriteService {
     }
   }
 
-  public async removeFavorite(id: number, product_id: number) {
+  async removeFavorite(id: number, product_id: number) {
     try {
-      const user = await this.userRepo.findById(id);
-      if (!user) {
-        throw new UnprocessableEntityException(
-          messages.USER_NOT_FOUND_EXCEPTION,
-        );
-      }
       await this.repo.deleteFavoriteByUserId(id, product_id);
     } catch (err) {
       this.logger.error(err);
