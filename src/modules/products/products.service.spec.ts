@@ -61,13 +61,15 @@ describe('ProductsService', () => {
   describe('findAll', () => {
     it('상품이 하나도 없는 경우 빈 배열을 반환한다.', async () => {
       // given
-      mockRepo.all = jest.fn().mockResolvedValue([]);
+      const indexProductDto = new IndexProductDto();
+      mockRepo.all = jest.fn().mockResolvedValue({ total: 0, data: [] });
 
       // when
-      const products = await service.findAll();
+      const products = await service.findAll(indexProductDto);
+      console.log(products);
 
       // then
-      expect(products).toEqual([]);
+      expect(products.data).toEqual([]);
     });
 
     it('상품이 하나 이상 있는 경우 상품 목록을 반환한다.', async () => {
@@ -91,13 +93,16 @@ describe('ProductsService', () => {
         price: 10000,
         stock: 100,
       };
-      mockRepo.all = jest.fn().mockResolvedValue([product1, product2]);
+      const productList = [product1, product2];
+      mockRepo.all = jest
+        .fn()
+        .mockResolvedValue({ total: productList.length, data: productList });
 
       // when
       const products = await service.findAll(indexProductDto);
 
       // then
-      expect(products).toEqual([product1, product2]);
+      expect(products.data).toEqual([product1, product2]);
     });
   });
 
