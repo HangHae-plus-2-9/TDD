@@ -19,7 +19,6 @@ export class ProductsRepository {
   }
 
   async all(filters: any = {}): Promise<PaginatedResult<ProductModel>> {
-    console.log(filters);
     const { searchText, startDate, endDate, perPage, page, orderBy, isDesc } =
       filters;
     const query = this.model.createQueryBuilder('product');
