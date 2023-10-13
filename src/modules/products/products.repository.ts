@@ -31,9 +31,6 @@ export class ProductsRepository {
     updatedProductModel: Partial<ProductModel>,
   ): Promise<any> {
     const productEntity = await this.model.findOne({ where: { id } });
-    if (!productEntity) {
-      throw new Error('Product not found');
-    }
     Object.assign(productEntity, updatedProductModel.toEntity());
     const updatedProduct = await this.model.save(productEntity);
     return updatedProduct.toModel();
@@ -41,9 +38,6 @@ export class ProductsRepository {
 
   async remove(id: number): Promise<ProductModel> {
     const product = await this.findById(id);
-    if (!product) {
-      throw new Error('Product not found');
-    }
     const deletedProduct = await this.model.save({
       ...product,
       deleted_at: new Date(),
