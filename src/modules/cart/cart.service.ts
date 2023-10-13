@@ -66,14 +66,6 @@ export class CartService {
     }
   }
 
-  findAll() {
-    return `This action returns all cart`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} cart`;
-  }
-
   async update(
     userId: number,
     productId: number,
@@ -92,11 +84,10 @@ export class CartService {
         cartId,
         productId,
       );
-
       if (cartItem) {
         cartItem.quantity = updateCartItemsDto.quantity;
+        cartItem.save();
       }
-      cartItem.save();
     } catch (err) {
       this.logger.error(err);
       throw err;
@@ -114,7 +105,7 @@ export class CartService {
       }
       await CartItemEntity.delete({
         cart_id: cartId,
-        product_id: productId,
+        product: productId,
       });
     } catch (err) {
       this.logger.error(err);
@@ -143,7 +134,7 @@ export class CartService {
     try {
       const cartItem = CartItemEntity.create({
         cart_id,
-        product_id,
+        product: product_id,
         quantity,
       });
       await this.cartItemRepo.create(cartItem);

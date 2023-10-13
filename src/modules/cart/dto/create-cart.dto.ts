@@ -3,7 +3,7 @@ import { PickType } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateCartItemsDto extends PickType(CartItemEntity, [
-  'product_id',
+  'product',
   'quantity',
 ] as const) {
   @IsNumber()

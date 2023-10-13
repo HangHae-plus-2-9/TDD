@@ -19,31 +19,29 @@ export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Post()
-  @Auth([ROLE_TYPE.CUSTOMER])
+  @Auth([ROLE_TYPE.ADMIN])
   async addCart(
-    // @AuthUser() tokenPayload: AccessTokenPayload,
+    @AuthUser() tokenPayload: AccessTokenPayload,
     @Body() createCartItemsDto: CreateCartItemsDto,
   ) {
-    const userId = 1;
-    return this.cartService.create(userId, createCartItemsDto);
-    // return this.cartService.create(tokenPayload.userId, createCartItemsDto);
+    return this.cartService.create(tokenPayload.userId, createCartItemsDto);
   }
+
+  // @Get()
+  // findAll() {
+  //   return this.cartService.findAll();
+  // }
 
   @Get()
-  findAll() {
-    return this.cartService.findAll();
-  }
-
-  @Get(':id')
-  @Auth([ROLE_TYPE.CUSTOMER])
+  @Auth([ROLE_TYPE.ADMIN])
   async getCart(@AuthUser() tokenPayload: AccessTokenPayload) {
     return this.cartService.getCartData(tokenPayload.userId);
   }
 
   @Patch(':id')
-  @Auth([ROLE_TYPE.CUSTOMER])
+  @Auth([ROLE_TYPE.ADMIN])
   async updateQuantity(
-    @Param('id') productId: string,
+    @Param('id') productId: number,
     @AuthUser() tokenPayload: AccessTokenPayload,
     @Body() UpdateCartItemsDto: UpdateCartItemsDto,
   ) {
@@ -55,7 +53,7 @@ export class CartController {
   }
 
   @Delete(':id')
-  @Auth([ROLE_TYPE.CUSTOMER])
+  @Auth([ROLE_TYPE.ADMIN])
   async removeCart(
     @Param('id') productId: string,
     @AuthUser() tokenPayload: AccessTokenPayload,

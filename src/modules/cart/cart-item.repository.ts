@@ -31,8 +31,8 @@ export class CartItemRepository
     if (!cartId) return null;
     return await this.model.findOne({
       where: {
-        id: cartId,
-        product_id: productId,
+        cart_id: cartId,
+        product: productId,
       },
     });
   }
