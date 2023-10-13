@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersService } from './orders.service';
 import { OrdersRepository } from './orders.repository';
 import { OrderItemsRepository } from './order-items.repository';
+import { ProductNotFoundException } from '@/common/exceptions';
 
 const orderItems = [
   { productId: 1, quantity: 1, price: 30000 },
@@ -118,8 +119,8 @@ describe('OrdersService', () => {
       };
 
       // when & then
-      await expect(service.create(invalidCreateOrderDto)).rejects.toThrow(
-        'Product not found',
+      await expect(service.create(invalidCreateOrderDto)).rejects.toThrowError(
+        ProductNotFoundException
       );
     });
 

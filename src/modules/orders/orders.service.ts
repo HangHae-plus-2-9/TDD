@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { OrderNotFoundException } from '@/common/exceptions';
+import {
+  OrderNotFoundException,
+  ProductNotFoundException,
+} from '@/common/exceptions';
 import { OrdersRepository } from './orders.repository';
 import { OrderItemsRepository } from './order-items.repository';
 import { OrdersMapper } from './orders.mapper';
@@ -21,7 +24,7 @@ const productService = {
       (product) => product.productId === productId,
     );
     if (!productInfo) {
-      throw new Error('Product not found');
+      throw new ProductNotFoundException();
     }
     return productInfo;
   },
@@ -44,7 +47,7 @@ export class OrdersService {
       // orderItems 생성시 productId로 상품정보 조회해서 price 가져오기
       const productInfo = productService.findOne(item.productId);
       if (!productInfo) {
-        throw new Error('Product not found');
+        throw new ProductNotFoundException();
       }
       if (productInfo.quantity < item.quantity) {
         throw new Error('Quantity must be less than product quantity');
