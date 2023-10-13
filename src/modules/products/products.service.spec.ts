@@ -66,7 +66,6 @@ describe('ProductsService', () => {
 
       // when
       const products = await service.findAll(indexProductDto);
-      console.log(products);
 
       // then
       expect(products.data).toEqual([]);
