@@ -1,73 +1,36 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ProductsComponent } from './products.component';
 import { ProductsRepositoryInterface } from './interfaces/product-repository.interface';
+import { ProductEntity } from './entities/product.entity';
+import { messages } from '@/common/resources';
 
-/**
- * 가상의 서비스
- *  - 게시글을 작성하면서 댓글까지 트랜젝션으로 함꼐 생성되는 경우를 가정
- */
 @Injectable()
 export class ProductsService {
   comp: any;
   constructor(
+    private readonly logger: Logger,
     // private readonly comp: ProductsComponent,
     @Inject('ProductsRepositoryInterface')
     private readonly repo: ProductsRepositoryInterface,
   ) {}
 
-  // 기존에 트랙젝션을 사용하기 위해 사용했왔던 방식 - 이번에는 지양하기로.
-  // create_without_component(createProductDto: CreateProductDto) {
-  //   // 1. 어떤 로직으로 게시글을 작성하고 검증한다
-  //   this.some_validation_comment();
-  //   // 2. 다른 로직으로 댓글을 작성하고 검증한다.
-  //   this.some_validation_comment();
-
-  //   // @Transaction()
-  //   // 3. 게시글을 트랜젝션으로 생성한다.
-  //   const newSomething = this.repo.create(createProductDto);
-  //   // 4. 댓글을 트랜젝션으로 생성한다.
-  //   const newOtherThing = this.repo.create(createProductDto); // 위와 다르다고 가정
-  //   // @Commit()
-  //   // ~~
-  //   // @Rollback()
-  //   // ~~
-  //   return [newSomething, newOtherThing];
-  // }
-
-  private product_add_validation() {
-    return false;
+  async upload(createProductDto: CreateProductDto) {
+    try {
+      const product = await this.saveProduct(createProductDto);
+      console.log(product);
+      return product;
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
   }
 
-  private some_validation_comment() {
-    return true;
-  }
-
-  /**
-   * 트랜젝션이 사용 될 때, 우리가 주로 사용하기로 한 방식
-   */
-  create_with_component(createProductDto: CreateProductDto) {
-
-    // 1. 어떤 로직으로 게시글을 작성하고 검증한다
-    this.some_validation_comment();
-    // 2. 다른 로직으로 댓글을 작성하고 검증한다.
-    this.some_validation_comment();
-    return this.comp.createSomethingAndOther(createProductDto);
-  }
-
-  // create_with_component(createProductDto: CreateProductDto) {
-
-  //   // 1. 어떤 로직으로 게시글을 작성하고 검증한다
-  //   this.some_validation_comment();
-  //   // 2. 다른 로직으로 댓글을 작성하고 검증한다.
-  //   this.some_validation_comment();
-  //   return this.comp.createSomethingAndOther(createProductDto);
-  // }
-
-  /**
-   * 이하 트랜젝션 없이 간단한 로직은 그냥 repository 직접 호출해서 사용
-   */
   findAll() {
     return this.repo.all();
   }
@@ -82,5 +45,28 @@ export class ProductsService {
 
   remove(id: number) {
     return this.repo.remove(id);
+  }
+
+  async saveProduct(createProductDto: CreateProductDto) {
+    try {
+      const product = ProductEntity.create({
+        seller: createProductDto.seller,
+        name: createProductDto.name,
+        product_type: createProductDto.product_type,
+        category_name: createProductDto.category_name,
+        option: createProductDto.option,
+        description: createProductDto.description,
+        price: createProductDto.price,
+        quantity: createProductDto.quantity,
+      });
+      console.log('product', product);
+      await this.repo.create(product);
+      return product.toProduct();
+    } catch (err) {
+      this.logger.error;
+      throw new UnprocessableEntityException(
+        messages.UNPROCESSABLE_ENTITY_EXCEPTION,
+      );
+    }
   }
 }

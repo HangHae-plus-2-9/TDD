@@ -4,7 +4,6 @@ import { FavoriteEntity } from './entities/favorite.entity';
 import { FavoriteRepositoryInterface } from './interface/favorite-repository.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { FavoriteProductDto } from './dto/favorite-request.dto';
 
 @Injectable()
 export class FavoirteRepository
@@ -17,6 +16,19 @@ export class FavoirteRepository
   ) {
     super(model);
   }
+  async findfavoriteByUserId(
+    userId: number,
+    productId: number,
+  ): Promise<FavoriteEntity> {
+    if (!userId || !productId) return null;
+    console.log(userId, productId);
+    return await this.model.findOne({
+      where: {
+        user_id: userId,
+        product_id: productId,
+      },
+    });
+  }
 
   async findAllFavoriteByUserId(userId: number): Promise<FavoriteEntity[]> {
     if (!userId) return null;
@@ -25,21 +37,11 @@ export class FavoirteRepository
     });
   }
 
-  async uploadFavorite(
-    user_id: number,
-    favoriteProductDto: FavoriteProductDto,
-  ) {
-    if (!favoriteProductDto) return null;
-    return await this.model.save({
-      user_id,
-      product_id: favoriteProductDto.product_id,
-    });
-  }
-
-  async deleteFavoriteByUserId(user_id: number, product_id: number) {
+  async deleteFavoriteByUserId(userId: number, productId: number) {
+    console.log('herE?', userId, productId);
     return await this.model.delete({
-      user_id,
-      product_id,
+      user_id: userId,
+      product_id: productId,
     });
   }
 }

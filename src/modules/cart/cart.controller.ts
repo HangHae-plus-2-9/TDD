@@ -21,10 +21,12 @@ export class CartController {
   @Post()
   @Auth([ROLE_TYPE.CUSTOMER])
   async addCart(
-    @AuthUser() tokenPayload: AccessTokenPayload,
+    // @AuthUser() tokenPayload: AccessTokenPayload,
     @Body() createCartItemsDto: CreateCartItemsDto,
   ) {
-    return this.cartService.create(tokenPayload.userId, createCartItemsDto);
+    const userId = 1;
+    return this.cartService.create(userId, createCartItemsDto);
+    // return this.cartService.create(tokenPayload.userId, createCartItemsDto);
   }
 
   @Get()

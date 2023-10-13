@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FavoriteService } from './favorite.service';
 
-const mockUserId = '1';
+const mockUserId = 1;
 const mockFavorite = [
   {
     userId: 1,

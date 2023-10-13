@@ -16,4 +16,7 @@ export const messages = {
 
   //Cart
   CART_NOT_FOUNT_EXCEPTION: '카트를 찾을 수 없습니다.',
+
+  //Favorite
+  FAVORITE_NOT_FOUND_EXCEPTION: '즐겨찾기 목록이 없습니다.',
 };

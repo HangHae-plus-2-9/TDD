@@ -27,8 +27,10 @@ export class CartService {
       let cartId: number | null;
       // eslint-disable-next-line prefer-const
       const cart = await this.repo.findCart(userId);
+      console.log(cart);
       if (!cart) {
         const newCart = await this.createCart(userId);
+        console.log('newCart', newCart);
         cartId = newCart.id;
       } else {
         cartId = cart.id;

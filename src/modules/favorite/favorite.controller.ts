@@ -13,7 +13,6 @@ import { ROLE_TYPE } from '@/common/resources';
 import { AccessTokenPayload } from '../auth/dto/access-token-payload.dto';
 import { FavoriteProductDto } from './dto/favorite-request.dto';
 import { UpdateFavoriteDto } from './dto/update-favorite.dto';
-import { CreateFavoriteDto } from './dto/create-favorite.dto';
 
 @Controller({ version: '1', path: 'favorite' })
 export class FavoriteController {
@@ -24,8 +23,8 @@ export class FavoriteController {
   //   return this.favoriteService.create(createFavoriteDto);
   // }
 
-  @Post('/')
-  @Auth([ROLE_TYPE.CUSTOMER])
+  @Post('/add')
+  @Auth([ROLE_TYPE.ADMIN])
   async uploadFavoriteList(
     @AuthUser() tokenPayload: AccessTokenPayload,
     @Body() favoriteProductDto: FavoriteProductDto,
@@ -33,25 +32,25 @@ export class FavoriteController {
     return this.favoriteService.upload(tokenPayload.userId, favoriteProductDto);
   }
 
-  @Get('/')
-  @Auth([ROLE_TYPE.CUSTOMER])
+  @Get('/:id')
+  @Auth([ROLE_TYPE.ADMIN])
   async getAllfavorite(@AuthUser() toeknPayload: AccessTokenPayload) {
     return this.favoriteService.getAllfavoriteList(toeknPayload.userId);
   }
 
-  @Delete('/:id')
-  @Auth([ROLE_TYPE.CUSTOMER])
+  @Delete('/:productId')
+  @Auth([ROLE_TYPE.ADMIN])
   async deleteFavorite(
     @AuthUser() tokenPayload: AccessTokenPayload,
-    @Body() favoriteProductDto: FavoriteProductDto,
+    @Param('productId') productId: number,
   ) {
-    return;
+    return this.favoriteService.removeFavorite(tokenPayload.userId, +productId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.favoriteService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.favoriteService.findOne(+id);
+  // }
 
   @Patch(':id')
   update(

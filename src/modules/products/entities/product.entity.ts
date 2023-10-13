@@ -1,28 +1,67 @@
 import { CommonColumns } from '@/common/entities/common-columns';
-// import { UserEntity } from '@/modules/users/entities/user.entity';
-import { Column, Entity } from 'typeorm';
+import { SellerEntity } from '@/modules/users/entities/seller.entity';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
-@Entity({ name: 'products' })
+export interface Product {
+  id: number;
+  seller: SellerEntity | number;
+  name: string;
+  product_type: string;
+  category_name: string;
+  option: string;
+  description: string;
+  price: string;
+  quantity: number;
+}
+
+@Entity({ name: 'product' })
 export class ProductEntity extends CommonColumns {
-  
-  // @PrimaryGeneratedColumn()
-  // id: number;
-
-  // // @ManyToOne(() => UserEntity, seller => seller.products)
-  // // @JoinColumn({ name: 'seller_id' })  // This sets up the foreign key
-  // // seller: UserEntity;
+  @ManyToOne(() => SellerEntity, (seller: SellerEntity) => seller.products)
+  seller: SellerEntity | number;
 
   @Column()
   name: string;
 
-  // @Column()
-  // price: string;
+  @Column()
+  product_type: string;
 
-  // @Column()
-  // quantity: number;
+  @Column()
+  category_name: string;
 
-  // @Column({ nullable: true })
-  // description?: string;
+  @Column()
+  option: string;
 
+  @Column()
+  description: string;
 
+  @Column()
+  price: string;
+
+  @Column()
+  quantity: number;
+
+  public toProduct(): Product {
+    const {
+      id,
+      seller,
+      name,
+      product_type,
+      category_name,
+      option,
+      description,
+      price,
+      quantity,
+    } = this;
+    return {
+      id,
+      seller,
+      name,
+      product_type,
+      category_name,
+      option,
+      description,
+      price,
+      quantity,
+    };
+  }
 }
