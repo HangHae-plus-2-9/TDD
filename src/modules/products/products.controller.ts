@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -15,6 +16,9 @@ import {
   ApiCreatedResponse,
   ApiResponse,
 } from '@nestjs/swagger';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductModel } from './models/product.model';
+import { IndexProductDto } from './dto/index-product.dto';
 
 @ApiTags('products')
 @Controller({ version: '1', path: 'products' })
@@ -31,14 +35,12 @@ export class ProductsController {
     description: 'Internal Server Error',
   })
   create(@Body() createProductDto: CreateProductDto) {
-    // 유저 인풋 검증
-    return this.productsService.create_with_component(createProductDto);
-    return this.productsService.create_without_component(createProductDto);
+    return this.productsService.create(ProductModel.fromDto(createProductDto));
   }
 
   @Get()
-  findAll() {
-    return this.productsService.findAll();
+  findAll(@Query() indexProductDto: IndexProductDto) {
+    return this.productsService.findAll(indexProductDto);
   }
 
   @Get(':id')
@@ -47,8 +49,11 @@ export class ProductsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: any) {
-    return this.productsService.update(+id, updateProductDto);
+  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+    return this.productsService.update(
+      +id,
+      ProductModel.fromDto(updateProductDto),
+    );
   }
 
   @Delete(':id')

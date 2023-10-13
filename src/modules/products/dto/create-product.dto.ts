@@ -1,22 +1,23 @@
-// import { IsInt, IsString, IsOptional, Min, IsNumber } from 'class-validator';
-import { ProductEntity } from '../entities/product.entity';
+import { IsNumber, IsString, Min } from 'class-validator';
 
-export class CreateProductDto extends ProductEntity {
+export class CreateProductDto {
+  @IsNumber()
+  sellerId: number;
 
-  // @IsInt()
-  // sellerId: number; // 사용자는 판매자의 ID만 제공합니다. 연관된 엔터티는 서비스 레벨에서 처리됩니다.
+  @IsString()
+  name: string;
 
-  // @IsString()
-  // name: string;
+  @IsString()
+  categoryName: string;
 
-  // @IsString()
-  // price: string;
+  @IsString()
+  description: string;
 
-  // @IsNumber()
-  // @Min(0)
-  // quantity: number;
+  @IsNumber()
+  @Min(1)
+  price: number;
 
-  // @IsString()
-  // @IsOptional() // 선택적 필드입니다.
-  // description?: string;
+  @IsNumber()
+  @Min(1)
+  stock: number;
 }
