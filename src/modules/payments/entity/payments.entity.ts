@@ -1,19 +1,16 @@
 import { Column, Entity, OneToOne } from 'typeorm';
 import { CommonColumns } from '@/common/entities/common-columns';
 import { OrderEntity } from '@/modules/orders/entities/order.entity';
-import { PaymentPg, PaymetMethod } from '@/modules/payments/enum/payments.enum';
+import { PaymentMethod } from '@/modules/payments/enum/payment-method.enum';
 
 @Entity()
 export class Payments extends CommonColumns {
-  @Column({ type: 'enum', enum: PaymentPg, default: PaymentPg.Tosspayments })
-  pg: PaymentPg;
-
   @Column({
     type: 'enum',
-    enum: PaymetMethod,
-    default: PaymetMethod.CreditCard,
+    enum: PaymentMethod,
+    default: PaymentMethod.CreditCard,
   })
-  method: PaymetMethod;
+  method: PaymentMethod;
 
   @Column()
   amount: number;
@@ -21,9 +18,9 @@ export class Payments extends CommonColumns {
   @OneToOne(() => OrderEntity, (order) => order.payment)
   order: OrderEntity;
 
-  @Column({ name: 'canceled_amount' })
+  @Column({ name: 'canceled_amount', nullable: true })
   canceledAmount: number;
 
-  @Column({ name: 'canceled_at' })
+  @Column({ name: 'canceled_at', nullable: true })
   canceledAt: Date;
 }
