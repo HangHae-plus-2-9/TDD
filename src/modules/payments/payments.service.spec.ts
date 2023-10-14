@@ -5,6 +5,7 @@ import { Payments } from '@/modules/payments/entity/payments.entity';
 import { PaymentMethod } from '@/modules/payments/enum/payment-method.enum';
 import { OrderEntity } from '@/modules/orders/entities/order.entity';
 import { Repository } from 'typeorm';
+import { ConflictException } from '@nestjs/common';
 
 describe('PaymentsService', () => {
   let sut: PaymentsService;
@@ -30,10 +31,6 @@ describe('PaymentsService', () => {
     paymentsRepository = module.get(getRepositoryToken(Payments));
   });
 
-  it('should be defined', () => {
-    expect(sut).toBeDefined();
-  });
-
   describe('create', () => {
     it('정상적인 Payments 생성 요청 시, Payments가 생성된다', async () => {
       // given
@@ -49,6 +46,16 @@ describe('PaymentsService', () => {
       // then
       expect(actual).toEqual(expected);
     });
+  });
+
+  it('이미 주문에 해당하는 결제 정보가 존재할 때는 ConflictException을 던진다', async () => {
+    const orderId = 99;
+    const amount = 9_900;
+    paymentsRepository.save.mockRejectedValue({ code: '23505' });
+
+    const createOperation = sut.create(orderId, amount);
+
+    await expect(createOperation).rejects.toThrow(ConflictException);
   });
 });
 
