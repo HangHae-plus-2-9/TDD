@@ -13,4 +13,7 @@ export const messages = {
 
   // Product
   PRODUCT_NOT_FOUND_EXCEPTION: '상품을 찾을 수 없습니다.',
+
+  // Order
+  ORDER_NOT_FOUND_EXCEPTION: '주문을 찾을 수 없습니다.',
 };

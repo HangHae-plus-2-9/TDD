@@ -1,30 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from './products.service';
-import { ProductsRepositoryInterface } from './interfaces/product-repository.interface';
-import { ProductsComponent } from './products.component';
+import { ProductsRepository } from './products.repository';
+import { CreateProductDto } from './dto/create-product.dto';
+import { ProductModel } from './models/product.model';
+import { ProductNotFoundException } from '@/common/exceptions';
+import { IndexProductDto } from './dto/index-product.dto';
 
 describe('ProductsService', () => {
   let service: ProductsService;
-  let mockComp: Partial<ProductsComponent>; // 가짜 컴포넌트 - partial 사용
-  let mockRepo: ProductsRepositoryInterface; // 가짜 레포지토리 - interface 사용
+  let mockRepo: Partial<ProductsRepository>;
 
   beforeEach(async () => {
-    mockComp = {};
-    mockRepo = {
-      doSomethingForProduct: jest.fn(),
-      create: jest.fn(),
-      all: jest.fn(),
-      findById: jest.fn(),
-      update: jest.fn(),
-      remove: jest.fn(),
-      createMany: jest.fn(),
-      paginate: jest.fn(),
-    };
+    mockRepo = {};
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProductsService,
-        { provide: 'ProductsRepositoryInterface', useValue: mockRepo },
-        { provide: ProductsComponent, useValue: mockComp },
+        {
+          provide: ProductsRepository,
+          useValue: mockRepo,
+        },
       ],
     }).compile();
 
@@ -34,70 +28,196 @@ describe('ProductsService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-  //post 하기 전 유효성 검사(통과케이스)
-  // it('should validate product upload and return true', async () => {
-  //   const ProductInfo = { id: 1, name: 'Sample Product', price: 100 };
-  //   mockRepo.create.mockResolvedValue(storedProductInfo);
 
-  //   const isValid = await service.add_product_validation(storedProductInfo);
-  //   expect(isValid).toBe(true);
-  // });
-  // //post 유효성검사 : 제품 이름이 빈 문자열이면 validation Error
-  // it('should throw an error if product name is empty', async () => {
-  //   const productWithEmptyName = { name: '', price: 100 };
-  //   const storedProductInfo = { id: 1, ...productWithEmptyName };
-  //   mockRepo.create.mockResolvedValue(storedProductInfo);
+  describe('create', () => {
+    it('모든 값이 정상적으로 주어진 경우 상품을 생성하고 생성된 상품을 반환한다.', async () => {
+      // given
+      const createProductDto = new CreateProductDto();
+      createProductDto.sellerId = 1;
+      createProductDto.name = 'product1';
+      createProductDto.categoryName = 'category';
+      createProductDto.description = 'description';
+      createProductDto.price = 10000;
+      createProductDto.stock = 100;
 
-  //   await expect(
-  //     service.add_product_validation(storedProductInfo),
-  //   ).rejects.toThrow('Validation Error: Product name is required.');
-  // });
-  // // post 유효성검사 : 가격이 음수면 validation Error
-  // it('should throw an error if product price is minus', async () => {
-  //   const productWithMinusPrice = { name: 'Sample Product', price: -1 };
-  //   const storedProductInfo = { id: 1, ...productWithMinusPrice };
-  //   mockRepo.create.mockResolvedValue(storedProductInfo);
+      mockRepo.create = jest.fn().mockResolvedValue({
+        id: 1,
+        ...createProductDto,
+      });
 
-  //   await expect(
-  //     service.add_product_validation(storedProductInfo),
-  //   ).rejects.toThrow('Validation Error:product price is minus');
-  // });
-  // // post 유효성검사 : 가격이 정수가 아니면 validation Error
-  // it('should throw an error if product price is not a natural number', async () => {
-  //   const productWithDecimalPrice = { name: 'Sample Product', price: 100.5 };
-  //   const storedProductInfo = { id: 1, ...productWithDecimalPrice };
-  //   mockRepo.create.mockResolvedValue(storedProductInfo);
+      // when
+      const createdProduct = await service.create(
+        ProductModel.fromDto(createProductDto),
+      );
 
-  //   await expect(
-  //     service.add_product_validation(storedProductInfo),
-  //   ).rejects.toThrow('Validation Error:product price is not natural number');
-  // });
-  // // post 유효성검사 : description 멘트가 너무 길면 validation Error
-  // it('should throw an error if product description is too long', async () => {
-  //   const longDescription = 'a'.repeat(1001); // 1000자 이상이면 에러라고 가정
-  //   const productWithLongDescription = {
-  //     name: 'Sample Product',
-  //     price: 100,
-  //     description: longDescription,
-  //   };
-  //   const storedProductInfo = { id: 1, ...productWithLongDescription };
-  //   mockRepo.create.mockResolvedValue(storedProductInfo);
+      // then
+      expect(createdProduct).toEqual({
+        id: 1,
+        ...createProductDto,
+      });
+    });
+  });
 
-  //   await expect(
-  //     service.add_product_validation(storedProductInfo),
-  //   ).rejects.toThrow('Validation Error: Product description is too long.');
-  // });
-  // // post 유효성검사: 카테고리가 실제로 데이터베이스 내에 존재하지 않을때 에러 발생
-  // it('should throw an error if product category does not exist', async () => {
-  //   const productWithNonExistingCategory = {
-  //     name: 'Sample Product',
-  //     price: 100,
-  //     category: 'UnknownCategory',
-  //   };
-  //   mockRepo.create.mockResolvedValue(productWithNonExistingCategory);
+  describe('findAll', () => {
+    it('상품이 하나도 없는 경우 빈 배열을 반환한다.', async () => {
+      // given
+      const indexProductDto = new IndexProductDto();
+      mockRepo.all = jest.fn().mockResolvedValue({ total: 0, data: [] });
 
-  //   await expect(
-  //     service.add_product_validation(productWithNonExistingCategory),
-  //   ).rejects.toThrow('Validation Error: Provided category does not exist.');
-  // });
+      // when
+      const products = await service.findAll(indexProductDto);
+
+      // then
+      expect(products.data).toEqual([]);
+    });
+
+    it('상품이 하나 이상 있는 경우 상품 목록을 반환한다.', async () => {
+      // given
+      const indexProductDto = new IndexProductDto();
+      const product1 = {
+        id: 1,
+        sellerId: 1,
+        name: 'product1',
+        categoryName: 'category',
+        description: 'description',
+        price: 10000,
+        stock: 100,
+      };
+      const product2 = {
+        id: 2,
+        sellerId: 1,
+        name: 'product2',
+        categoryName: 'category',
+        description: 'description',
+        price: 10000,
+        stock: 100,
+      };
+      const productList = [product1, product2];
+      mockRepo.all = jest
+        .fn()
+        .mockResolvedValue({ total: productList.length, data: productList });
+
+      // when
+      const products = await service.findAll(indexProductDto);
+
+      // then
+      expect(products.data).toEqual([product1, product2]);
+    });
+  });
+
+  describe('findOne', () => {
+    it('해당 id의 상품이 없는 경우 undefined를 반환한다.', async () => {
+      // given
+      mockRepo.findById = jest.fn().mockResolvedValue(undefined);
+
+      // when
+      const product = await service.findOne(1);
+
+      // then
+      expect(product).toBeUndefined();
+    });
+
+    it('해당 id의 상품이 있는 경우 상품을 반환한다.', async () => {
+      // given
+      const product = {
+        id: 1,
+        sellerId: 1,
+        name: 'product1',
+        categoryName: 'category',
+        description: 'description',
+        price: 10000,
+        stock: 100,
+      };
+      mockRepo.findById = jest.fn().mockResolvedValue(product);
+
+      // when
+      const foundProduct = await service.findOne(1);
+
+      // then
+      expect(foundProduct).toEqual(product);
+    });
+  });
+
+  describe('update', () => {
+    it('해당 id의 상품이 없는 경우 에러를 발생시킨다.', async () => {
+      // given
+      const updateProductDto = new CreateProductDto();
+      updateProductDto.name = 'product1-update';
+
+      mockRepo.findById = jest.fn().mockResolvedValue(undefined);
+
+      // when
+      const updateProduct = service.update(1, updateProductDto);
+
+      // then
+      await expect(updateProduct).rejects.toThrowError(
+        ProductNotFoundException,
+      );
+    });
+
+    it('해당 id의 상품이 있는 경우 상품을 수정하고 수정된 상품을 반환한다.', async () => {
+      // given
+      const updateProductDto = new CreateProductDto();
+      updateProductDto.name = 'product1-update';
+      const product = {
+        id: 1,
+        sellerId: 1,
+        name: 'product1',
+        categoryName: 'category',
+        description: 'description',
+        price: 10000,
+        stock: 100,
+      };
+      mockRepo.findById = jest.fn().mockResolvedValue(product);
+      mockRepo.update = jest.fn().mockResolvedValue({
+        ...product,
+        ...updateProductDto,
+      });
+
+      // when
+      const updatedProduct = await service.update(1, updateProductDto);
+
+      // then
+      expect(updatedProduct).toEqual({
+        ...product,
+        ...updateProductDto,
+      });
+    });
+  });
+
+  describe('remove', () => {
+    it('해당 id의 상품이 없는 경우 에러를 발생시킨다.', async () => {
+      // given
+      mockRepo.findById = jest.fn().mockResolvedValue(undefined);
+
+      // when
+      const removeProduct = service.remove(1);
+
+      // then
+      await expect(removeProduct).rejects.toThrowError(
+        ProductNotFoundException,
+      );
+    });
+
+    it('해당 id의 상품이 있는 경우 상품을 삭제하고 삭제된 상품을 반환한다.', async () => {
+      // given
+      const product = {
+        id: 1,
+        sellerId: 1,
+        name: 'product1',
+        categoryName: 'category',
+        description: 'description',
+        price: 10000,
+        stock: 100,
+      };
+      mockRepo.findById = jest.fn().mockResolvedValue(product);
+      mockRepo.remove = jest.fn().mockResolvedValue(product);
+
+      // when
+      const removedProduct = await service.remove(1);
+
+      // then
+      expect(removedProduct).toEqual(product);
+    });
+  });
 });
