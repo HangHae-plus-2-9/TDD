@@ -1,6 +1,7 @@
 import { CommonColumns } from '@/common/entities/common-columns';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { OrderItemEntity } from './order-item.entity';
+import { Payments } from '@/modules/payments/entity/payments.entity';
 
 @Entity('orders')
 export class OrderEntity extends CommonColumns {
@@ -48,4 +49,8 @@ export class OrderEntity extends CommonColumns {
 
   @OneToMany(() => OrderItemEntity, (orderItem) => orderItem.order_id)
   order_items: OrderItemEntity[];
+
+  @OneToOne(() => Payments, (payment) => payment.order)
+  @JoinColumn()
+  payment: Payments;
 }
