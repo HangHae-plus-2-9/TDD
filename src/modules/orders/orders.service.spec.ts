@@ -154,17 +154,11 @@ describe('OrdersService', () => {
       );
     });
 
-    xit('결제 금액이 올바르지 않을 때, 주문이 생성되지 않아야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('결제 금액이 올바르지 않을 때, 주문이 생성되지 않아야 한다.');
 
-    xit('결제 수단이 올바르지 않을 때, 주문이 생성되지 않아야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('결제 수단이 올바르지 않을 때, 주문이 생성되지 않아야 한다.');
 
-    xit('배송 정보가 올바르지 않을 때, 주문이 생성되지 않아야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('배송 정보가 올바르지 않을 때, 주문이 생성되지 않아야 한다.');
   });
 
   describe('findOne', () => {
@@ -207,90 +201,54 @@ describe('OrdersService', () => {
       ]);
     });
 
-    xit('구매자의 ID로 주문을 가져올 수 있어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('구매자의 ID로 주문을 가져올 수 있어야 한다.');
 
-    xit('상품의 ID로 주문을 가져올 수 있어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('상품의 ID로 주문을 가져올 수 있어야 한다.');
 
-    xit('올바르지 않은 파라미터로 주문을 가져올 수 없어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('올바르지 않은 파라미터로 주문을 가져올 수 없어야 한다.');
   });
 
   describe('getCustomerOrders', () => {
-    xit('구매자의 ID로 주문을 가져올 수 있어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('구매자의 ID로 주문을 가져올 수 있어야 한다.');
   });
 
   describe('getSellerOrders', () => {
-    xit('판매자의 ID로 주문을 가져올 수 있어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('판매자의 ID로 주문을 가져올 수 있어야 한다.');
 
-    xit('올바르지 않은 파라미터로 주문을 가져올 수 없어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('올바르지 않은 파라미터로 주문을 가져올 수 없어야 한다.');
   });
 
   describe('update', () => {
-    xit('주문을 수정할 수 있어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('주문을 수정할 수 있어야 한다.');
 
-    xit('수정시 정보가 누락되었을 때, 주문을 수정할 수 없어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('수정시 정보가 누락되었을 때, 주문을 수정할 수 없어야 한다.');
 
-    xit('주문 수량이 재고 수량보다 많을 때, 주문을 수정할 수 없어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('주문 수량이 재고 수량보다 많을 때, 주문을 수정할 수 없어야 한다.');
 
-    xit('올바르지 않은 파라미터로 주문을 수정할 수 없어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('올바르지 않은 파라미터로 주문을 수정할 수 없어야 한다.');
   });
 
   describe('remove', () => {
-    xit('주문을 삭제할 수 있어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('주문을 삭제할 수 있어야 한다.');
   });
 
   describe('cancel', () => {
-    xit('주문을 취소할 수 있어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('주문을 취소할 수 있어야 한다.');
 
-    xit('취소된 주문은 취소할 수 없어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('취소된 주문은 취소할 수 없어야 한다.');
   });
 
   describe('ship', () => {
-    xit('주문을 발송대기 상태로 전환할 수 있어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('주문을 발송대기 상태로 전환할 수 있어야 한다.');
 
-    xit('발송대기 상태인 주문은 발송대기 상태로 전환할 수 없어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('발송대기 상태인 주문은 발송대기 상태로 전환할 수 없어야 한다.');
   });
 
   describe('complete', () => {
-    xit('주문을 완료 상태로 전환할 수 있어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('주문을 완료 상태로 전환할 수 있어야 한다.');
 
-    xit('결제대기 상태인 주문은 완료 상태로 전환할 수 없어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('결제대기 상태인 주문은 완료 상태로 전환할 수 없어야 한다.');
 
-    xit('완료 상태인 주문은 완료 상태로 전환할 수 없어야 한다.', async () => {
-      expect(false).toBe(true);
-    });
+    it.todo('완료 상태인 주문은 완료 상태로 전환할 수 없어야 한다.');
   });
 });
