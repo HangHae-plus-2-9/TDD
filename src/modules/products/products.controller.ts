@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -17,8 +16,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ProductModel } from './models/product.model';
-import { IndexProductDto } from './dto/index-product.dto';
+import { dtoToSpec } from './mappers/product.mapper';
 
 @ApiTags('products')
 @Controller({ version: '1', path: 'products' })
@@ -35,12 +33,13 @@ export class ProductsController {
     description: 'Internal Server Error',
   })
   create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(ProductModel.fromDto(createProductDto));
+    const productSpec = dtoToSpec(createProductDto);
+    return this.productsService.create(createProductDto.sellerId, productSpec);
   }
 
   @Get()
-  findAll(@Query() indexProductDto: IndexProductDto) {
-    return this.productsService.findAll(indexProductDto);
+  findAll() {
+    return this.productsService.findAll();
   }
 
   @Get(':id')
@@ -50,10 +49,8 @@ export class ProductsController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(
-      +id,
-      ProductModel.fromDto(updateProductDto),
-    );
+    const updatedProductSpec = dtoToSpec(updateProductDto);
+    return this.productsService.update(+id, updatedProductSpec);
   }
 
   @Delete(':id')

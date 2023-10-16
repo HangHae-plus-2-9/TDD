@@ -1,48 +1,61 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
-import { ProductModel } from './models/product.model';
-import { ProductNotFoundException } from '@/common/exceptions';
-import { IndexProductDto } from './dto/index-product.dto';
+import { ProductSpec } from './models/product-spec.model';
+import { PRODUCT_STATUS } from '@/common/resources';
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly repo: ProductsRepository) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly repo: ProductsRepository,
+  ) {}
 
-  async create(productModel: ProductModel) {
-    return await this.repo.create(productModel);
+  async create(sellerId: number, productSpec: ProductSpec) {
+    try {
+      const productSpecWithStatus = {
+        ...productSpec,
+        status: PRODUCT_STATUS.PENDING,
+      };
+      return await this.repo.create(sellerId, productSpecWithStatus);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
   }
 
-  async findAll(indexProductDto: IndexProductDto) {
-    const { page, perPage } = indexProductDto;
-    const { total, data } = await await this.repo.all(indexProductDto);
-    return {
-      total,
-      data,
-      current_page: page,
-      from: (page - 1) * perPage + 1,
-      to: (page - 1) * perPage + perPage,
-      last_page: Math.ceil(total / perPage),
-      per_page: perPage,
-    };
+  async findAll() {
+    try {
+      return await this.repo.all();
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
   }
 
   async findOne(id: number) {
-    return await this.repo.findById(id);
+    try {
+      return await this.repo.findById(id);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
   }
 
-  async update(id: number, productModel: Partial<ProductModel>) {
-    const product = await this.repo.findById(id);
-    if (!product) {
-      throw new ProductNotFoundException();
+  async update(id: number, productSpec: Partial<ProductSpec>) {
+    try {
+      return await this.repo.update(id, productSpec);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
     }
-    return await this.repo.update(id, productModel);
   }
 
   async remove(id: number) {
-    const product = await this.repo.findById(id);
-    if (!product) {
-      throw new ProductNotFoundException();
+    try {
+      return await this.repo.remove(id);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
     }
-    return await this.repo.remove(id);
   }
 }

@@ -14,3 +14,9 @@ export enum USER_STATUS {
   ACTIVE = 2,
   INACTIVE = 3,
 }
+
+export enum PRODUCT_STATUS {
+  PENDING = 1,
+  ACTIVE = 2,
+  INACTIVE = 3,
+}
