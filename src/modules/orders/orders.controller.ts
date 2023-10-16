@@ -11,6 +11,7 @@ import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { createDtoToSpec } from './mappers/order.mapper';
 
 @ApiTags('orders')
 @Controller({ version: '1', path: 'orders' })
@@ -23,7 +24,9 @@ export class OrdersController {
     description: 'The record has been successfully created.',
   })
   create(@Body() createOrderDto: CreateOrderDto) {
-    return this.ordersService.create(createOrderDto);
+    const customerId = createOrderDto.customerId;
+    const orderSpec = createDtoToSpec(createOrderDto);
+    return this.ordersService.create(customerId, orderSpec);
   }
 
   @Get()

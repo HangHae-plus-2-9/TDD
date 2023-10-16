@@ -1,35 +1,32 @@
-import { BaseRepository } from '@/common/repositories/base.repository';
 import { Injectable } from '@nestjs/common';
 import { OrderItemEntity } from './entities/order-item.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { OrderItemModel } from './models/order-item.model';
+import { orderItemEntityToModel } from './mappers/order.mapper';
 
 const ORDER_ITEM_ENTITIES = [];
 
 @Injectable()
-export class OrderItemsRepository extends BaseRepository<OrderItemEntity> {
+export class OrderItemsRepository {
   constructor(
     @InjectRepository(OrderItemEntity)
     private readonly model: Repository<OrderItemEntity>,
-  ) {
-    super(model);
-  }
+  ) {}
 
   async createManyWithOrderId(
     orderId: number,
-    orderItemModels: any[],
-  ): Promise<any[]> {
+    orderItemModels: OrderItemModel[],
+  ): Promise<OrderItemModel[]> {
     return await orderItemModels.map((item) => {
       const orderItemEntity = {
-        id: Math.floor(Math.random() * 1000000),
-        order_id: orderId,
         ...item,
         created_at: new Date(),
         updated_at: new Date(),
         deleted_at: null,
-      };
+      } as OrderItemEntity;
       ORDER_ITEM_ENTITIES.push({ ...orderItemEntity });
-      return orderItemEntity;
+      return orderItemEntityToModel(orderItemEntity);
     });
   }
 
