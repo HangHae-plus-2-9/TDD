@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from './products.service';
 import { ProductsRepository } from './products.repository';
 import { CreateProductDto } from './dto/create-product.dto';
-import { ProductModel } from './models/product.model';
+import { ProductSpec } from './models/product-spec.model';
 import { ProductNotFoundException } from '@/common/exceptions';
-import { IndexProductDto } from './dto/index-product.dto';
+import { Logger } from '@nestjs/common';
 
 describe('ProductsService', () => {
   let service: ProductsService;
@@ -14,6 +14,7 @@ describe('ProductsService', () => {
     mockRepo = {};
     const module: TestingModule = await Test.createTestingModule({
       providers: [
+        Logger,
         ProductsService,
         {
           provide: ProductsRepository,
@@ -35,8 +36,8 @@ describe('ProductsService', () => {
       const createProductDto = new CreateProductDto();
       createProductDto.sellerId = 1;
       createProductDto.name = 'product1';
-      createProductDto.categoryName = 'category';
-      createProductDto.description = 'description';
+      createProductDto.catName = 'category';
+      createProductDto.desc = 'description';
       createProductDto.price = 10000;
       createProductDto.stock = 100;
 
@@ -47,7 +48,8 @@ describe('ProductsService', () => {
 
       // when
       const createdProduct = await service.create(
-        ProductModel.fromDto(createProductDto),
+        createProductDto.sellerId,
+        createProductDto as unknown as ProductSpec,
       );
 
       // then
@@ -61,47 +63,48 @@ describe('ProductsService', () => {
   describe('findAll', () => {
     it('상품이 하나도 없는 경우 빈 배열을 반환한다.', async () => {
       // given
-      const indexProductDto = new IndexProductDto();
       mockRepo.all = jest.fn().mockResolvedValue({ total: 0, data: [] });
 
       // when
-      const products = await service.findAll(indexProductDto);
+      const products = await service.findAll();
 
       // then
-      expect(products.data).toEqual([]);
+      expect(products).toEqual({ data: [], total: 0 });
     });
 
     it('상품이 하나 이상 있는 경우 상품 목록을 반환한다.', async () => {
       // given
-      const indexProductDto = new IndexProductDto();
-      const product1 = {
+      const productModel1 = {
         id: 1,
         sellerId: 1,
         name: 'product1',
-        categoryName: 'category',
+        catName: 'category',
         description: 'description',
         price: 10000,
         stock: 100,
       };
-      const product2 = {
+      const productModel2 = {
         id: 2,
         sellerId: 1,
         name: 'product2',
-        categoryName: 'category',
+        catName: 'category',
         description: 'description',
         price: 10000,
         stock: 100,
       };
-      const productList = [product1, product2];
+      const productsList = [productModel1, productModel2];
       mockRepo.all = jest
         .fn()
-        .mockResolvedValue({ total: productList.length, data: productList });
+        .mockResolvedValue({ total: productsList.length, data: productsList });
 
       // when
-      const products = await service.findAll(indexProductDto);
+      const products = await service.findAll();
 
       // then
-      expect(products.data).toEqual([product1, product2]);
+      expect(products).toEqual({
+        data: productsList,
+        total: productsList.length,
+      });
     });
   });
 
@@ -119,22 +122,22 @@ describe('ProductsService', () => {
 
     it('해당 id의 상품이 있는 경우 상품을 반환한다.', async () => {
       // given
-      const product = {
+      const productModel = {
         id: 1,
         sellerId: 1,
         name: 'product1',
-        categoryName: 'category',
+        catName: 'category',
         description: 'description',
         price: 10000,
         stock: 100,
       };
-      mockRepo.findById = jest.fn().mockResolvedValue(product);
+      mockRepo.findById = jest.fn().mockResolvedValue(productModel);
 
       // when
       const foundProduct = await service.findOne(1);
 
       // then
-      expect(foundProduct).toEqual(product);
+      expect(foundProduct).toEqual(productModel);
     });
   });
 
@@ -144,7 +147,9 @@ describe('ProductsService', () => {
       const updateProductDto = new CreateProductDto();
       updateProductDto.name = 'product1-update';
 
-      mockRepo.findById = jest.fn().mockResolvedValue(undefined);
+      mockRepo.update = jest.fn().mockImplementation(() => {
+        throw new ProductNotFoundException();
+      });
 
       // when
       const updateProduct = service.update(1, updateProductDto);
@@ -163,7 +168,7 @@ describe('ProductsService', () => {
         id: 1,
         sellerId: 1,
         name: 'product1',
-        categoryName: 'category',
+        catName: 'category',
         description: 'description',
         price: 10000,
         stock: 100,
@@ -188,7 +193,9 @@ describe('ProductsService', () => {
   describe('remove', () => {
     it('해당 id의 상품이 없는 경우 에러를 발생시킨다.', async () => {
       // given
-      mockRepo.findById = jest.fn().mockResolvedValue(undefined);
+      mockRepo.remove = jest.fn().mockImplementation(() => {
+        throw new ProductNotFoundException();
+      });
 
       // when
       const removeProduct = service.remove(1);
@@ -201,23 +208,23 @@ describe('ProductsService', () => {
 
     it('해당 id의 상품이 있는 경우 상품을 삭제하고 삭제된 상품을 반환한다.', async () => {
       // given
-      const product = {
+      const productModel = {
         id: 1,
         sellerId: 1,
         name: 'product1',
-        categoryName: 'category',
+        catName: 'category',
         description: 'description',
         price: 10000,
         stock: 100,
       };
-      mockRepo.findById = jest.fn().mockResolvedValue(product);
-      mockRepo.remove = jest.fn().mockResolvedValue(product);
+      mockRepo.findById = jest.fn().mockResolvedValue(productModel);
+      mockRepo.remove = jest.fn().mockResolvedValue(productModel);
 
       // when
       const removedProduct = await service.remove(1);
 
       // then
-      expect(removedProduct).toEqual(product);
+      expect(removedProduct).toEqual(productModel);
     });
   });
 });
