@@ -4,9 +4,9 @@ import { OrderItemModel } from './order-item.model';
 
 export type OrderModel = {
   id?: number;
-  customer_id: number;
+  customerId: number;
   payment: CreatePaymentDto;
   shipping: CreateShippingDto;
-  canceled_at?: Date;
-  order_items: OrderItemModel[];
+  canceledAt?: Date;
+  orderItems: OrderItemModel[];
 };

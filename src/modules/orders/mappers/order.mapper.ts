@@ -6,7 +6,7 @@ import { OrderModel } from '../models/order.model';
 export const orderEntityToModel = (entity: OrderEntity): OrderModel => {
   return {
     id: entity.id,
-    customer_id: entity.customer_id,
+    customerId: entity.customer_id,
     payment: {
       method: entity.payment_method,
       amount: entity.payment_amount,
@@ -21,7 +21,7 @@ export const orderEntityToModel = (entity: OrderEntity): OrderModel => {
       departedAt: entity.departed_at,
       arrivedAt: entity.arrived_at,
     },
-    canceled_at: entity.canceled_at,
+    canceledAt: entity.canceled_at,
   } as OrderModel;
 };
 
@@ -30,8 +30,8 @@ export const orderItemEntityToModel = (
 ): OrderItemModel => {
   return {
     id: entity.id,
-    order_id: entity.order_id,
-    product_id: entity.product_id,
+    orderId: entity.order_id,
+    productId: entity.product_id,
     quantity: entity.quantity,
     price: entity.price,
   } as OrderItemModel;

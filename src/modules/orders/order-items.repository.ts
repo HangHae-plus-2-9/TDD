@@ -20,7 +20,11 @@ export class OrderItemsRepository {
   ): Promise<OrderItemModel[]> {
     return await orderItemModels.map((item) => {
       const orderItemEntity = {
-        ...item,
+        id: item.id,
+        order_id: orderId,
+        product_id: item.productId,
+        quantity: item.quantity,
+        price: item.price,
         created_at: new Date(),
         updated_at: new Date(),
         deleted_at: null,
@@ -50,7 +54,7 @@ export class OrderItemsRepository {
     // remove order items whose quantity is 0
     const willBeRemovedOrderItemsProductIds = orderItemModels.map((item) => {
       if (item.quantity === 0) {
-        return item.product_id;
+        return item.productId;
       }
     });
     const willBeRemovedOrderItemEntities = orderItemEntities.filter((item) =>
@@ -66,7 +70,7 @@ export class OrderItemsRepository {
     );
     willBeUpdatedOrderItemEntities.map((item) => {
       const orderItemModel = orderItemModels.find(
-        (model) => model.product_id === item.product_id,
+        (model) => model.productId === item.product_id,
       );
       item.quantity = orderItemModel.quantity;
       return item;

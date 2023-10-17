@@ -9,7 +9,10 @@ import { CreateOrderItemDto } from './dto/create-order-item.dto';
 import { createNumericId } from '@/common/utils';
 import * as _ from 'lodash';
 import { ProductsService } from '../products/products.service';
-import { ProductNotFoundException } from '@/common/exceptions';
+import { OrderNotFoundException, ProductNotFoundException } from '@/common/exceptions';
+import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { UpdateShippingDto } from './dto/update-shipping.dto';
+import { UpdateOrderItemDto } from './dto/update-order-item.dto';
 
 @Injectable()
 export class OrdersService {
@@ -28,6 +31,8 @@ export class OrdersService {
   ) {
     const orderId = createNumericId();
 
+    if (orderItems.length === 0) throw new Error('Order items must be exist');
+
     const orderItemModels = await this.orderItemRepo.createManyWithOrderId(
       orderId,
       await Promise.all(
@@ -43,8 +48,8 @@ export class OrdersService {
           this.productsService.subStock(item.productId, item.quantity);
           return {
             id: createNumericId(),
-            order_id: orderId,
-            product_id: item.productId,
+            orderId: orderId,
+            productId: item.productId,
             quantity: item.quantity,
             price: productModel.price,
           } as OrderItemModel;
@@ -54,7 +59,7 @@ export class OrdersService {
 
     const orderModel = await this.orderRepo.create({
       id: orderId,
-      customer_id: customerId,
+      customerId: customerId,
       payment: {
         method: paymentInfo.method,
         amount: orderItemModels.reduce(
@@ -74,10 +79,10 @@ export class OrdersService {
         arrivedAt: null,
         canceledAt: null,
       },
-      canceled_at: null,
+      canceledAt: null,
     } as OrderModel);
 
-    return { ...orderModel, order_items: orderItemModels };
+    return { ...orderModel, orderItems: orderItemModels };
   }
 
   async findAll() {
@@ -87,7 +92,7 @@ export class OrdersService {
         const orderItemModels = await this.orderItemRepo.getByOrderId(
           orderModel.id,
         );
-        return { ...orderModel, order_items: orderItemModels };
+        return { ...orderModel, orderItems: orderItemModels };
       }),
     );
     return orders;
@@ -96,28 +101,31 @@ export class OrdersService {
   async findOne(id: number) {
     const orderModel = await this.orderRepo.getByOrderId(id);
     const orderItemModels = await this.orderItemRepo.getByOrderId(id);
-    return { ...orderModel, order_items: orderItemModels };
+    return { ...orderModel, orderItems: orderItemModels };
   }
 
   async update(
     id: number,
-    paymentInfo: CreatePaymentDto,
-    shippingInfo: CreateShippingDto,
-    orderItems: CreateOrderItemDto[],
+    paymentInfo: UpdatePaymentDto,
+    shippingInfo: UpdateShippingDto,
+    orderItems: UpdateOrderItemDto[],
   ) {
     const updatedOrderItemModels =
       await this.orderItemRepo.updateManyWithOrderId(
         id,
         await Promise.all(
           orderItems.map(async (item) => {
-            const productInfo = await this.productsService.findOne(
+            const productModel = await this.productsService.findOne(
               item.productId,
             );
+            if (!productModel) throw new ProductNotFoundException();
+            if (productModel.stock < item.quantity)
+              throw new Error('Quantity must be less than product quantity');
             return {
-              order_id: id,
-              product_id: item.productId,
+              orderId: id,
+              productId: item.productId,
               quantity: item.quantity,
-              price: productInfo.price,
+              price: productModel.price,
             } as OrderItemModel;
           }),
         ),
@@ -138,15 +146,15 @@ export class OrdersService {
       { shipping: shippingInfo },
     );
     const updatedOrderModel = await this.orderRepo.update(id, newOrderModel);
-    return { ...updatedOrderModel, order_items: updatedOrderItemModels };
+    return { ...updatedOrderModel, orderItems: updatedOrderItemModels };
   }
 
-  async remove(id: number) {
-    // const order = this.findOne(id);
-    // if (!order) {
-    //   throw new OrderNotFoundException();
-    // }
-    // this.orderItemRepo.removeByOrderId(id);
-    // return this.orderRepo.remove(id);
+  async cancel(id: number) {
+    const orderModel = await this.orderRepo.getByOrderId(id);
+    if (!orderModel) throw new OrderNotFoundException();
+    const orderItemModels = await this.orderItemRepo.getByOrderId(id);
+    await this.orderItemRepo.removeByOrderId(id);
+    await this.orderRepo.removeByOrderId(id);
+    return { ...orderModel, orderItems: orderItemModels };
   }
 }

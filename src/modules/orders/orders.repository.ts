@@ -56,7 +56,7 @@ export class OrdersRepository {
   async create(orderModel: OrderModel): Promise<OrderModel> {
     ORDER_ENTITIES.push({
       id: orderModel.id,
-      customer_id: orderModel.customer_id,
+      customer_id: orderModel.customerId,
       payment_method: orderModel.payment.method,
       payment_amount: orderModel.payment.amount,
       paid_at: orderModel.payment.paidAt,
@@ -67,7 +67,7 @@ export class OrdersRepository {
       shipping_receiver_phone: orderModel.shipping.receiverPhone,
       departed_at: orderModel.shipping.departedAt,
       arrived_at: orderModel.shipping.arrivedAt,
-      canceled_at: orderModel.canceled_at,
+      canceled_at: orderModel.canceledAt,
       created_at: new Date(),
       updated_at: new Date(),
       deleted_at: null,
@@ -105,7 +105,7 @@ export class OrdersRepository {
       shipping_receiver_phone: newOrderModel.shipping.receiverPhone,
       departed_at: newOrderModel.shipping.departedAt,
       arrived_at: newOrderModel.shipping.arrivedAt,
-      canceled_at: newOrderModel.canceled_at,
+      canceled_at: newOrderModel.canceledAt,
       updated_at: new Date(),
     } as OrderEntity;
     ORDER_ENTITIES = ORDER_ENTITIES.map((order) =>
@@ -114,7 +114,7 @@ export class OrdersRepository {
     return orderEntityToModel(newOrderEntity);
   }
 
-  async remove(id: number): Promise<OrderModel> {
+  async removeByOrderId(id: number): Promise<OrderModel> {
     const orderEntity = ORDER_ENTITIES.find((order) => order.id === id);
     if (!orderEntity) {
       throw new Error('Order not found');

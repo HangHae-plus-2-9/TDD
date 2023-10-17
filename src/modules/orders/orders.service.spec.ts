@@ -2,20 +2,23 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersService } from './orders.service';
 import { OrdersRepository } from './orders.repository';
 import { OrderItemsRepository } from './order-items.repository';
-import { ProductNotFoundException } from '@/common/exceptions';
+import { OrderNotFoundException, ProductNotFoundException } from '@/common/exceptions';
 import { PAYMENT_METHOD } from '@/common/resources';
 import { CreateShippingDto } from './dto/create-shipping.dto';
 import { ProductsService } from '../products/products.service';
 import { Logger } from '@nestjs/common';
+import { CreateOrderItemDto } from './dto/create-order-item.dto';
+import { OrderItemModel } from './models/order-item.model';
+import { cloneDeep } from 'lodash';
 
 const customerId = 1;
 
-const productsList = [
+const dummyProductModels = [
   { id: 1, name: '테스트 상품 1', price: 30000, stock: 10 },
   { id: 2, name: '테스트 상품 2', price: 40000, stock: 10 },
 ];
 
-const orderItems = [
+const orderItems: CreateOrderItemDto[] = [
   { productId: 1, quantity: 1, price: 30000 },
   { productId: 2, quantity: 2, price: 40000 },
 ];
@@ -30,9 +33,9 @@ const createPaymentDto = {
 const createShippingDto = {
   courierName: null,
   invoiceNumber: null,
-  shippingAddress: '서울시 강남구',
-  shippingReceiver: '홍길동',
-  shippingReceiverPhone: '010-1234-5678',
+  address: '서울시 강남구',
+  receiver: '홍길동',
+  receiverPhone: '010-1234-5678',
   departedAt: null,
   arrivedAt: null,
 } as unknown as CreateShippingDto;
@@ -45,8 +48,12 @@ const createOrderDto = {
   orderItems,
 };
 const orderItemEntities = [
-  { id: 1, productId: 1, quantity: 1, price: 30000 },
-  { id: 2, productId: 2, quantity: 2, price: 40000 },
+  { id: 1, order_id: 1, product_id: 1, quantity: 1, price: 30000 },
+  { id: 2, order_id: 1, product_id: 2, quantity: 2, price: 40000 },
+];
+const orderItemModels: OrderItemModel[] = [
+  { id: 1, orderId: 1, productId: 1, quantity: 1, price: 30000 },
+  { id: 2, orderId: 1, productId: 2, quantity: 2, price: 40000 },
 ];
 const orderEntity = {
   id: 1,
@@ -66,6 +73,28 @@ const orderEntity = {
   updated_at: new Date(),
   deleted_at: null,
 };
+const orderModel = {
+  id: 1,
+  customerId: orderEntity.customer_id,
+  payment: {
+    method: orderEntity.payment_method,
+    amount: orderEntity.amount,
+    paidAt: orderEntity.paid_at,
+    canceledAt: orderEntity.canceled_at,
+  },
+  shipping: {
+    courierName: orderEntity.courier_name,
+    invoiceNumber: orderEntity.invoice_number,
+    address: orderEntity.shipping_address,
+    receiver: orderEntity.shipping_receiver,
+    receiverPhone: orderEntity.shipping_receiver_phone,
+    departedAt: orderEntity.departed_at,
+    arrivedAt: orderEntity.arrived_at,
+    canceledAt: orderEntity.canceled_at,
+  },
+  canceledAt: orderEntity.canceled_at,
+  orderItems: orderItemModels,
+};
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -76,7 +105,7 @@ describe('OrdersService', () => {
   beforeEach(async () => {
     stubProductsService = {
       findOne: jest.fn().mockImplementation((id) => {
-        return productsList.find((product) => product.id === id);
+        return dummyProductModels.find((product) => product.id === id);
       }),
     };
     stubOrderRepo = {
@@ -84,7 +113,7 @@ describe('OrdersService', () => {
       all: jest.fn(),
       getByOrderId: jest.fn(),
       update: jest.fn(),
-      remove: jest.fn(),
+      removeByOrderId: jest.fn(),
     };
     stubOrderItemRepo = {
       createManyWithOrderId: jest.fn(),
@@ -141,7 +170,7 @@ describe('OrdersService', () => {
       // this line is ideal because this is the behavior that we want.
       expect(result).toEqual({
         ...orderEntity,
-        order_items: orderItemEntities,
+        orderItems: orderItemEntities,
       });
       orderItems.forEach((item, index) => {
         expect(stubProductsService.subStock).toHaveBeenNthCalledWith(
@@ -213,11 +242,24 @@ describe('OrdersService', () => {
       ).rejects.toThrow('Quantity must be less than product quantity');
     });
 
-    it.todo('결제 금액이 올바르지 않을 때, 주문이 생성되지 않아야 한다.');
+    it('주문 아이템이 없는 경우 주문이 생성되지 않아야 한다.', async () => {
+      // given
+      const invalidOrderItems = [];
+      const invalidCreateOrderDto = {
+        ...createOrderDto,
+        orderItems: invalidOrderItems,
+      };
 
-    it.todo('결제 수단이 올바르지 않을 때, 주문이 생성되지 않아야 한다.');
-
-    it.todo('배송 정보가 올바르지 않을 때, 주문이 생성되지 않아야 한다.');
+      // when & then
+      await expect(
+        service.create(
+          invalidCreateOrderDto.customerId,
+          invalidCreateOrderDto.createPaymentDto,
+          invalidCreateOrderDto.createShippingDto,
+          invalidCreateOrderDto.orderItems,
+        ),
+      ).rejects.toThrow('Order items must be exist');
+    });
   });
 
   describe('findOne', () => {
@@ -238,7 +280,7 @@ describe('OrdersService', () => {
       // behavior
       expect(result).toEqual({
         ...orderEntity,
-        order_items: orderItemEntities,
+        orderItems: orderItemEntities,
       });
     });
   });
@@ -259,7 +301,7 @@ describe('OrdersService', () => {
       expect(stubOrderRepo.all).toBeCalledTimes(1);
       // behavior
       expect(result).toEqual([
-        { ...orderEntity, order_items: orderItemEntities },
+        { ...orderEntity, orderItems: orderItemEntities },
       ]);
     });
 
@@ -281,23 +323,212 @@ describe('OrdersService', () => {
   });
 
   describe('update', () => {
-    it.todo('주문을 수정할 수 있어야 한다.');
+    it('주문의 결제수단을 수정할 수 있어야 한다.', async () => {
+      // given
+      const newPaymentMethod = PAYMENT_METHOD.BANK_TRANSFER;
+      stubOrderItemRepo.updateManyWithOrderId = jest.fn().mockReturnValue(
+        orderItems.map((item, idx) => {
+          return { id: idx + 1, orderId: 1, ...item };
+        }),
+      );
+      stubProductsService.findOne = jest
+        .fn()
+        .mockReturnValue(dummyProductModels[0]);
+      stubOrderRepo.getByOrderId = jest
+        .fn()
+        .mockReturnValue(cloneDeep(orderModel));
+      stubOrderRepo.update = jest.fn().mockReturnValue({
+        ...orderModel,
+        payment: {
+          ...orderModel.payment,
+          method: newPaymentMethod,
+        },
+      });
+      console.log(orderModel.payment);
 
-    it.todo('수정시 정보가 누락되었을 때, 주문을 수정할 수 없어야 한다.');
+      // when
+      const result = await service.update(
+        customerId,
+        { method: newPaymentMethod },
+        { ...createShippingDto },
+        [...orderItems],
+      );
 
-    it.todo('주문 수량이 재고 수량보다 많을 때, 주문을 수정할 수 없어야 한다.');
+      // then
+      // implementation details
+      expect(stubOrderRepo.getByOrderId).toBeCalledTimes(1);
+      expect(stubOrderItemRepo.updateManyWithOrderId).toBeCalledTimes(1);
+      // behavior
+      expect(result).toEqual({
+        ...orderModel,
+        payment: {
+          ...orderModel.payment,
+          method: newPaymentMethod,
+        },
+      });
+    });
 
-    it.todo('올바르지 않은 파라미터로 주문을 수정할 수 없어야 한다.');
-  });
+    it('주문의 배송지 정보를 수정할 수 있어야 한다.', async () => {
+      // given
+      const newShippingAddress = '테스트 주소';
+      const newShippingReceiver = '테스트 이름';
+      const newShippingReceiverPhone = '010-0000-0000';
+      stubOrderItemRepo.updateManyWithOrderId = jest.fn().mockReturnValue(
+        orderItems.map((item, idx) => {
+          return { id: idx + 1, orderId: 1, ...item };
+        }),
+      );
+      stubProductsService.findOne = jest
+        .fn()
+        .mockReturnValue(dummyProductModels[0]);
+      stubOrderRepo.getByOrderId = jest
+        .fn()
+        .mockReturnValue(cloneDeep(orderModel));
+      stubOrderRepo.update = jest.fn().mockReturnValue({
+        ...orderModel,
+        shipping: {
+          ...orderModel.shipping,
+          address: newShippingAddress,
+          receiver: newShippingReceiver,
+          receiverPhone: newShippingReceiverPhone,
+        },
+      });
 
-  describe('remove', () => {
-    it.todo('주문을 삭제할 수 있어야 한다.');
+      // when
+      const result = await service.update(
+        customerId,
+        { ...createPaymentDto },
+        {
+          address: newShippingAddress,
+          receiver: newShippingReceiver,
+          receiverPhone: newShippingReceiverPhone,
+        },
+        [...orderItems],
+      );
+
+      // then
+      // implementation details
+      expect(stubOrderRepo.getByOrderId).toBeCalledTimes(1);
+      expect(stubOrderItemRepo.updateManyWithOrderId).toBeCalledTimes(1);
+      // behavior
+      expect(result).toEqual({
+        ...orderModel,
+        shipping: {
+          ...orderModel.shipping,
+          address: newShippingAddress,
+          receiver: newShippingReceiver,
+          receiverPhone: newShippingReceiverPhone,
+        },
+      });
+    });
+
+    it('주문의 상품 수량을 수정할 수 있어야 한다.', async () => {
+      // given
+      const newOrderItems = [
+        { productId: 1, quantity: 2, price: 30000 },
+        { productId: 2, quantity: 3, price: 40000 },
+      ];
+      const newOrderItemModels = newOrderItems.map((item, idx) => {
+        return { id: idx + 1, orderId: 1, ...item };
+      });
+      stubOrderItemRepo.updateManyWithOrderId = jest
+        .fn()
+        .mockReturnValue(newOrderItemModels);
+      stubProductsService.findOne = jest
+        .fn()
+        .mockReturnValue(dummyProductModels[0]);
+      stubOrderRepo.getByOrderId = jest
+        .fn()
+        .mockReturnValue(cloneDeep(orderModel));
+      stubOrderRepo.update = jest.fn().mockImplementation((id, orderModel) => {
+        return { ...orderModel, orderItems: newOrderItemModels };
+      });
+
+      // when
+      const result = await service.update(
+        customerId,
+        { ...createPaymentDto },
+        { ...createShippingDto },
+        newOrderItems,
+      );
+
+      // then
+      // implementation details
+      expect(stubOrderRepo.getByOrderId).toBeCalledTimes(1);
+      expect(stubOrderItemRepo.updateManyWithOrderId).toBeCalledTimes(1);
+      // behavior
+      expect(result).toEqual({
+        ...orderModel,
+        orderItems: newOrderItemModels,
+        payment: {
+          ...orderModel.payment,
+          amount: newOrderItemModels.reduce(
+            (acc, cur) => acc + cur.price * cur.quantity,
+            0,
+          ),
+        },
+      });
+    });
+
+    it('주문 수량이 재고 수량보다 많을 때, 주문을 수정할 수 없어야 한다.', async () => {
+      // given
+      const invalidOrderItems = [
+        { productId: 1, quantity: 999999, price: 30000 },
+      ];
+      const invalidCreateOrderDto = {
+        ...createOrderDto,
+        orderItems: invalidOrderItems,
+      };
+
+      // when & then
+      await expect(
+        service.update(
+          invalidCreateOrderDto.customerId,
+          invalidCreateOrderDto.createPaymentDto,
+          invalidCreateOrderDto.createShippingDto,
+          invalidCreateOrderDto.orderItems,
+        ),
+      ).rejects.toThrow('Quantity must be less than product quantity');
+    });
   });
 
   describe('cancel', () => {
-    it.todo('주문을 취소할 수 있어야 한다.');
+    it('주문을 취소할 수 있어야 한다.', async () => {
+      // given
+      stubOrderRepo.getByOrderId = jest.fn().mockReturnValue(orderEntity);
+      stubOrderRepo.removeByOrderId = jest.fn().mockReturnValue(orderEntity);
+      stubOrderItemRepo.getByOrderId = jest
+        .fn()
+        .mockReturnValue(orderItemEntities);
+      stubOrderItemRepo.removeByOrderId = jest
+        .fn()
+        .mockReturnValue(orderItemEntities);
 
-    it.todo('취소된 주문은 취소할 수 없어야 한다.');
+      // when
+      const result = await service.cancel(1);
+
+      // then
+      // implementation details
+      expect(stubOrderRepo.getByOrderId).toBeCalledTimes(1);
+      expect(stubOrderRepo.removeByOrderId).toBeCalledTimes(1);
+      expect(stubOrderItemRepo.getByOrderId).toBeCalledTimes(1);
+      expect(stubOrderItemRepo.removeByOrderId).toBeCalledTimes(1);
+      // behavior
+      expect(result).toEqual({
+        ...orderEntity,
+        orderItems: orderItemEntities,
+      });
+    });
+
+    it('취소된 주문은 취소할 수 없어야 한다.', async () => {
+      // given
+      stubOrderRepo.getByOrderId = jest.fn().mockReturnValue(undefined);
+
+      // when & then
+      await expect(service.cancel(1)).rejects.toThrowError(
+        OrderNotFoundException,
+      );
+    });
   });
 
   describe('ship', () => {
