@@ -57,4 +57,14 @@ export class ProductsController {
   remove(@Param('id') id: string) {
     return this.productsService.remove(+id);
   }
+
+  @Patch(':id/sub')
+  subtractStock(@Param('id') id: string, @Body() body: { quantity: number }) {
+    return this.productsService.subStock(+id, body.quantity);
+  }
+
+  @Patch(':id/add')
+  addStock(@Param('id') id: string, @Body() body: { quantity: number }) {
+    return this.productsService.addStock(+id, body.quantity);
+  }
 }

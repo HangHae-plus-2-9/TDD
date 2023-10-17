@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
 import { ProductSpec } from './models/product-spec.model';
 import { PRODUCT_STATUS } from '@/common/resources';
+import { ProductModel } from './models/product.model';
+import { ProductNotFoundException } from '@/common/exceptions';
 
 @Injectable()
 export class ProductsService {
@@ -10,7 +12,10 @@ export class ProductsService {
     private readonly repo: ProductsRepository,
   ) {}
 
-  async create(sellerId: number, productSpec: ProductSpec) {
+  async create(
+    sellerId: number,
+    productSpec: ProductSpec,
+  ): Promise<ProductModel> {
     try {
       const productSpecWithStatus = {
         ...productSpec,
@@ -23,7 +28,7 @@ export class ProductsService {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<ProductModel[]> {
     try {
       return await this.repo.all();
     } catch (err) {
@@ -32,16 +37,19 @@ export class ProductsService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<ProductModel> {
     try {
-      return await this.repo.findById(id);
+      return await this.repo.getByProductId(id);
     } catch (err) {
       this.logger.error(err);
       throw err;
     }
   }
 
-  async update(id: number, productSpec: Partial<ProductSpec>) {
+  async update(
+    id: number,
+    productSpec: Partial<ProductSpec>,
+  ): Promise<ProductModel> {
     try {
       return await this.repo.update(id, productSpec);
     } catch (err) {
@@ -50,12 +58,32 @@ export class ProductsService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<ProductModel> {
     try {
       return await this.repo.remove(id);
     } catch (err) {
       this.logger.error(err);
       throw err;
     }
+  }
+
+  async subStock(productId: number, quantity: number): Promise<ProductModel> {
+    try {
+      const productModel = await this.repo.getByProductId(productId);
+      if (!productModel) throw new ProductNotFoundException();
+      if (productModel.stock < quantity) throw new Error('재고가 부족합니다.');
+      const updatedProductModel = {
+        ...productModel,
+        stock: productModel.stock - quantity,
+      };
+      return await this.repo.update(productId, updatedProductModel);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
+  }
+
+  async addStock(productId: number, quantity: number): Promise<ProductModel> {
+    return await this.subStock(productId, -quantity);
   }
 }
