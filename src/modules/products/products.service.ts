@@ -1,48 +1,89 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
+import { ProductSpec } from './models/product-spec.model';
+import { PRODUCT_STATUS } from '@/common/resources';
 import { ProductModel } from './models/product.model';
 import { ProductNotFoundException } from '@/common/exceptions';
-import { IndexProductDto } from './dto/index-product.dto';
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly repo: ProductsRepository) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly repo: ProductsRepository,
+  ) {}
 
-  async create(productModel: ProductModel) {
-    return await this.repo.create(productModel);
-  }
-
-  async findAll(indexProductDto: IndexProductDto) {
-    const { page, perPage } = indexProductDto;
-    const { total, data } = await await this.repo.all(indexProductDto);
-    return {
-      total,
-      data,
-      current_page: page,
-      from: (page - 1) * perPage + 1,
-      to: (page - 1) * perPage + perPage,
-      last_page: Math.ceil(total / perPage),
-      per_page: perPage,
-    };
-  }
-
-  async findOne(id: number) {
-    return await this.repo.findById(id);
-  }
-
-  async update(id: number, productModel: Partial<ProductModel>) {
-    const product = await this.repo.findById(id);
-    if (!product) {
-      throw new ProductNotFoundException();
+  async create(
+    sellerId: number,
+    productSpec: ProductSpec,
+  ): Promise<ProductModel> {
+    try {
+      const productSpecWithStatus = {
+        ...productSpec,
+        status: PRODUCT_STATUS.PENDING,
+      };
+      return await this.repo.create(sellerId, productSpecWithStatus);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
     }
-    return await this.repo.update(id, productModel);
   }
 
-  async remove(id: number) {
-    const product = await this.repo.findById(id);
-    if (!product) {
-      throw new ProductNotFoundException();
+  async findAll(): Promise<ProductModel[]> {
+    try {
+      return await this.repo.all();
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
     }
-    return await this.repo.remove(id);
+  }
+
+  async findOne(id: number): Promise<ProductModel> {
+    try {
+      return await this.repo.getByProductId(id);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
+  }
+
+  async update(
+    id: number,
+    productSpec: Partial<ProductSpec>,
+  ): Promise<ProductModel> {
+    try {
+      return await this.repo.update(id, productSpec);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
+  }
+
+  async remove(id: number): Promise<ProductModel> {
+    try {
+      return await this.repo.remove(id);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
+  }
+
+  async subStock(productId: number, quantity: number): Promise<ProductModel> {
+    try {
+      const productModel = await this.repo.getByProductId(productId);
+      if (!productModel) throw new ProductNotFoundException();
+      if (productModel.stock < quantity) throw new Error('재고가 부족합니다.');
+      const updatedProductModel = {
+        ...productModel,
+        stock: productModel.stock - quantity,
+      };
+      return await this.repo.update(productId, updatedProductModel);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
+  }
+
+  async addStock(productId: number, quantity: number): Promise<ProductModel> {
+    return await this.subStock(productId, -quantity);
   }
 }
