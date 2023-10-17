@@ -344,7 +344,6 @@ describe('OrdersService', () => {
           method: newPaymentMethod,
         },
       });
-      console.log(orderModel.payment);
 
       // when
       const result = await service.update(
@@ -492,7 +491,7 @@ describe('OrdersService', () => {
     });
   });
 
-  describe('cancel', () => {
+  describe('remove', () => {
     it('주문을 취소할 수 있어야 한다.', async () => {
       // given
       stubOrderRepo.getByOrderId = jest.fn().mockReturnValue(orderEntity);
@@ -505,7 +504,7 @@ describe('OrdersService', () => {
         .mockReturnValue(orderItemEntities);
 
       // when
-      const result = await service.cancel(1);
+      const result = await service.remove(1);
 
       // then
       // implementation details
@@ -525,7 +524,7 @@ describe('OrdersService', () => {
       stubOrderRepo.getByOrderId = jest.fn().mockReturnValue(undefined);
 
       // when & then
-      await expect(service.cancel(1)).rejects.toThrowError(
+      await expect(service.remove(1)).rejects.toThrowError(
         OrderNotFoundException,
       );
     });

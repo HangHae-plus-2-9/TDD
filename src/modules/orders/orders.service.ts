@@ -149,7 +149,7 @@ export class OrdersService {
     return { ...updatedOrderModel, orderItems: updatedOrderItemModels };
   }
 
-  async cancel(id: number) {
+  async remove(id: number) {
     const orderModel = await this.orderRepo.getByOrderId(id);
     if (!orderModel) throw new OrderNotFoundException();
     const orderItemModels = await this.orderItemRepo.getByOrderId(id);
