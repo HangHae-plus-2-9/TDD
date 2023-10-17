@@ -2,7 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersService } from './orders.service';
 import { OrdersRepository } from './orders.repository';
 import { OrderItemsRepository } from './order-items.repository';
-import { OrderNotFoundException, ProductNotFoundException } from '@/common/exceptions';
+import {
+  OrderNotFoundException,
+  ProductNotFoundException,
+} from '@/common/exceptions';
 import { PAYMENT_METHOD } from '@/common/resources';
 import { CreateShippingDto } from './dto/create-shipping.dto';
 import { ProductsService } from '../products/products.service';
