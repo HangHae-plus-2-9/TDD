@@ -13,15 +13,41 @@ const SELLERS = [
   { id: 1, name: 'Apple' },
   { id: 2, name: 'Microsoft' },
 ];
-const PRODUCTS: ProductEntity[] = [
+let PRODUCTS: ProductEntity[] = [
   {
     id: 1,
     seller_id: 1,
-    name: 'iPhone 12',
+    name: 'iPhone 15',
+    cat_name: 'Smartphone',
+    desc: 'The latest iPhone',
+    price: 2000,
+    stock: 10,
+    status: PRODUCT_STATUS.ACTIVE,
+    created_at: new Date(),
+    updated_at: new Date(),
+    deleted_at: null,
+  } as ProductEntity,
+  {
+    id: 2,
+    seller_id: 1,
+    name: 'iPhone 14',
     cat_name: 'Smartphone',
     desc: 'The latest iPhone',
     price: 1000,
-    stock: 100,
+    stock: 10,
+    status: PRODUCT_STATUS.ACTIVE,
+    created_at: new Date(),
+    updated_at: new Date(),
+    deleted_at: null,
+  } as ProductEntity,
+  {
+    id: 3,
+    seller_id: 2,
+    name: 'Surface Pro 8',
+    cat_name: 'Laptop',
+    desc: 'The latest Surface Pro',
+    price: 2000,
+    stock: 10,
     status: PRODUCT_STATUS.ACTIVE,
     created_at: new Date(),
     updated_at: new Date(),
@@ -65,7 +91,7 @@ export class ProductsRepository {
     return PRODUCTS.map((product) => ProductMapper.toModel(product));
   }
 
-  async findById(id: number): Promise<ProductModel> {
+  async getByProductId(id: number): Promise<ProductModel> {
     const product = PRODUCTS.find((product) => product.id === id);
     if (!product) {
       throw new ProductNotFoundException();
@@ -85,6 +111,13 @@ export class ProductsRepository {
       ...product,
       ...updatedProductSpec,
     } as ProductEntity;
+
+    PRODUCTS = PRODUCTS.map((item) => {
+      if (item.id === id) {
+        return product;
+      }
+      return item;
+    });
     return ProductMapper.toModel(product);
   }
 

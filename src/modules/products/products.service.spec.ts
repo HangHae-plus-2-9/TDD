@@ -111,7 +111,7 @@ describe('ProductsService', () => {
   describe('findOne', () => {
     it('해당 id의 상품이 없는 경우 undefined를 반환한다.', async () => {
       // given
-      mockRepo.findById = jest.fn().mockResolvedValue(undefined);
+      mockRepo.getByProductId = jest.fn().mockResolvedValue(undefined);
 
       // when
       const product = await service.findOne(1);
@@ -131,7 +131,7 @@ describe('ProductsService', () => {
         price: 10000,
         stock: 100,
       };
-      mockRepo.findById = jest.fn().mockResolvedValue(productModel);
+      mockRepo.getByProductId = jest.fn().mockResolvedValue(productModel);
 
       // when
       const foundProduct = await service.findOne(1);
@@ -173,7 +173,7 @@ describe('ProductsService', () => {
         price: 10000,
         stock: 100,
       };
-      mockRepo.findById = jest.fn().mockResolvedValue(product);
+      mockRepo.getByProductId = jest.fn().mockResolvedValue(product);
       mockRepo.update = jest.fn().mockResolvedValue({
         ...product,
         ...updateProductDto,
@@ -217,7 +217,7 @@ describe('ProductsService', () => {
         price: 10000,
         stock: 100,
       };
-      mockRepo.findById = jest.fn().mockResolvedValue(productModel);
+      mockRepo.getByProductId = jest.fn().mockResolvedValue(productModel);
       mockRepo.remove = jest.fn().mockResolvedValue(productModel);
 
       // when
@@ -225,6 +225,106 @@ describe('ProductsService', () => {
 
       // then
       expect(removedProduct).toEqual(productModel);
+    });
+  });
+
+  describe('subStock', () => {
+    it('해당 id의 상품이 없는 경우 에러를 발생시킨다.', async () => {
+      // given
+      mockRepo.getByProductId = jest.fn().mockResolvedValue(undefined);
+
+      // when
+      const subStock = service.subStock(1, 10);
+
+      // then
+      await expect(subStock).rejects.toThrowError(ProductNotFoundException);
+    });
+
+    it('해당 id의 상품이 있고, 재고가 충분한 경우 상품의 재고를 감소시키고 감소된 상품을 반환한다.', async () => {
+      // given
+      const productModel = {
+        id: 1,
+        sellerId: 1,
+        name: 'product1',
+        catName: 'category',
+        description: 'description',
+        price: 10000,
+        stock: 100,
+      };
+      mockRepo.getByProductId = jest.fn().mockResolvedValue(productModel);
+      mockRepo.update = jest.fn().mockResolvedValue({
+        ...productModel,
+        stock: productModel.stock - 10,
+      });
+
+      // when
+      const subStock = await service.subStock(1, 10);
+
+      // then
+      expect(subStock).toEqual({
+        ...productModel,
+        stock: productModel.stock - 10,
+      });
+    });
+
+    it('해당 id의 상품이 있고, 재고가 충분하지 않은 경우 에러를 발생시킨다.', async () => {
+      // given
+      const productModel = {
+        id: 1,
+        sellerId: 1,
+        name: 'product1',
+        catName: 'category',
+        description: 'description',
+        price: 10000,
+        stock: 100,
+      };
+      mockRepo.getByProductId = jest.fn().mockResolvedValue(productModel);
+
+      // when
+      const subStock = service.subStock(1, 1000);
+
+      // then
+      await expect(subStock).rejects.toThrowError('재고가 부족합니다.');
+    });
+  });
+
+  describe('addStock', () => {
+    it('해당 id의 상품이 없는 경우 에러를 발생시킨다.', async () => {
+      // given
+      mockRepo.getByProductId = jest.fn().mockResolvedValue(undefined);
+
+      // when
+      const addStock = service.addStock(1, 10);
+
+      // then
+      await expect(addStock).rejects.toThrowError(ProductNotFoundException);
+    });
+
+    it('해당 id의 상품이 있고, 재고를 증가시킨다.', async () => {
+      // given
+      const productModel = {
+        id: 1,
+        sellerId: 1,
+        name: 'product1',
+        catName: 'category',
+        description: 'description',
+        price: 10000,
+        stock: 100,
+      };
+      mockRepo.getByProductId = jest.fn().mockResolvedValue(productModel);
+      mockRepo.update = jest.fn().mockResolvedValue({
+        ...productModel,
+        stock: productModel.stock + 10,
+      });
+
+      // when
+      const addStock = await service.addStock(1, 10);
+
+      // then
+      expect(addStock).toEqual({
+        ...productModel,
+        stock: productModel.stock + 10,
+      });
     });
   });
 });
