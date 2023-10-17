@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { ProductNotFoundException } from '@/common/exceptions';
+import { Injectable, Logger } from '@nestjs/common';
 import { OrdersRepository } from './orders.repository';
 import { OrderItemsRepository } from './order-items.repository';
 import { OrderModel } from './models/order.model';
@@ -9,29 +8,14 @@ import { CreateShippingDto } from './dto/create-shipping.dto';
 import { CreateOrderItemDto } from './dto/create-order-item.dto';
 import { createNumericId } from '@/common/utils';
 import * as _ from 'lodash';
+import { ProductsService } from '../products/products.service';
+import { ProductNotFoundException } from '@/common/exceptions';
 
-const DUMMY_PRODUCTS = [
-  { productId: 1, price: 10000, quantity: 10 },
-  { productId: 2, price: 20000, quantity: 10 },
-  { productId: 3, price: 30000, quantity: 10 },
-  { productId: 4, price: 40000, quantity: 10 },
-  { productId: 5, price: 50000, quantity: 10 },
-];
-
-const productService = {
-  findOne: (productId: number) => {
-    const productInfo = DUMMY_PRODUCTS.find(
-      (product) => product.productId === productId,
-    );
-    if (!productInfo) {
-      throw new ProductNotFoundException();
-    }
-    return productInfo;
-  },
-};
 @Injectable()
 export class OrdersService {
   constructor(
+    private readonly logger: Logger,
+    private readonly productsService: ProductsService,
     private readonly orderRepo: OrdersRepository,
     private readonly orderItemRepo: OrderItemsRepository,
   ) {}
@@ -46,21 +30,26 @@ export class OrdersService {
 
     const orderItemModels = await this.orderItemRepo.createManyWithOrderId(
       orderId,
-      orderItems.map((item) => {
-        const productInfo = productService.findOne(item.productId);
-        if (item.quantity <= 0)
-          throw new Error('Quantity must be greater than 0');
-        if (productInfo.quantity < item.quantity)
-          throw new Error('Quantity must be less than product quantity');
-        // TODO: Product quantity update
-        return {
-          id: createNumericId(),
-          order_id: orderId,
-          product_id: item.productId,
-          quantity: item.quantity,
-          price: productInfo.price,
-        } as OrderItemModel;
-      }),
+      await Promise.all(
+        orderItems.map(async (item) => {
+          const productModel = await this.productsService.findOne(
+            item.productId,
+          );
+          if (!productModel) throw new ProductNotFoundException();
+          if (item.quantity <= 0)
+            throw new Error('Quantity must be greater than 0');
+          if (productModel.stock < item.quantity)
+            throw new Error('Quantity must be less than product quantity');
+          this.productsService.subStock(item.productId, item.quantity);
+          return {
+            id: createNumericId(),
+            order_id: orderId,
+            product_id: item.productId,
+            quantity: item.quantity,
+            price: productModel.price,
+          } as OrderItemModel;
+        }),
+      ),
     );
 
     const orderModel = await this.orderRepo.create({
@@ -119,15 +108,19 @@ export class OrdersService {
     const updatedOrderItemModels =
       await this.orderItemRepo.updateManyWithOrderId(
         id,
-        orderItems.map((item) => {
-          const productInfo = productService.findOne(item.productId);
-          return {
-            order_id: id,
-            product_id: item.productId,
-            quantity: item.quantity,
-            price: productInfo.price,
-          } as OrderItemModel;
-        }),
+        await Promise.all(
+          orderItems.map(async (item) => {
+            const productInfo = await this.productsService.findOne(
+              item.productId,
+            );
+            return {
+              order_id: id,
+              product_id: item.productId,
+              quantity: item.quantity,
+              price: productInfo.price,
+            } as OrderItemModel;
+          }),
+        ),
       );
     // TODO: Product quantity update
     const newOrderModel = await this.orderRepo.getByOrderId(id);

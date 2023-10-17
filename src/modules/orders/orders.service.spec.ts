@@ -5,8 +5,15 @@ import { OrderItemsRepository } from './order-items.repository';
 import { ProductNotFoundException } from '@/common/exceptions';
 import { PAYMENT_METHOD } from '@/common/resources';
 import { CreateShippingDto } from './dto/create-shipping.dto';
+import { ProductsService } from '../products/products.service';
+import { Logger } from '@nestjs/common';
 
 const customerId = 1;
+
+const productsList = [
+  { id: 1, name: '테스트 상품 1', price: 30000, stock: 10 },
+  { id: 2, name: '테스트 상품 2', price: 40000, stock: 10 },
+];
 
 const orderItems = [
   { productId: 1, quantity: 1, price: 30000 },
@@ -62,10 +69,16 @@ const orderEntity = {
 
 describe('OrdersService', () => {
   let service: OrdersService;
+  let stubProductsService: Partial<ProductsService>;
   let stubOrderRepo: Partial<OrdersRepository>;
   let stubOrderItemRepo: Partial<OrderItemsRepository>;
 
   beforeEach(async () => {
+    stubProductsService = {
+      findOne: jest.fn().mockImplementation((id) => {
+        return productsList.find((product) => product.id === id);
+      }),
+    };
     stubOrderRepo = {
       create: jest.fn(),
       all: jest.fn(),
@@ -78,7 +91,12 @@ describe('OrdersService', () => {
     };
     const module: TestingModule = await Test.createTestingModule({
       providers: [
+        Logger,
         OrdersService,
+        {
+          provide: ProductsService,
+          useValue: stubProductsService,
+        },
         {
           provide: OrdersRepository,
           useValue: stubOrderRepo,
@@ -91,6 +109,7 @@ describe('OrdersService', () => {
     }).compile();
 
     service = module.get<OrdersService>(OrdersService);
+    stubProductsService = module.get<ProductsService>(ProductsService);
   });
 
   it('should be defined', () => {
@@ -98,12 +117,13 @@ describe('OrdersService', () => {
   });
 
   describe('create', () => {
-    it('모든 값이 정상일 때, 주문이 생성되어야 한다.', async () => {
+    it('모든 값이 정상일 때, 주문이 생성되고 물품 재고를 삭감해야 한다.', async () => {
       // given
       stubOrderRepo.create = jest.fn().mockReturnValue(orderEntity);
       stubOrderItemRepo.createManyWithOrderId = jest
         .fn()
         .mockReturnValue(orderItemEntities);
+      stubProductsService.subStock = jest.fn();
 
       // when
       const result = await service.create(
@@ -122,6 +142,13 @@ describe('OrdersService', () => {
       expect(result).toEqual({
         ...orderEntity,
         order_items: orderItemEntities,
+      });
+      orderItems.forEach((item, index) => {
+        expect(stubProductsService.subStock).toHaveBeenNthCalledWith(
+          index + 1,
+          item.productId,
+          item.quantity,
+        );
       });
     });
 
