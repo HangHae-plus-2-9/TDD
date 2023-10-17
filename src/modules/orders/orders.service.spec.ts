@@ -3,27 +3,38 @@ import { OrdersService } from './orders.service';
 import { OrdersRepository } from './orders.repository';
 import { OrderItemsRepository } from './order-items.repository';
 import { ProductNotFoundException } from '@/common/exceptions';
+import { PAYMENT_METHOD } from '@/common/resources';
+import { CreateShippingDto } from './dto/create-shipping.dto';
+
+const customerId = 1;
 
 const orderItems = [
   { productId: 1, quantity: 1, price: 30000 },
   { productId: 2, quantity: 2, price: 40000 },
 ];
 
-const createOrderDto = {
-  customerId: 1,
-  paymentMethod: 'CREDIT_CARD',
+const createPaymentDto = {
+  method: PAYMENT_METHOD.CREDIT_CARD,
   amount: null,
   paidAt: null,
   canceledAt: null,
-  courierName: 'CJ대한통운',
-  isPrepaid: true,
-  invoiceNumber: '123456789',
+};
+
+const createShippingDto = {
+  courierName: null,
+  invoiceNumber: null,
   shippingAddress: '서울시 강남구',
   shippingReceiver: '홍길동',
   shippingReceiverPhone: '010-1234-5678',
-  shippingFee: 2500,
   departedAt: null,
   arrivedAt: null,
+} as unknown as CreateShippingDto;
+
+const createOrderDto = {
+  customerId: 1,
+  createPaymentDto,
+  createShippingDto,
+  canceledAt: null,
   orderItems,
 };
 const orderItemEntities = [
@@ -33,19 +44,17 @@ const orderItemEntities = [
 const orderEntity = {
   id: 1,
   customer_id: createOrderDto.customerId,
-  payment_method: createOrderDto.paymentMethod,
-  amount: createOrderDto.amount,
-  paid_at: createOrderDto.paidAt,
+  payment_method: createOrderDto.createPaymentDto.method,
+  amount: createOrderDto.createPaymentDto.amount,
+  paid_at: createOrderDto.createPaymentDto.paidAt,
+  courier_name: createOrderDto.createShippingDto.courierName,
+  invoice_number: createOrderDto.createShippingDto.invoiceNumber,
+  shipping_address: createOrderDto.createShippingDto.address,
+  shipping_receiver: createOrderDto.createShippingDto.receiver,
+  shipping_receiver_phone: createOrderDto.createShippingDto.receiverPhone,
+  departed_at: createOrderDto.createShippingDto.departedAt,
+  arrived_at: createOrderDto.createShippingDto.arrivedAt,
   canceled_at: createOrderDto.canceledAt,
-  courier_name: createOrderDto.courierName,
-  is_prepaid: createOrderDto.isPrepaid,
-  invoice_number: createOrderDto.invoiceNumber,
-  shipping_address: createOrderDto.shippingAddress,
-  shipping_receiver: createOrderDto.shippingReceiver,
-  shipping_receiver_phone: createOrderDto.shippingReceiverPhone,
-  shipping_fee: createOrderDto.shippingFee,
-  departed_at: createOrderDto.departedAt,
-  arrived_at: createOrderDto.arrivedAt,
   created_at: new Date(),
   updated_at: new Date(),
   deleted_at: null,
@@ -60,7 +69,7 @@ describe('OrdersService', () => {
     stubOrderRepo = {
       create: jest.fn(),
       all: jest.fn(),
-      findById: jest.fn(),
+      getByOrderId: jest.fn(),
       update: jest.fn(),
       remove: jest.fn(),
     };
@@ -97,7 +106,12 @@ describe('OrdersService', () => {
         .mockReturnValue(orderItemEntities);
 
       // when
-      const result = await service.create(createOrderDto);
+      const result = await service.create(
+        customerId,
+        createPaymentDto,
+        createShippingDto,
+        orderItems,
+      );
 
       // then
       // this two lines are not so ideal because these are implementation details.
@@ -105,7 +119,10 @@ describe('OrdersService', () => {
       expect(stubOrderItemRepo.createManyWithOrderId).toBeCalledTimes(1);
 
       // this line is ideal because this is the behavior that we want.
-      expect(result).toEqual({ ...orderEntity, orderItems: orderItemEntities });
+      expect(result).toEqual({
+        ...orderEntity,
+        order_items: orderItemEntities,
+      });
     });
 
     it('주문 상품의 ID를 찾을 수 없을 때, 주문이 생성되지 않아야 한다.', async () => {
@@ -119,9 +136,14 @@ describe('OrdersService', () => {
       };
 
       // when & then
-      await expect(service.create(invalidCreateOrderDto)).rejects.toThrowError(
-        ProductNotFoundException
-      );
+      await expect(
+        service.create(
+          invalidCreateOrderDto.customerId,
+          invalidCreateOrderDto.createPaymentDto,
+          invalidCreateOrderDto.createShippingDto,
+          invalidCreateOrderDto.orderItems,
+        ),
+      ).rejects.toThrowError(ProductNotFoundException);
     });
 
     it('주문 수량이 올바르지 않을 때, 주문이 생성되지 않아야 한다.', async () => {
@@ -133,9 +155,14 @@ describe('OrdersService', () => {
       };
 
       // when & then
-      await expect(service.create(invalidCreateOrderDto)).rejects.toThrow(
-        'Quantity must be greater than 0',
-      );
+      await expect(
+        service.create(
+          invalidCreateOrderDto.customerId,
+          invalidCreateOrderDto.createPaymentDto,
+          invalidCreateOrderDto.createShippingDto,
+          invalidCreateOrderDto.orderItems,
+        ),
+      ).rejects.toThrow('Quantity must be greater than 0');
     });
 
     it('주문 수량이 재고 수량보다 많을 때, 주문이 생성되지 않아야 한다.', async () => {
@@ -149,9 +176,14 @@ describe('OrdersService', () => {
       };
 
       // when & then
-      await expect(service.create(invalidCreateOrderDto)).rejects.toThrow(
-        'Quantity must be less than product quantity',
-      );
+      await expect(
+        service.create(
+          invalidCreateOrderDto.customerId,
+          invalidCreateOrderDto.createPaymentDto,
+          invalidCreateOrderDto.createShippingDto,
+          invalidCreateOrderDto.orderItems,
+        ),
+      ).rejects.toThrow('Quantity must be less than product quantity');
     });
 
     it.todo('결제 금액이 올바르지 않을 때, 주문이 생성되지 않아야 한다.');
@@ -164,8 +196,8 @@ describe('OrdersService', () => {
   describe('findOne', () => {
     it('특정 주문을 가져올 수 있어야 한다.', async () => {
       // given
-      stubOrderRepo.findById = jest.fn().mockReturnValue(orderEntity);
-      stubOrderItemRepo.findByOrderId = jest
+      stubOrderRepo.getByOrderId = jest.fn().mockReturnValue(orderEntity);
+      stubOrderItemRepo.getByOrderId = jest
         .fn()
         .mockReturnValue(orderItemEntities);
 
@@ -174,10 +206,13 @@ describe('OrdersService', () => {
 
       // then
       // implementation details
-      expect(stubOrderRepo.findById).toBeCalledTimes(1);
-      expect(stubOrderItemRepo.findByOrderId).toBeCalledTimes(1);
+      expect(stubOrderRepo.getByOrderId).toBeCalledTimes(1);
+      expect(stubOrderItemRepo.getByOrderId).toBeCalledTimes(1);
       // behavior
-      expect(result).toEqual({ ...orderEntity, orderItems: orderItemEntities });
+      expect(result).toEqual({
+        ...orderEntity,
+        order_items: orderItemEntities,
+      });
     });
   });
 
@@ -185,7 +220,7 @@ describe('OrdersService', () => {
     it('모든 주문을 가져올 수 있어야 한다.', async () => {
       // given
       stubOrderRepo.all = jest.fn().mockReturnValue([orderEntity]);
-      stubOrderItemRepo.findByOrderId = jest
+      stubOrderItemRepo.getByOrderId = jest
         .fn()
         .mockReturnValue(orderItemEntities);
 
@@ -197,7 +232,7 @@ describe('OrdersService', () => {
       expect(stubOrderRepo.all).toBeCalledTimes(1);
       // behavior
       expect(result).toEqual([
-        { ...orderEntity, orderItems: orderItemEntities },
+        { ...orderEntity, order_items: orderItemEntities },
       ]);
     });
 

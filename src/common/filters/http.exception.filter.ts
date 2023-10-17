@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import {
   ArgumentsHost,
   Catch,
@@ -11,6 +11,7 @@ import { Request, Response } from 'express';
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpExceptionFilter.name);
+
   catch(exception: Error, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const res = ctx.getResponse<Response>();
@@ -26,17 +27,31 @@ export class HttpExceptionFilter implements ExceptionFilter {
     );
     this.logger.error(exception.stack);
 
-    if (!(exception instanceof HttpException)) {
+    const status =
+      exception instanceof HttpException ? exception.getStatus() : 500;
+    let message = exception.message;
+
+    if (
+      exception instanceof BadRequestException &&
+      exception.getResponse() instanceof Object
+    ) {
+      const response = exception.getResponse() as Record<string, any>;
+      if (response.message && typeof response.message === 'string') {
+        message = response.message;
+      } else if (response.message && Array.isArray(response.message)) {
+        message = response.message.join(', ');
+      }
+    } else if (!(exception instanceof HttpException)) {
       exception = new InternalServerErrorException();
     }
 
     const response = {
-      statusCode: (exception as HttpException).getStatus(),
-      message: (exception as HttpException).message,
+      statusCode: status,
+      message: message,
       timestamp: new Date().toISOString(),
       path: req.url,
     };
 
-    res.status((exception as HttpException).getStatus()).json(response);
+    res.status(status).json(response);
   }
 }

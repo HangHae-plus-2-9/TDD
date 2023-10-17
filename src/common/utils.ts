@@ -44,3 +44,7 @@ export const getEndOfDay = (date: Date) => {
     59,
   );
 };
+
+export const createNumericId = () => {
+  return Math.floor(Math.random() * 2000000000);
+};

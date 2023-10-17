@@ -1,22 +1,12 @@
+import { CreatePaymentDto } from '../dto/create-payment.dto';
+import { CreateShippingDto } from '../dto/create-shipping.dto';
 import { OrderItemModel } from './order-item.model';
 
 export type OrderModel = {
   id?: number;
   customer_id: number;
-  payment: {
-    method: string;
-    amount: number;
-    paid_at?: Date;
-  };
-  shipping: {
-    courier_name: string;
-    invoice_number: string;
-    address: string;
-    receiver: string;
-    receiver_phone: string;
-    departed_at?: Date;
-    arrived_at?: Date;
-  };
+  payment: CreatePaymentDto;
+  shipping: CreateShippingDto;
   canceled_at?: Date;
   order_items: OrderItemModel[];
 };

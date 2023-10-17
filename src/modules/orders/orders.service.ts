@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateOrderDto } from './dto/update-order.dto';
 import { ProductNotFoundException } from '@/common/exceptions';
 import { OrdersRepository } from './orders.repository';
 import { OrderItemsRepository } from './order-items.repository';
-import { OrderSpec } from './models/order-spec.model';
 import { OrderModel } from './models/order.model';
 import { OrderItemModel } from './models/order-item.model';
+import { CreatePaymentDto } from './dto/create-payment.dto';
+import { CreateShippingDto } from './dto/create-shipping.dto';
+import { CreateOrderItemDto } from './dto/create-order-item.dto';
+import { createNumericId } from '@/common/utils';
+import * as _ from 'lodash';
 
 const DUMMY_PRODUCTS = [
   { productId: 1, price: 10000, quantity: 10 },
@@ -33,124 +36,116 @@ export class OrdersService {
     private readonly orderItemRepo: OrderItemsRepository,
   ) {}
 
-  // TODO: Transaction, 함수분리 필요
-  async create(customerId: number, orderSpec: OrderSpec) {
-    const orderId = Math.floor(Math.random() * 1000000000);
-    const payment = {
-      ...orderSpec.payment,
-      paid_at: null,
-    };
-    const shipping = {
-      courier_name: null,
-      invoice_number: null,
-      ...orderSpec.shipping,
-      departed_at: null,
-      arrived_at: null,
-    };
-    // const orderModel = {
-    //   id: orderId,
-    //   customerId,
-    //   payment,
-    //   shipping,
-    //   canceled_at: null,
-    //   orderItems: orderItemModels,
-    // };
+  async create(
+    customerId: number,
+    paymentInfo: CreatePaymentDto,
+    shippingInfo: CreateShippingDto,
+    orderItems: CreateOrderItemDto[],
+  ) {
+    const orderId = createNumericId();
 
     const orderItemModels = await this.orderItemRepo.createManyWithOrderId(
       orderId,
-      orderSpec.order_items.map(
-        (item) =>
-          ({
-            id: Math.floor(Math.random() * 1000000000),
-            order_id: orderId,
-            ...item,
-            price: productService.findOne(item.product_id).price,
-          } as OrderItemModel),
-      ),
+      orderItems.map((item) => {
+        const productInfo = productService.findOne(item.productId);
+        if (item.quantity <= 0)
+          throw new Error('Quantity must be greater than 0');
+        if (productInfo.quantity < item.quantity)
+          throw new Error('Quantity must be less than product quantity');
+        // TODO: Product quantity update
+        return {
+          id: createNumericId(),
+          order_id: orderId,
+          product_id: item.productId,
+          quantity: item.quantity,
+          price: productInfo.price,
+        } as OrderItemModel;
+      }),
     );
 
     const orderModel = await this.orderRepo.create({
       id: orderId,
       customer_id: customerId,
-      payment,
-      shipping,
+      payment: {
+        method: paymentInfo.method,
+        amount: orderItemModels.reduce(
+          (acc, cur) => acc + cur.price * cur.quantity,
+          0,
+        ),
+        paidAt: null,
+        canceledAt: null,
+      },
+      shipping: {
+        courierName: null,
+        invoiceNumber: null,
+        address: shippingInfo.address,
+        receiver: shippingInfo.receiver,
+        receiverPhone: shippingInfo.receiverPhone,
+        departedAt: null,
+        arrivedAt: null,
+        canceledAt: null,
+      },
       canceled_at: null,
     } as OrderModel);
 
     return { ...orderModel, order_items: orderItemModels };
-
-    // const { orderItems: orderItemModels, ...orderModel } = createOrderDto;
-
-    // const verifiedOrderItemModels = orderItemModels.map((item) => {
-    //   if (item.quantity < 1) {
-    //     throw new Error('Quantity must be greater than 0');
-    //   }
-    //   // orderItems 생성시 productId로 상품정보 조회해서 price 가져오기
-    //   const productInfo = productService.findOne(item.productId);
-    //   if (!productInfo) {
-    //     throw new ProductNotFoundException();
-    //   }
-    //   if (productInfo.quantity < item.quantity) {
-    //     throw new Error('Quantity must be less than product quantity');
-    //   }
-    //   return {
-    //     ...item,
-    //     price: productInfo.price,
-    //   };
-    // });
-    // orderModel.amount = verifiedOrderItemModels.reduce(
-    //   (acc, cur) => acc + cur.price * cur.quantity,
-    //   0,
-    // );
-
-    // const orderEntity = await this.orderRepo.create(orderModel);
-    // const orderItemEntities = await this.orderItemRepo.createManyWithOrderId(
-    //   orderEntity.id,
-    //   verifiedOrderItemModels,
-    // );
-    // orderEntity.orderItems = orderItemEntities;
-    // return orderEntity;
   }
 
   async findAll() {
-    return this.orderRepo.all();
+    const orderModels = await this.orderRepo.all();
+    const orders = await Promise.all(
+      orderModels.map(async (orderModel) => {
+        const orderItemModels = await this.orderItemRepo.getByOrderId(
+          orderModel.id,
+        );
+        return { ...orderModel, order_items: orderItemModels };
+      }),
+    );
+    return orders;
   }
 
   async findOne(id: number) {
-    // const orderEntity = await this.orderRepo.findById(id);
-    // const orderItemEntities = await this.orderItemRepo.findByOrderId(id);
-    // return { ...orderEntity, orderItems: orderItemEntities };
+    const orderModel = await this.orderRepo.getByOrderId(id);
+    const orderItemModels = await this.orderItemRepo.getByOrderId(id);
+    return { ...orderModel, order_items: orderItemModels };
   }
 
-  // TODO: Transaction, 함수분리 필요
-  async update(id: number, updateOrderDto: UpdateOrderDto) {
-    // const orderEntity = await this.findOne(id);
-    // if (!orderEntity) {
-    //   throw new OrderNotFoundException();
-    // }
-    // const orderItemEntities = await this.orderItemRepo.findByOrderId(id);
-    // if (orderItemEntities.length > 0) {
-    //   this.orderItemRepo.removeByOrderId(id);
-    // }
-    // // newOrderItemModels: 기존 orderItemEntities가 삭제된 후, 새로 등록될 orderItemModels
-    // // updateOrderModel: 기존 orderEntity를 업데이트할 정보
-    // const { orderItems: newOrderItemModels, ...updateOrderModel } =
-    //   updateOrderDto;
-    // const newOrderModel = {
-    //   ...OrdersMapper.toModelFromEntity(orderEntity),
-    //   ...updateOrderModel,
-    //   amount: newOrderItemModels.reduce(
-    //     (acc, cur) => acc + cur.price * cur.quantity,
-    //     0,
-    //   ),
-    // };
-    // const newOrderItemEntities = await this.orderItemRepo.createManyWithOrderId(
-    //   id,
-    //   newOrderItemModels,
-    // );
-    // const newOrderEntity = this.orderRepo.update(id, newOrderModel);
-    // newOrderEntity.orderItems = newOrderItemEntities;
-    // return newOrderEntity;
+  async update(
+    id: number,
+    paymentInfo: CreatePaymentDto,
+    shippingInfo: CreateShippingDto,
+    orderItems: CreateOrderItemDto[],
+  ) {
+    const updatedOrderItemModels =
+      await this.orderItemRepo.updateManyWithOrderId(
+        id,
+        orderItems.map((item) => {
+          const productInfo = productService.findOne(item.productId);
+          return {
+            order_id: id,
+            product_id: item.productId,
+            quantity: item.quantity,
+            price: productInfo.price,
+          } as OrderItemModel;
+        }),
+      );
+    // TODO: Product quantity update
+    const newOrderModel = await this.orderRepo.getByOrderId(id);
+    _.merge(
+      newOrderModel,
+      {
+        payment: {
+          ...paymentInfo,
+          amount: updatedOrderItemModels.reduce(
+            (acc, cur) => acc + cur.price * cur.quantity,
+            0,
+          ),
+        },
+      },
+      { shipping: shippingInfo },
+    );
+    const updatedOrderModel = await this.orderRepo.update(id, newOrderModel);
+    return { ...updatedOrderModel, order_items: updatedOrderItemModels };
   }
 
   async remove(id: number) {

@@ -8,7 +8,7 @@ export class OrderEntity extends CommonColumns {
   customer_id: number;
 
   @Column()
-  payment_method: string;
+  payment_method: number;
 
   @Column()
   payment_amount: number;
@@ -20,7 +20,7 @@ export class OrderEntity extends CommonColumns {
   canceled_at?: Date;
 
   @Column()
-  courier_name?: string;
+  courier_name?: number;
 
   @Column()
   invoice_number?: string;

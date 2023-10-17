@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderEntity } from './entities/order.entity';
 import { OrderModel } from './models/order.model';
-import { cloneDeep } from 'lodash';
 import { orderEntityToModel } from './mappers/order.mapper';
+import { OrderNotFoundException } from '@/common/exceptions';
 
 let ORDER_ENTITIES = [];
 
@@ -21,50 +21,59 @@ export class OrdersRepository {
       customer_id: orderModel.customer_id,
       payment_method: orderModel.payment.method,
       payment_amount: orderModel.payment.amount,
-      paid_at: orderModel.payment.paid_at,
-      courier_name: orderModel.shipping.courier_name,
-      invoice_number: orderModel.shipping.invoice_number,
+      paid_at: orderModel.payment.paidAt,
+      courier_name: orderModel.shipping.courierName,
+      invoice_number: orderModel.shipping.invoiceNumber,
       shipping_address: orderModel.shipping.address,
       shipping_receiver: orderModel.shipping.receiver,
-      shipping_receiver_phone: orderModel.shipping.receiver_phone,
-      departed_at: orderModel.shipping.departed_at,
-      arrived_at: orderModel.shipping.arrived_at,
+      shipping_receiver_phone: orderModel.shipping.receiverPhone,
+      departed_at: orderModel.shipping.departedAt,
+      arrived_at: orderModel.shipping.arrivedAt,
       canceled_at: orderModel.canceled_at,
       created_at: new Date(),
       updated_at: new Date(),
       deleted_at: null,
     });
-    return orderModel;
-    // const orderEntity = {
-    //   id: Math.floor(Math.random() * 1000000),
-    //   ...orderModel,
-    //   created_at: new Date(),
-    //   updated_at: new Date(),
-    //   deleted_at: null,
-    // };
-    // ORDER_ENTITIES.push({ ...orderEntity });
-    // return orderEntity;
+    return orderEntityToModel(ORDER_ENTITIES[ORDER_ENTITIES.length - 1]);
   }
 
   async all(): Promise<OrderModel[]> {
     return ORDER_ENTITIES.map((entity) => orderEntityToModel(entity));
   }
 
-  async findById(id: number): Promise<OrderModel> {
-    return orderEntityToModel(ORDER_ENTITIES.find((order) => order.id === id));
+  async getByOrderId(id: number): Promise<OrderModel> {
+    const orderEntity = ORDER_ENTITIES.find((order) => order.id === id);
+    if (!orderEntity) {
+      throw new OrderNotFoundException();
+    }
+    return orderEntityToModel(orderEntity);
   }
 
-  async update(id: number, newOrderModel: any): Promise<OrderModel> {
+  async update(id: number, newOrderModel: OrderModel): Promise<OrderModel> {
     const orderEntity = ORDER_ENTITIES.find((order) => order.id === id);
     if (!orderEntity) {
       throw new Error('Order not found');
     }
 
-    const { orderItems, ...newOrderEntity } = newOrderModel;
-    const newOrderItems = orderItems;
-    ORDER_ENTITIES[id] = { ...orderEntity, ...newOrderEntity };
-    ORDER_ENTITIES[id].orderItems = newOrderItems;
-    return orderEntityToModel(ORDER_ENTITIES[id]);
+    const newOrderEntity = {
+      ...orderEntity,
+      payment_method: newOrderModel.payment.method,
+      payment_amount: newOrderModel.payment.amount,
+      paid_at: newOrderModel.payment.paidAt,
+      courier_name: newOrderModel.shipping.courierName,
+      invoice_number: newOrderModel.shipping.invoiceNumber,
+      shipping_address: newOrderModel.shipping.address,
+      shipping_receiver: newOrderModel.shipping.receiver,
+      shipping_receiver_phone: newOrderModel.shipping.receiverPhone,
+      departed_at: newOrderModel.shipping.departedAt,
+      arrived_at: newOrderModel.shipping.arrivedAt,
+      canceled_at: newOrderModel.canceled_at,
+      updated_at: new Date(),
+    };
+    ORDER_ENTITIES = ORDER_ENTITIES.map((order) =>
+      order.id === id ? newOrderEntity : order,
+    );
+    return orderEntityToModel(newOrderEntity);
   }
 
   async remove(id: number): Promise<OrderModel> {

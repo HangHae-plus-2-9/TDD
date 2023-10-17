@@ -11,7 +11,6 @@ import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { createDtoToSpec } from './mappers/order.mapper';
 
 @ApiTags('orders')
 @Controller({ version: '1', path: 'orders' })
@@ -24,9 +23,14 @@ export class OrdersController {
     description: 'The record has been successfully created.',
   })
   create(@Body() createOrderDto: CreateOrderDto) {
-    const customerId = createOrderDto.customerId;
-    const orderSpec = createDtoToSpec(createOrderDto);
-    return this.ordersService.create(customerId, orderSpec);
+    const { customerId, paymentInfo, shippingInfo, orderItems } =
+      createOrderDto;
+    return this.ordersService.create(
+      customerId,
+      paymentInfo,
+      shippingInfo,
+      orderItems,
+    );
   }
 
   @Get()
@@ -44,7 +48,13 @@ export class OrdersController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update order by id' })
   update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.ordersService.update(+id, updateOrderDto);
+    const { paymentInfo, shippingInfo, orderItems } = updateOrderDto;
+    return this.ordersService.update(
+      +id,
+      paymentInfo,
+      shippingInfo,
+      orderItems,
+    );
   }
 
   @Delete(':id')
