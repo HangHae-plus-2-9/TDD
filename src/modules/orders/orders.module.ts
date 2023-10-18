@@ -7,6 +7,7 @@ import { OrdersRepository } from './orders.repository';
 import { OrderItemsRepository } from './order-items.repository';
 import { OrderItemEntity } from './entities/order-item.entity';
 import { ProductsModule } from '../products/products.module';
+import { RequestIdProvider } from '@/common/providers/request-id.provider';
 
 @Module({
   imports: [
@@ -14,6 +15,12 @@ import { ProductsModule } from '../products/products.module';
     ProductsModule,
   ],
   controllers: [OrdersController],
-  providers: [Logger, OrdersService, OrdersRepository, OrderItemsRepository],
+  providers: [
+    RequestIdProvider,
+    Logger,
+    OrdersService,
+    OrdersRepository,
+    OrderItemsRepository,
+  ],
 })
 export class OrdersModule {}

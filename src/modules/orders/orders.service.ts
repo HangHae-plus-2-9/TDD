@@ -16,10 +16,12 @@ import {
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { UpdateShippingDto } from './dto/update-shipping.dto';
 import { UpdateOrderItemDto } from './dto/update-order-item.dto';
+import { RequestIdProvider } from '@/common/providers/request-id.provider';
 
 @Injectable()
 export class OrdersService {
   constructor(
+    private readonly reqCtx: RequestIdProvider,
     private readonly logger: Logger,
     private readonly productsService: ProductsService,
     private readonly orderRepo: OrdersRepository,
@@ -89,6 +91,7 @@ export class OrdersService {
   }
 
   async findAll() {
+    console.log(this.reqCtx.requestId);
     const orderModels = await this.orderRepo.all();
     const orders = await Promise.all(
       orderModels.map(async (orderModel) => {
