@@ -9,10 +9,10 @@ export class OrderEntity extends CommonColumns {
   customer_id: number;
 
   @Column()
-  payment_method: string;
+  payment_method: number;
 
   @Column()
-  amount: number;
+  payment_amount: number;
 
   @Column()
   paid_at?: Date;
@@ -21,10 +21,7 @@ export class OrderEntity extends CommonColumns {
   canceled_at?: Date;
 
   @Column()
-  courier_name?: string;
-
-  @Column()
-  is_prepaid: boolean;
+  courier_name?: number;
 
   @Column()
   invoice_number?: string;
@@ -37,9 +34,6 @@ export class OrderEntity extends CommonColumns {
 
   @Column()
   shipping_receiver_phone: string;
-
-  @Column()
-  shipping_fee: number;
 
   @Column()
   departed_at?: Date;
