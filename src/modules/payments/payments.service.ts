@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Payments } from '@/modules/payments/entity/payments.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -31,5 +35,13 @@ export class PaymentsService {
       }
       throw error;
     }
+  }
+
+  async findOne(id: number) {
+    const payment = await this.paymentsRepository.findOneBy({ id });
+    if (!payment) {
+      throw new NotFoundException('Payment not found');
+    }
+    return payment;
   }
 }
