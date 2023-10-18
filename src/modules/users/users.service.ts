@@ -1,25 +1,23 @@
 import {
-  Inject,
   Injectable,
   Logger,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UsersRepositoryInterface } from './interfaces/user-repository.interface';
 import { ROLE_TYPE, messages } from '@/common/resources';
 import { UserEntity } from './entities/user.entity';
 import { AuthService } from '../auth/auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { TokenPayloadDto } from '../auth/dto/token-payload.dto';
+import { UsersRepository } from './users.repository';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly logger: Logger,
     private readonly authService: AuthService,
-    @Inject('UsersRepositoryInterface')
-    private readonly repo: UsersRepositoryInterface,
+    private readonly repo: UsersRepository,
   ) {}
 
   async register({ name, email, password }: CreateUserDto) {
