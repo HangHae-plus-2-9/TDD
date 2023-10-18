@@ -12,6 +12,8 @@ permissions:
 env:
   SHA: ${{ github.sha }}
   ECR_REPOSITORY_NESTJS: 'hh-nestjs'
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
   DATABASE_CONNECTION: ${{ secrets.DATABASE_CONNECTION }}
   DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
   DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
