@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -35,7 +36,8 @@ export class OrdersController {
 
   @Get()
   @ApiOperation({ summary: 'Get all orders' })
-  findAll() {
+  findAll(@Req() req: Request) {
+    console.log('RequestId:', req.headers['request-id']);
     return this.ordersService.findAll();
   }
 
