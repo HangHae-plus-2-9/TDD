@@ -65,7 +65,7 @@ jobs:
       - name: run e2e tests
         env:
           GITHUB_ACTIONS: true # TODO: 너무 지저분하다.. Github Actions의 postgres는 ssl을 사용하는듯
-        run: npm run test:e2e
+        run: npm run migration:run && npm run test:e2e
 
       - name: Notify Slack on Failure
         if: failure()

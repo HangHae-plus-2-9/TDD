@@ -12,10 +12,11 @@ import { CreateProductDto } from './dto/create-product.dto';
 import {
   ApiTags,
   ApiOperation,
-  ApiProperty,
   ApiCreatedResponse,
   ApiResponse,
 } from '@nestjs/swagger';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { dtoToSpec } from './mappers/product.mapper';
 
 @ApiTags('products')
 @Controller({ version: '1', path: 'products' })
@@ -24,7 +25,6 @@ export class ProductsController {
 
   @Post()
   @ApiOperation({ summary: '상품 등록' })
-  @ApiProperty({ type: String })
   @ApiCreatedResponse({
     description: 'The record has been successfully created.',
   })
@@ -33,9 +33,8 @@ export class ProductsController {
     description: 'Internal Server Error',
   })
   create(@Body() createProductDto: CreateProductDto) {
-    // 유저 인풋 검증
-    return this.productsService.create_with_component(createProductDto);
-    return this.productsService.create_without_component(createProductDto);
+    const productSpec = dtoToSpec(createProductDto);
+    return this.productsService.create(createProductDto.sellerId, productSpec);
   }
 
   @Get()
@@ -49,12 +48,23 @@ export class ProductsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: any) {
-    return this.productsService.update(+id, updateProductDto);
+  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+    const updatedProductSpec = dtoToSpec(updateProductDto);
+    return this.productsService.update(+id, updatedProductSpec);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.productsService.remove(+id);
+  }
+
+  @Patch(':id/sub')
+  subtractStock(@Param('id') id: string, @Body() body: { quantity: number }) {
+    return this.productsService.subStock(+id, body.quantity);
+  }
+
+  @Patch(':id/add')
+  addStock(@Param('id') id: string, @Body() body: { quantity: number }) {
+    return this.productsService.addStock(+id, body.quantity);
   }
 }

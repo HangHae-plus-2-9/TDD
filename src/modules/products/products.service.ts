@@ -1,74 +1,89 @@
-import { Injectable } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { ProductsComponent } from './products.component';
+import { Injectable, Logger } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
+import { ProductSpec } from './models/product-spec.model';
+import { PRODUCT_STATUS } from '@/common/resources';
+import { ProductModel } from './models/product.model';
+import { ProductNotFoundException } from '@/common/exceptions';
 
-/**
- * 가상의 서비스
- *  - 게시글을 작성하면서 댓글까지 트랜젝션으로 함꼐 생성되는 경우를 가정
- */
 @Injectable()
 export class ProductsService {
   constructor(
-    private readonly prdComp: ProductsComponent,
+    private readonly logger: Logger,
     private readonly repo: ProductsRepository,
   ) {}
 
-  // 기존에 트랙젝션을 사용하기 위해 사용했왔던 방식 - 이번에는 지양하기로.
-  create_without_component(createProductDto: CreateProductDto) {
-    // 1. 어떤 로직으로 게시글을 작성하고 검증한다
-    this.some_validation_post();
-    // 2. 다른 로직으로 댓글을 작성하고 검증한다.
-    this.some_validation_comment();
-
-    // @Transaction()
-    // 3. 게시글을 트랜젝션으로 생성한다.
-    const newSomething = this.repo.create();
-    // 4. 댓글을 트랜젝션으로 생성한다.
-    const newOtherThing = this.repo.create(); // 위와 다르다고 가정
-    // @Commit()
-    // ~~
-    // @Rollback()
-    // ~~
-    return [newSomething, newOtherThing];
+  async create(
+    sellerId: number,
+    productSpec: ProductSpec,
+  ): Promise<ProductModel> {
+    try {
+      const productSpecWithStatus = {
+        ...productSpec,
+        status: PRODUCT_STATUS.PENDING,
+      };
+      return await this.repo.create(sellerId, productSpecWithStatus);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
   }
 
-  private some_validation_post() {
-    return true;
+  async findAll(): Promise<ProductModel[]> {
+    try {
+      return await this.repo.all();
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
   }
 
-  private some_validation_comment() {
-    return true;
+  async findOne(id: number): Promise<ProductModel> {
+    try {
+      return await this.repo.getByProductId(id);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
   }
 
-  /**
-   * 트랜젝션이 사용 될 때, 우리가 주로 사용하기로 한 방식
-   */
-  create_with_component(createProductDto: CreateProductDto) {
-    // 1. 어떤 로직으로 게시글을 작성하고 검증한다
-    this.some_validation_post();
-    // 2. 다른 로직으로 댓글을 작성하고 검증한다.
-    this.some_validation_comment();
-    return this.prdComp.createSomethingAndOther(createProductDto);
+  async update(
+    id: number,
+    productSpec: Partial<ProductSpec>,
+  ): Promise<ProductModel> {
+    try {
+      return await this.repo.update(id, productSpec);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
   }
 
-  /**
-   * 이하 트랜젝션 없이 간단한 로직은 그냥 repository 직접 호출해서 사용
-   */
-  findAll() {
-    return this.repo.findAll();
+  async remove(id: number): Promise<ProductModel> {
+    try {
+      return await this.repo.remove(id);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
   }
 
-  findOne(id: number) {
-    return this.repo.findOne(id);
+  async subStock(productId: number, quantity: number): Promise<ProductModel> {
+    try {
+      const productModel = await this.repo.getByProductId(productId);
+      if (!productModel) throw new ProductNotFoundException();
+      if (productModel.stock < quantity) throw new Error('재고가 부족합니다.');
+      const updatedProductModel = {
+        ...productModel,
+        stock: productModel.stock - quantity,
+      };
+      return await this.repo.update(productId, updatedProductModel);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return this.repo.update(id, updateProductDto);
-  }
-
-  remove(id: number) {
-    return this.repo.remove(id);
+  async addStock(productId: number, quantity: number): Promise<ProductModel> {
+    return await this.subStock(productId, -quantity);
   }
 }

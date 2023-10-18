@@ -12,22 +12,22 @@ import {
 
 describe('HealthCheckController', () => {
   let controller: HealthCheckController;
-  let health: Partial<HealthCheckService>;
-  let http: Partial<HttpHealthIndicator>;
-  let typeOrm: Partial<TypeOrmHealthIndicator>;
-  let sample: Partial<SampleHealthIndicator>;
+  let mockHealth: Partial<HealthCheckService>;
+  let mockHttp: Partial<HttpHealthIndicator>;
+  let mockTypeOrm: Partial<TypeOrmHealthIndicator>;
+  let mockSample: Partial<SampleHealthIndicator>;
 
   beforeEach(async () => {
-    health = {
+    mockHealth = {
       check: jest.fn(),
     };
-    http = {
+    mockHttp = {
       pingCheck: jest.fn(),
     };
-    typeOrm = {
+    mockTypeOrm = {
       pingCheck: jest.fn(),
     };
-    sample = {
+    mockSample = {
       isHealthy: jest.fn(),
     };
     const module: TestingModule = await Test.createTestingModule({
@@ -35,19 +35,19 @@ describe('HealthCheckController', () => {
       providers: [
         {
           provide: HealthCheckService,
-          useValue: health,
+          useValue: mockHealth,
         },
         {
           provide: HttpHealthIndicator,
-          useValue: http,
+          useValue: mockHttp,
         },
         {
           provide: TypeOrmHealthIndicator,
-          useValue: typeOrm,
+          useValue: mockTypeOrm,
         },
         {
           provide: SampleHealthIndicator,
-          useValue: sample,
+          useValue: mockSample,
         },
       ],
     }).compile();
@@ -61,7 +61,7 @@ describe('HealthCheckController', () => {
 
   it('should call health check service', () => {
     const check = jest.fn();
-    health.check = check;
+    mockHealth.check = check;
     controller.check();
     expect(check).toBeCalled();
   });
@@ -73,17 +73,17 @@ describe('HealthCheckController', () => {
     const sampleResult = { status: 'up' };
 
     const httpSpy = jest
-      .spyOn(http, 'pingCheck')
+      .spyOn(mockHttp, 'pingCheck')
       .mockResolvedValue(httpResult as unknown as HealthIndicatorResult);
     const dbSpy = jest
-      .spyOn(typeOrm, 'pingCheck')
+      .spyOn(mockTypeOrm, 'pingCheck')
       .mockResolvedValue(dbResult as unknown as HealthIndicatorResult);
     const sampleSpy = jest
-      .spyOn(sample, 'isHealthy')
+      .spyOn(mockSample, 'isHealthy')
       .mockResolvedValue(sampleResult as any);
 
     const healthSpy = jest
-      .spyOn(health, 'check')
+      .spyOn(mockHealth, 'check')
       .mockImplementation(
         async (healthIndicators: HealthIndicatorFunction[]) => {
           const results = await Promise.all(healthIndicators.map((cb) => cb()));
