@@ -8,6 +8,8 @@ FROM node:18-alpine as development
 # ----------------------------------------
 FROM development as build
 
+ARG JWT_SECRET
+ARG JWT_EXPIRES_IN
 ARG DATABASE_CONNECTION
 ARG DATABASE_HOST
 ARG DATABASE_PORT
@@ -17,7 +19,12 @@ ARG DATABASE_NAME
 ARG SWAGGER_URL
 ARG API_AUTH_USER
 ARG API_AUTH_PASSWORD
+ARG AWS_ACCESS_KEY_ID
+ARG AWS_SECRET_ACCESS_KEY
+ARG AWS_REGION
 
+RUN echo "JWT_SECRET=$JWT_SECRET" >> .env.production
+RUN echo "JWT_EXPIRES_IN=$JWT_EXPIRES_IN" >> .env.production
 RUN echo "DATABASE_CONNECTION=$DATABASE_CONNECTION" >> .env.production
 RUN echo "DATABASE_HOST=$DATABASE_HOST" >> .env.production
 RUN echo "DATABASE_PORT=$DATABASE_PORT" >> .env.production
@@ -27,6 +34,9 @@ RUN echo "DATABASE_NAME=$DATABASE_NAME" >> .env.production
 RUN echo "SWAGGER_URL=$SWAGGER_URL" >> .env.production
 RUN echo "API_AUTH_USER=$API_AUTH_USER" >> .env.production
 RUN echo "API_AUTH_PASSWORD=$API_AUTH_PASSWORD" >> .env.production
+RUN echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> .env.production
+RUN echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> .env.production
+RUN echo "AWS_REGION=$AWS_REGION" >> .env.production
 
 COPY . .
 

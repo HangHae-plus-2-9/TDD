@@ -14,3 +14,20 @@ export enum USER_STATUS {
   ACTIVE = 2,
   INACTIVE = 3,
 }
+
+export enum PRODUCT_STATUS {
+  PENDING = 1,
+  ACTIVE = 2,
+  INACTIVE = 3,
+}
+
+export enum PAYMENT_METHOD {
+  CREDIT_CARD = 1,
+  BANK_TRANSFER = 2,
+}
+
+export enum COURIER_LIST {
+  CJ = 1,
+  HANJIN = 2,
+  HYUNDAI = 3,
+}

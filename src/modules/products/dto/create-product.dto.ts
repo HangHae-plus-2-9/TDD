@@ -8,10 +8,10 @@ export class CreateProductDto {
   name: string;
 
   @IsString()
-  categoryName: string;
+  catName: string;
 
   @IsString()
-  description: string;
+  desc: string;
 
   @IsNumber()
   @Min(1)
