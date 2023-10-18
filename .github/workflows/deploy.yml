@@ -17,6 +17,8 @@ env:
   ECR_REPOSITORY_NESTJS: 'hhp-nestjs'
   ECS_SERVICE_NAME: 'nestjs'
   ECS_CLUSTER_NAME: 'hhp-cluster'
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
   DATABASE_CONNECTION: ${{ secrets.DATABASE_CONNECTION }}
   DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
   DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
@@ -142,6 +144,8 @@ jobs:
           tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_NESTJS }}:${{ github.sha }}
           build-args: |
             NODE_ENV=production
+            JWT_SECRET=${{ env.JWT_SECRET }}
+            JWT_EXPIRES_IN=${{ env.JWT_EXPIRES_IN }}
             DATABASE_CONNECTION=${{ env.DATABASE_CONNECTION }}
             DATABASE_HOST=${{ env.DATABASE_HOST }}
             DATABASE_PORT=${{ env.DATABASE_PORT }}
