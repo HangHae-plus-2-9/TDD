@@ -1,6 +1,7 @@
 import * as winston from 'winston';
 import { WinstonModule } from 'nest-winston';
 import { isDevelopment } from '.';
+import * as WinstonCloudwatch from 'winston-cloudwatch';
 
 const { combine, timestamp, printf, colorize } = winston.format;
 
@@ -47,7 +48,23 @@ const consoleOnlyOptions = {
   format: combine(colorize({ all: true })),
 };
 
+const cloudwatchConfig = {
+  logGroupName: 'HHP-8th-nestjs',
+  logStreamName: 'HHP-8th-nestjs-log-stream',
+  awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  awsSecretKey: process.env.AWS_SECRET_ACCESS_KEY,
+  awsRegion: process.env.AWS_REGION,
+  messageFormatter: ({ level, message, additionalInfo }) => {
+    return `[${level}] : ${message} \nAdditional Info: ${JSON.stringify(
+      additionalInfo,
+    )}`;
+  },
+};
+
+const cloudwatchHelper = new WinstonCloudwatch(cloudwatchConfig);
+
 const transports = [
+  cloudwatchHelper,
   new winston.transports.Console(consoleOnlyOptions),
   new winston.transports.File({
     level: 'error',
