@@ -55,10 +55,10 @@ const consoleOnlyOptions = {
 
 const cloudwatchConfig = {
   logGroupName:
-    'process.env.AWS_LOG_GROUP_NAME' || //
+    process.env.AWS_LOG_GROUP_NAME || //
     'HHP-8th-nestjs-log-group-fallback',
   logStreamName:
-    'process.env.AWS_LOG_STREAM_NAME' || //
+    process.env.AWS_LOG_STREAM_NAME || //
     'HHP-8th-nestjs-log-stream-fallback',
   awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
   awsSecretKey: process.env.AWS_SECRET_ACCESS_KEY,
