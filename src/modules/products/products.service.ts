@@ -1,14 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
 import { ProductSpec } from './models/product-spec.model';
 import { PRODUCT_STATUS } from '@/common/resources';
 import { ProductModel } from './models/product.model';
 import { ProductNotFoundException } from '@/common/exceptions';
+import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 
 @Injectable()
 export class ProductsService {
   constructor(
-    private readonly logger: Logger,
+    private readonly cLogger: WinstonContextLogger,
     private readonly repo: ProductsRepository,
   ) {}
 
@@ -23,7 +24,7 @@ export class ProductsService {
       };
       return await this.repo.create(sellerId, productSpecWithStatus);
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw err;
     }
   }
@@ -32,7 +33,7 @@ export class ProductsService {
     try {
       return await this.repo.all();
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw err;
     }
   }
@@ -41,7 +42,7 @@ export class ProductsService {
     try {
       return await this.repo.getByProductId(id);
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw err;
     }
   }
@@ -53,7 +54,7 @@ export class ProductsService {
     try {
       return await this.repo.update(id, productSpec);
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw err;
     }
   }
@@ -62,7 +63,7 @@ export class ProductsService {
     try {
       return await this.repo.remove(id);
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw err;
     }
   }
@@ -78,7 +79,7 @@ export class ProductsService {
       };
       return await this.repo.update(productId, updatedProductModel);
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw err;
     }
   }

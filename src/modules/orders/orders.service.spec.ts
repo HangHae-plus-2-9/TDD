@@ -9,10 +9,12 @@ import {
 import { PAYMENT_METHOD } from '@/common/resources';
 import { CreateShippingDto } from './dto/create-shipping.dto';
 import { ProductsService } from '../products/products.service';
-import { Logger } from '@nestjs/common';
 import { CreateOrderItemDto } from './dto/create-order-item.dto';
 import { OrderItemModel } from './models/order-item.model';
 import { cloneDeep } from 'lodash';
+import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
+import { Logger } from '@nestjs/common';
+import { AsyncLocalStorage } from 'async_hooks';
 
 const customerId = 1;
 
@@ -124,6 +126,8 @@ describe('OrdersService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         Logger,
+        WinstonContextLogger,
+        AsyncLocalStorage,
         OrdersService,
         {
           provide: ProductsService,

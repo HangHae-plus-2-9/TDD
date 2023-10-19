@@ -6,6 +6,7 @@ import { OrderModel } from './models/order.model';
 import { orderEntityToModel } from './mappers/order.mapper';
 import { OrderNotFoundException } from '@/common/exceptions';
 import { COURIER_LIST, PAYMENT_METHOD } from '@/common/resources';
+import { AsyncLocalStorage } from 'async_hooks';
 
 let ORDER_ENTITIES: OrderEntity[] = [
   {
@@ -49,6 +50,7 @@ let ORDER_ENTITIES: OrderEntity[] = [
 @Injectable()
 export class OrdersRepository {
   constructor(
+    private readonly als: AsyncLocalStorage<any>,
     @InjectRepository(OrderEntity)
     private readonly model: Repository<OrderEntity>,
   ) {}
@@ -76,6 +78,7 @@ export class OrdersRepository {
   }
 
   async all(): Promise<OrderModel[]> {
+    console.log('RequestId:', this.als.getStore()['requestId']);
     return ORDER_ENTITIES.map((entity) => orderEntityToModel(entity));
   }
 
