@@ -1,4 +1,5 @@
-import { BadRequestException, Logger } from '@nestjs/common';
+import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
+import { BadRequestException, Inject } from '@nestjs/common';
 import {
   ArgumentsHost,
   Catch,
@@ -10,7 +11,10 @@ import { Request, Response } from 'express';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(HttpExceptionFilter.name);
+  constructor(
+    @Inject(WinstonContextLogger)
+    private readonly cLogger: WinstonContextLogger,
+  ) {}
 
   catch(exception: Error, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -22,10 +26,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
       query: req.query,
       params: req.params,
     };
-    this.logger.error(
+    this.cLogger.error(
       `${req.method} ${req.url} ${JSON.stringify(errorReq, null, 2)}`,
     );
-    this.logger.error(exception.stack);
+    this.cLogger.error(exception.stack);
 
     const status =
       exception instanceof HttpException ? exception.getStatus() : 500;

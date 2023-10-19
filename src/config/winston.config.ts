@@ -35,10 +35,15 @@ winston.addColors(color);
 const customLogFormat = combine(
   timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   printf((aLog) => {
-    if (aLog.stack && aLog.stack[0] !== undefined) {
-      return `[${aLog.timestamp}] [${aLog.level}]: ${aLog.message} \n ${aLog.stack}`;
-    }
-    return `[${aLog.timestamp}] [${aLog.level}]: ${aLog.message}`;
+    const requestId = aLog.alsCtx?.requestId;
+    const requestIdStr = requestId //
+      ? `[${requestId}]`
+      : '';
+    const stackStr =
+      aLog.stack && aLog.stack[0] !== undefined //
+        ? ` \n ${aLog.stack}`
+        : '';
+    return `[${aLog.timestamp}] [${aLog.level}] ${requestIdStr}: ${aLog.message}${stackStr}`;
   }),
 );
 

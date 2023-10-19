@@ -16,13 +16,12 @@ import {
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { UpdateShippingDto } from './dto/update-shipping.dto';
 import { UpdateOrderItemDto } from './dto/update-order-item.dto';
-import { AsyncLocalStorage } from 'async_hooks';
+import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 
 @Injectable()
 export class OrdersService {
   constructor(
-    private readonly als: AsyncLocalStorage<any>,
-    private readonly logger: Logger,
+    private readonly cLogger: WinstonContextLogger,
     private readonly productsService: ProductsService,
     private readonly orderRepo: OrdersRepository,
     private readonly orderItemRepo: OrderItemsRepository,
@@ -91,7 +90,7 @@ export class OrdersService {
   }
 
   async findAll() {
-    console.log('RequestId:', this.als.getStore()['requestId']);
+    this.cLogger.log('Context Logger');
     const orderModels = await this.orderRepo.all();
     const orders = await Promise.all(
       orderModels.map(async (orderModel) => {

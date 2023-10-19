@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
-import { Logger } from '@nestjs/common';
 import { UsersRepositoryInterface } from './interfaces/user-repository.interface';
 import { AuthService } from '../auth/auth.service';
+import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
+import { Logger } from '@nestjs/common';
+import { AsyncLocalStorage } from 'async_hooks';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -24,6 +26,8 @@ describe('UsersService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         Logger,
+        WinstonContextLogger,
+        AsyncLocalStorage,
         UsersService,
         {
           provide: AuthService,

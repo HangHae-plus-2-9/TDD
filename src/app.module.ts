@@ -8,7 +8,9 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AlsModule } from './als/als.module';
 import { AsyncLocalStorage } from 'async_hooks';
-import { v4 as uuidv4 } from 'uuid';
+import { RequestIdMiddleware } from './common/middlewares/request-id.middleware';
+import { WinstonContextModule } from './winston-context/winston-context.module';
+import { HttpExceptionFilter } from './common/filters/http.exception.filter';
 
 @Module({
   imports: [
@@ -23,25 +25,14 @@ import { v4 as uuidv4 } from 'uuid';
     OrdersModule,
     UsersModule,
     AuthModule,
+    WinstonContextModule,
   ],
+  providers: [HttpExceptionFilter],
 })
 export class AppModule implements NestModule {
   constructor(private readonly als: AsyncLocalStorage<any>) {}
 
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply((req, res, next) => {
-        const requestId = uuidv4() as string;
-        req.requestId = requestId;
-        req.headers['request-id'] = requestId;
-        const store = {
-          requestId,
-        };
-        this.als.run(store, () => {
-          console.log(this.als.getStore());
-          return next();
-        });
-      })
-      .forRoutes('*');
+    consumer.apply(RequestIdMiddleware).forRoutes('*');
   }
 }
