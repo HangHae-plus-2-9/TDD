@@ -35,15 +35,15 @@ winston.addColors(color);
 const customLogFormat = combine(
   timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   printf((aLog) => {
-    const requestId = aLog.alsCtx?.requestId;
-    const requestIdStr = requestId //
-      ? `[${requestId}]`
+    const nestReqId = aLog.alsCtx?.nestReqId;
+    const nestReqIdStr = nestReqId //
+      ? `[${nestReqId}]`
       : '';
     const stackStr =
       aLog.stack && aLog.stack[0] !== undefined //
         ? ` \n ${aLog.stack}`
         : '';
-    return `[${aLog.timestamp}] [${aLog.level}] ${requestIdStr}: ${aLog.message}${stackStr}`;
+    return `[${aLog.timestamp}] [${aLog.level}] ${nestReqIdStr}: ${aLog.message}${stackStr}`;
   }),
 );
 
@@ -55,16 +55,19 @@ const consoleOnlyOptions = {
 
 const cloudwatchConfig = {
   logGroupName:
-    process.env.AWS_LOG_GROUP_NAME || //
+    'process.env.AWS_LOG_GROUP_NAME' || //
     'HHP-8th-nestjs-log-group-fallback',
   logStreamName:
-    process.env.AWS_LOG_STREAM_NAME || //
+    'process.env.AWS_LOG_STREAM_NAME' || //
     'HHP-8th-nestjs-log-stream-fallback',
   awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
   awsSecretKey: process.env.AWS_SECRET_ACCESS_KEY,
   awsRegion: process.env.AWS_REGION,
-  messageFormatter: ({ level, message, additionalInfo }) => {
-    return `[${level}] : ${message} \nAdditional Info: ${JSON.stringify(
+  messageFormatter: ({ level, message, additionalInfo, nestReqId }) => {
+    const nestReqIdStr = nestReqId //
+      ? `[${nestReqId}]`
+      : '';
+    return `[${level}] ${nestReqIdStr}: ${message} \nAdditional Info: ${JSON.stringify(
       additionalInfo,
     )}`;
   },
