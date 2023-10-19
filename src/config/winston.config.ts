@@ -2,6 +2,10 @@ import * as winston from 'winston';
 import { WinstonModule } from 'nest-winston';
 import { isDevelopment } from '.';
 import * as WinstonCloudwatch from 'winston-cloudwatch';
+import * as dotenv from 'dotenv';
+
+// main.ts에서 winstonLogger를 app보다 먼저 호출하므로, configService를 사용할 수 없다.
+dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
 const { combine, timestamp, printf, colorize } = winston.format;
 
@@ -54,19 +58,17 @@ const consoleOnlyOptions = {
 };
 
 const cloudwatchConfig = {
-  logGroupName:
-    process.env.AWS_LOG_GROUP_NAME || //
-    'HHP-8th-nestjs-log-group-fallback',
-  logStreamName:
-    process.env.AWS_LOG_STREAM_NAME || //
-    'HHP-8th-nestjs-log-stream-fallback',
+  logGroupName: process.env.AWS_LOG_GROUP_NAME,
+  logStreamName: process.env.AWS_LOG_STREAM_NAME,
   awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
   awsSecretKey: process.env.AWS_SECRET_ACCESS_KEY,
   awsRegion: process.env.AWS_REGION,
-  messageFormatter: ({ level, message, additionalInfo, nestReqId }) => {
+  messageFormatter: (aLog) => {
+    const { level, message, additionalInfo, alsCtx } = aLog;
+    const nestReqId = alsCtx?.nestReqId;
     const nestReqIdStr = nestReqId //
       ? `[${nestReqId}]`
-      : '';
+      : '[]';
     return `[${level}] ${nestReqIdStr}: ${message} \nAdditional Info: ${JSON.stringify(
       additionalInfo,
     )}`;
