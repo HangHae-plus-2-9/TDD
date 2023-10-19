@@ -14,11 +14,11 @@ import { HttpExceptionFilter } from './common/filters/http.exception.filter';
 
 @Module({
   imports: [
-    AlsModule,
     ConfigModule.forRoot({
       envFilePath: `.env.${process.env.NODE_ENV}`,
       isGlobal: true,
     }),
+    AlsModule,
     DatabaseModule,
     HealthCheckModule,
     ProductsModule,
