@@ -8,10 +8,10 @@ export class RequestIdMiddleware implements NestMiddleware {
   constructor(private readonly als: AsyncLocalStorage<any>) {}
 
   use(req: Request, res: Response, next: NextFunction) {
-    const requestId = uuidv4() as string;
-    req.headers['request-id'] = requestId;
+    const nestReqId = uuidv4() as string;
+    req.headers['request-id'] = nestReqId;
     const store = {
-      requestId,
+      nestReqId,
     };
     this.als.run(store, () => next());
   }
