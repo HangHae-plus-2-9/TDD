@@ -60,9 +60,9 @@ const consoleOnlyOptions = {
 const cloudwatchConfig = {
   logGroupName: process.env.AWS_LOG_GROUP_NAME,
   logStreamName: process.env.AWS_LOG_STREAM_NAME,
-  awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  awsSecretKey: process.env.AWS_SECRET_ACCESS_KEY,
-  awsRegion: process.env.AWS_REGION,
+  awsAccessKeyId: process.env.AWS_LOG_ACCESS_KEY_ID,
+  awsSecretKey: process.env.AWS_LOG_SECRET_ACCESS_KEY,
+  awsRegion: process.env.AWS_LOG_REGION,
   messageFormatter: (aLog) => {
     const { level, message, additionalInfo, alsCtx } = aLog;
     const nestReqId = alsCtx?.nestReqId;

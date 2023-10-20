@@ -30,9 +30,9 @@ env:
   API_AUTH_PASSWORD: ${{ secrets.API_AUTH_PASSWORD }}
   AWS_LOG_GROUP_NAME: ${{ secrets.AWS_LOG_GROUP_NAME }}
   AWS_LOG_STREAM_NAME: ${{ secrets.AWS_LOG_STREAM_NAME }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_LOG_ACCESS_KEY_ID: ${{ secrets.AWS_LOG_ACCESS_KEY_ID }}
+  AWS_LOG_SECRET_ACCESS_KEY: ${{ secrets.AWS_LOG_SECRET_ACCESS_KEY }}
+  AWS_LOG_REGION: ${{ secrets.AWS_LOG_REGION }}
 
 jobs:
   test:
@@ -159,9 +159,9 @@ jobs:
             API_AUTH_PASSWORD=${{ env.API_AUTH_PASSWORD }}
             AWS_LOG_GROUP_NAME=${{ env.AWS_LOG_GROUP_NAME }}
             AWS_LOG_STREAM_NAME=${{ env.AWS_LOG_STREAM_NAME }}
-            AWS_ACCESS_KEY_ID=${{ env.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY=${{ env.AWS_SECRET_ACCESS_KEY }}
-            AWS_REGION=${{ env.AWS_REGION }}
+            AWS_LOG_ACCESS_KEY_ID=${{ env.AWS_LOG_ACCESS_KEY_ID }}
+            AWS_LOG_SECRET_ACCESS_KEY=${{ env.AWS_LOG_SECRET_ACCESS_KEY }}
+            AWS_LOG_REGION=${{ env.AWS_LOG_REGION }}
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
