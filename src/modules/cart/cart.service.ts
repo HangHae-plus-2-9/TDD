@@ -11,11 +11,12 @@ import { CartEntity } from './entities/cart.entity';
 import { CartItemEntity } from './entities/cart-items.entity';
 import { CartRepositoryInterface } from './interface/cart-repository.interface';
 import { CartItemRepositoryInterface } from './interface/cart-item-repository.interface';
+import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 
 @Injectable()
 export class CartService {
   constructor(
-    private readonly logger: Logger,
+    private readonly cLogger: WinstonContextLogger,
     @Inject('CartRepositoryInterface')
     private readonly repo: CartRepositoryInterface,
     @Inject('CartItemRepositoryInterface')
@@ -27,10 +28,8 @@ export class CartService {
       let cartId: number | null;
       // eslint-disable-next-line prefer-const
       const cart = await this.repo.findCart(userId);
-      console.log(cart);
       if (!cart) {
         const newCart = await this.createCart(userId);
-        console.log('newCart', newCart);
         cartId = newCart.id;
       } else {
         cartId = cart.id;
@@ -44,7 +43,7 @@ export class CartService {
 
       return newCartItem;
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw err;
     }
   }
@@ -61,7 +60,7 @@ export class CartService {
 
       return await this.cartItemRepo.findAllCartData(cartId);
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw err;
     }
   }
@@ -89,7 +88,7 @@ export class CartService {
         cartItem.save();
       }
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw err;
     }
   }
@@ -108,7 +107,7 @@ export class CartService {
         product: productId,
       });
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw err;
     }
   }
@@ -121,7 +120,7 @@ export class CartService {
       await this.repo.create(cart);
       return cart.toCart();
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw new UnprocessableEntityException(messages.CART_NOT_FOUNT_EXCEPTION);
     }
   }
@@ -140,7 +139,7 @@ export class CartService {
       await this.cartItemRepo.create(cartItem);
       return cartItem.toCartItem();
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw new UnprocessableEntityException(messages.CART_NOT_FOUNT_EXCEPTION);
     }
   }

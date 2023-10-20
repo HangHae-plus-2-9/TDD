@@ -1,19 +1,18 @@
 import {
   Inject,
   Injectable,
-  Logger,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { UpdateFavoriteDto } from './dto/update-favorite.dto';
 import { FavoriteProductDto } from './dto/favorite-request.dto';
 import { FavoriteEntity } from './entities/favorite.entity';
 import { messages } from '@/common/resources';
 import { FavoriteRepositoryInterface } from './interface/favorite-repository.interface';
+import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 
 @Injectable()
 export class FavoriteService {
   constructor(
-    private readonly logger: Logger,
+    private readonly cLogger: WinstonContextLogger,
     @Inject('FavoriteRepositoryInterface')
     private readonly repo: FavoriteRepositoryInterface,
   ) {}
@@ -23,7 +22,7 @@ export class FavoriteService {
       const favoriteList = this.repo.findAllFavoriteByUserId(id);
       return favoriteList || [];
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw err;
     }
   }
@@ -31,10 +30,9 @@ export class FavoriteService {
   async upload(id: number, { product_id }: FavoriteProductDto) {
     try {
       const favorite = await this.saveFavorite(id, product_id);
-      console.log('favorite', favorite);
       return favorite;
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw err;
     }
   }
@@ -56,7 +54,7 @@ export class FavoriteService {
       await this.repo.create(favorite);
       return favorite.toFavorite();
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw new UnprocessableEntityException(
         messages.USER_REGISTER_FAILED_EXCEPTION,
       );
@@ -73,7 +71,7 @@ export class FavoriteService {
       }
       await this.repo.deleteFavoriteByUserId(id, product_id);
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw new UnprocessableEntityException(
         messages.USER_REGISTER_FAILED_EXCEPTION,
       );
