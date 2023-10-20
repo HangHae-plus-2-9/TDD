@@ -1,25 +1,20 @@
-import {
-  Inject,
-  Injectable,
-  Logger,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UsersRepositoryInterface } from './interfaces/user-repository.interface';
 import { ROLE_TYPE, messages } from '@/common/resources';
 import { UserEntity } from './entities/user.entity';
 import { AuthService } from '../auth/auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { TokenPayloadDto } from '../auth/dto/token-payload.dto';
+import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
+import { UsersRepository } from './users.repository';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private readonly logger: Logger,
+    private readonly cLogger: WinstonContextLogger,
     private readonly authService: AuthService,
-    @Inject('UsersRepositoryInterface')
-    private readonly repo: UsersRepositoryInterface,
+    private readonly repo: UsersRepository,
   ) {}
 
   async register({ name, email, password }: CreateUserDto) {
@@ -33,7 +28,7 @@ export class UsersService {
       const user = await this.saveUser(name, email, password);
       return user;
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw err;
     }
   }
@@ -63,7 +58,7 @@ export class UsersService {
       });
       return token;
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw err;
     }
   }
@@ -81,7 +76,7 @@ export class UsersService {
       const user = this.repo.findById(id);
       return user || [];
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw err;
     }
   }
@@ -99,7 +94,7 @@ export class UsersService {
       const user = await this.repo.findByEmail(email);
       return user !== null;
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw new UnprocessableEntityException(
         messages.UNPROCESSABLE_ENTITY_EXCEPTION,
       );
@@ -116,7 +111,7 @@ export class UsersService {
       await this.repo.create(user);
       return user.toUserWithoutPassword();
     } catch (err) {
-      this.logger.error(err);
+      this.cLogger.error(err);
       throw new UnprocessableEntityException(
         messages.USER_REGISTER_FAILED_EXCEPTION,
       );

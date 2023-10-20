@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from './entities/product.entity';
 import { Repository } from 'typeorm';
@@ -8,6 +8,7 @@ import { ProductModel } from './models/product.model';
 import { PRODUCT_STATUS } from '@/common/resources';
 import { ProductSpecWithStatus } from './models/product-spec-status.model';
 import { ProductNotFoundException } from '@/common/exceptions';
+import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 
 const SELLERS = [
   { id: 1, name: 'Apple' },
@@ -58,7 +59,7 @@ let PRODUCTS: ProductEntity[] = [
 @Injectable()
 export class ProductsRepository {
   constructor(
-    @Inject(Logger) private readonly logger: Logger,
+    private readonly cLogger: WinstonContextLogger,
     @InjectRepository(ProductEntity)
     private readonly model: Repository<ProductEntity>,
   ) {}

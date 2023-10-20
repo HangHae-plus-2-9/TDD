@@ -28,6 +28,11 @@ env:
   SWAGGER_URL: ${{ secrets.SWAGGER_URL }}
   API_AUTH_USER: ${{ secrets.API_AUTH_USER }}
   API_AUTH_PASSWORD: ${{ secrets.API_AUTH_PASSWORD }}
+  AWS_LOG_GROUP_NAME: ${{ secrets.AWS_LOG_GROUP_NAME }}
+  AWS_LOG_STREAM_NAME: ${{ secrets.AWS_LOG_STREAM_NAME }}
+  AWS_LOG_ACCESS_KEY_ID: ${{ secrets.AWS_LOG_ACCESS_KEY_ID }}
+  AWS_LOG_SECRET_ACCESS_KEY: ${{ secrets.AWS_LOG_SECRET_ACCESS_KEY }}
+  AWS_LOG_REGION: ${{ secrets.AWS_LOG_REGION }}
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -155,6 +160,11 @@ jobs:
             SWAGGER_URL=${{ env.SWAGGER_URL }}
             API_AUTH_USER=${{ env.API_AUTH_USER }}
             API_AUTH_PASSWORD=${{ env.API_AUTH_PASSWORD }}
+            AWS_LOG_GROUP_NAME=${{ env.AWS_LOG_GROUP_NAME }}
+            AWS_LOG_STREAM_NAME=${{ env.AWS_LOG_STREAM_NAME }}
+            AWS_LOG_ACCESS_KEY_ID=${{ env.AWS_LOG_ACCESS_KEY_ID }}
+            AWS_LOG_SECRET_ACCESS_KEY=${{ env.AWS_LOG_SECRET_ACCESS_KEY }}
+            AWS_LOG_REGION=${{ env.AWS_LOG_REGION }}
             AWS_ACCESS_KEY_ID=${{ env.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY=${{ env.AWS_SECRET_ACCESS_KEY }}
             AWS_REGION=${{ env.AWS_REGION }}

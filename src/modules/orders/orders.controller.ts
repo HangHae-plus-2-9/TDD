@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -35,7 +36,8 @@ export class OrdersController {
 
   @Get()
   @ApiOperation({ summary: 'Get all orders' })
-  findAll() {
+  findAll(@Req() req: Request) {
+    console.log('RequestId:', req.headers['request-id']);
     return this.ordersService.findAll();
   }
 
@@ -48,6 +50,11 @@ export class OrdersController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update order by id' })
   update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
+    console.log('process.env.AWS_LOG_GROUP_NAME', process.env.AWS_LOG_GROUP_NAME);
+    console.log('process.env.AWS_LOG_STREAM_NAME', process.env.AWS_LOG_STREAM_NAME);
+    console.log('process.env.AWS_LOG_ACCESS_KEY_ID', process.env.AWS_LOG_ACCESS_KEY_ID);
+    console.log('process.env.AWS_LOG_SECRET_ACCESS_KEY', process.env.AWS_LOG_SECRET_ACCESS_KEY);
+    console.log('process.env.AWS_LOG_REGION', process.env.AWS_LOG_REGION);
     const { paymentInfo, shippingInfo, orderItems } = updateOrderDto;
     return this.ordersService.update(
       +id,
