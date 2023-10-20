@@ -9,7 +9,6 @@ import { FavoriteProductDto } from './dto/favorite-request.dto';
 import { FavoriteEntity } from './entities/favorite.entity';
 import { messages } from '@/common/resources';
 import { FavoriteRepositoryInterface } from './interface/favorite-repository.interface';
-import { ProductsRepositoryInterface } from '../products/interfaces/product-repository.interface';
 
 @Injectable()
 export class FavoriteService {

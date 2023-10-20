@@ -30,7 +30,6 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer()).get('/api/v1/products/1').expect(200);
   });
 
-<<<<<<< HEAD
   xit('POST /api/v1/orders', () => {
     return request(app.getHttpServer())
       .post('/api/v1/orders')
@@ -39,10 +38,10 @@ describe('AppController (e2e)', () => {
         quantity: 1,
       })
       .expect(201);
-=======
+  });
+
   it('GET /api/vi/favorite', async () => {
     const res = await request(app.getHttpServer).get('/api/vi/fovorite');
     expect(res.statusCode).toBe(200);
->>>>>>> featrue/favorite
   });
 });

@@ -14,7 +14,7 @@ export interface Product {
   quantity: number;
 }
 
-@Entity({ name: 'product' })
+@Entity({ name: 'products' })
 export class ProductEntity extends CommonColumns {
   @Column()
   seller_id: number;
