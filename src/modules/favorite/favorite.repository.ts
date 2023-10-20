@@ -21,7 +21,6 @@ export class FavoirteRepository
     productId: number,
   ): Promise<FavoriteEntity> {
     if (!userId || !productId) return null;
-    console.log(userId, productId);
     return await this.model.findOne({
       where: {
         user_id: userId,
@@ -38,7 +37,6 @@ export class FavoirteRepository
   }
 
   async deleteFavoriteByUserId(userId: number, productId: number) {
-    console.log('herE?', userId, productId);
     return await this.model.delete({
       user_id: userId,
       product_id: productId,

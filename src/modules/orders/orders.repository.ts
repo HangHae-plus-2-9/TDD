@@ -78,7 +78,6 @@ export class OrdersRepository {
   }
 
   async all(): Promise<OrderModel[]> {
-    console.log('RequestId:', this.als.getStore()['requestId']);
     return ORDER_ENTITIES.map((entity) => orderEntityToModel(entity));
   }
 
