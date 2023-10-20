@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { CommonColumns } from '@/common/entities/common-columns';
 
 export interface Cart {

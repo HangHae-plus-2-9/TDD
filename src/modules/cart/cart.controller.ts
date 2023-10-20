@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CreateCartItemsDto } from './dto/create-cart.dto';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { UpdateCartItemsDto } from './dto/update-cart.dto';
 import { Auth, AuthUser } from '@/common/decorators';
 import { ROLE_TYPE } from '@/common/resources';

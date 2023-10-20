@@ -39,15 +39,11 @@ export class FavoriteService {
     }
   }
 
-  create(id: number, { product_id }: FavoriteProductDto) {
-    return 'This action adds a new favorite';
-  }
-
   findOne(id: number) {
     return `This action returns a #${id} favorite`;
   }
 
-  update(id: number, updateFavoriteDto: UpdateFavoriteDto) {
+  update(id: number) {
     return `This action updates a #${id} favorite`;
   }
 
