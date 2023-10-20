@@ -60,6 +60,13 @@ const consoleOnlyOptions = {
 const cloudwatchConfig = {
   logGroupName: process.env.AWS_LOG_GROUP_NAME,
   logStreamName: process.env.AWS_LOG_STREAM_NAME,
+  // awsOptions: {
+  //   credentials: {
+  //     accessKeyId: process.env.AWS_LOG_ACCESS_KEY_ID,
+  //     secretAccessKey: process.env.AWS_LOG_SECRET_ACCESS_KEY,
+  //   },
+  //   region: process.env.AWS_LOG_REGION,
+  // },
   awsAccessKeyId: process.env.AWS_LOG_ACCESS_KEY_ID,
   awsSecretKey: process.env.AWS_LOG_SECRET_ACCESS_KEY,
   awsRegion: process.env.AWS_LOG_REGION,

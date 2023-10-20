@@ -39,4 +39,9 @@ describe('AppController (e2e)', () => {
       })
       .expect(201);
   });
+
+  it('GET /api/vi/favorite', async () => {
+    const res = await request(app.getHttpServer).get('/api/vi/fovorite');
+    expect(res.statusCode).toBe(200);
+  });
 });
