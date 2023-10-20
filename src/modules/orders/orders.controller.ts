@@ -52,9 +52,9 @@ export class OrdersController {
   update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
     console.log('process.env.AWS_LOG_GROUP_NAME', process.env.AWS_LOG_GROUP_NAME);
     console.log('process.env.AWS_LOG_STREAM_NAME', process.env.AWS_LOG_STREAM_NAME);
-    console.log('process.env.AWS_ACCESS_KEY_ID', process.env.AWS_ACCESS_KEY_ID);
-    console.log('process.env.AWS_SECRET_ACCESS_KEY', process.env.AWS_SECRET_ACCESS_KEY);
-    console.log('process.env.AWS_REGION', process.env.AWS_REGION);
+    console.log('process.env.AWS_ACCESS_KEY_ID', process.env.AWS_LOG_ACCESS_KEY_ID);
+    console.log('process.env.AWS_SECRET_ACCESS_KEY', process.env.AWS_LOG_SECRET_ACCESS_KEY);
+    console.log('process.env.AWS_REGION', process.env.AWS_LOG_REGION);
     const { paymentInfo, shippingInfo, orderItems } = updateOrderDto;
     return this.ordersService.update(
       +id,
