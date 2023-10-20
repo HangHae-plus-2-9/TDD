@@ -1,4 +1,3 @@
-import { CreateCartItemsDto } from './dto/create-cart.dto';
 import { CartRepositoryInterface } from './interface/cart-repository.interface';
 import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '@/common/repositories/base.repository';

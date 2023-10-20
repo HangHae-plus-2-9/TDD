@@ -6,7 +6,6 @@ import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
 import { FavoirteRepository } from './favorite.repository';
 import { FavoriteService } from './favorite.service';
-import { ProductsRepository } from '../products/products.repository';
 
 @Module({
   imports: [

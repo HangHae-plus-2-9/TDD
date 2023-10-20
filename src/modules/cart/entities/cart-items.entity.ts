@@ -1,8 +1,6 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { CommonColumns } from '@/common/entities/common-columns';
 import { CartEntity } from './cart.entity';
-import { UserEntity } from '@/modules/users/entities/user.entity';
-import { ProductEntity } from '@/modules/products/entities/product.entity';
 
 export interface CartItem {
   id: number;

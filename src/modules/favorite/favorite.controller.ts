@@ -18,11 +18,6 @@ import { UpdateFavoriteDto } from './dto/update-favorite.dto';
 export class FavoriteController {
   constructor(private readonly favoriteService: FavoriteService) {}
 
-  // @Post()
-  // create(@Body() createFavoriteDto: CreateFavoriteDto) {
-  //   return this.favoriteService.create(createFavoriteDto);
-  // }
-
   @Post('/add')
   @Auth([ROLE_TYPE.ADMIN])
   async uploadFavoriteList(
@@ -45,13 +40,5 @@ export class FavoriteController {
     @Param('productId') productId: number,
   ) {
     return this.favoriteService.removeFavorite(tokenPayload.userId, +productId);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateFavoriteDto: UpdateFavoriteDto,
-  ) {
-    return this.favoriteService.update(+id, updateFavoriteDto);
   }
 }

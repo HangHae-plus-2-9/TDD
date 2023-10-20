@@ -9,7 +9,6 @@ import { FavoriteProductDto } from './dto/favorite-request.dto';
 import { FavoriteEntity } from './entities/favorite.entity';
 import { messages } from '@/common/resources';
 import { FavoriteRepositoryInterface } from './interface/favorite-repository.interface';
-import { ProductsRepositoryInterface } from '../products/interfaces/product-repository.interface';
 
 @Injectable()
 export class FavoriteService {
@@ -40,15 +39,11 @@ export class FavoriteService {
     }
   }
 
-  create(id: number, { product_id }: FavoriteProductDto) {
-    return 'This action adds a new favorite';
-  }
-
   findOne(id: number) {
     return `This action returns a #${id} favorite`;
   }
 
-  update(id: number, updateFavoriteDto: UpdateFavoriteDto) {
+  update(id: number) {
     return `This action updates a #${id} favorite`;
   }
 
