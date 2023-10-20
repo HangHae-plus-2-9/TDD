@@ -11,6 +11,8 @@ import { AsyncLocalStorage } from 'async_hooks';
 import { RequestIdMiddleware } from './common/middlewares/request-id.middleware';
 import { WinstonContextModule } from './winston-context/winston-context.module';
 import { HttpExceptionFilter } from './common/filters/http.exception.filter';
+import { FavoriteModule } from './modules/favorite/favorite.module';
+import { CartModule } from './modules/cart/cart.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { HttpExceptionFilter } from './common/filters/http.exception.filter';
     UsersModule,
     AuthModule,
     WinstonContextModule,
+    FavoriteModule,
+    CartModule,
   ],
   providers: [HttpExceptionFilter],
 })

@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
 import { ProductSpec } from './models/product-spec.model';
-import { PRODUCT_STATUS } from '@/common/resources';
+import { PRODUCT_STATUS, messages } from '@/common/resources';
 import { ProductModel } from './models/product.model';
 import { ProductNotFoundException } from '@/common/exceptions';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
+import { ProductEntity } from './entities/product.entity';
 
 @Injectable()
 export class ProductsService {
+  comp: any;
   constructor(
     private readonly cLogger: WinstonContextLogger,
     private readonly repo: ProductsRepository,
@@ -87,4 +89,27 @@ export class ProductsService {
   async addStock(productId: number, quantity: number): Promise<ProductModel> {
     return await this.subStock(productId, -quantity);
   }
+
+  // async saveProduct(createProductDto: CreateProductDto) {
+  //   try {
+  //     const product = ProductEntity.create({
+  //       seller: createProductDto.seller,
+  //       name: createProductDto.name,
+  //       product_type: createProductDto.product_type,
+  //       category_name: createProductDto.category_name,
+  //       option: createProductDto.option,
+  //       description: createProductDto.description,
+  //       price: createProductDto.price,
+  //       quantity: createProductDto.quantity,
+  //     });
+  //     console.log('product', product);
+  //     await this.repo.create(product);
+  //     return product.toProduct();
+  //   } catch (err) {
+  //     this.logger.error;
+  //     throw new UnprocessableEntityException(
+  //       messages.UNPROCESSABLE_ENTITY_EXCEPTION,
+  //     );
+  //   }
+  // }
 }

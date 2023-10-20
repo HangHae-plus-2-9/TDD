@@ -1,6 +1,7 @@
 import { CommonColumns } from '@/common/entities/common-columns';
 import { USER_STATUS } from '@/common/resources';
-import { Column, Entity } from 'typeorm';
+import { FavoriteEntity } from '@/modules/favorite/entities/favorite.entity';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 export interface UserWithoutPassword {
   id: number;
