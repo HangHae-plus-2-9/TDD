@@ -1,18 +1,9 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  Patch,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { FavoriteService } from './favorite.service';
 import { Auth, AuthUser } from '@/common/decorators';
 import { ROLE_TYPE } from '@/common/resources';
 import { AccessTokenPayload } from '../auth/dto/access-token-payload.dto';
 import { FavoriteProductDto } from './dto/favorite-request.dto';
-import { UpdateFavoriteDto } from './dto/update-favorite.dto';
 
 @Controller({ version: '1', path: 'favorite' })
 export class FavoriteController {
