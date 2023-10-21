@@ -5,22 +5,6 @@ import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 import { AsyncLocalStorage } from 'async_hooks';
 import { FavoriteRepositoryInterface } from './interface/favorite-repository.interface';
 
-const mockUserId = 1;
-const mockFavorite = [
-  {
-    userId: 1,
-    itemId: 1,
-  },
-  {
-    userId: 1,
-    itemId: 2,
-  },
-  {
-    userId: 1,
-    itemId: 3,
-  },
-];
-
 describe('FavoriteService', () => {
   let favoriteService: FavoriteService;
   let mockRepo: FavoriteRepositoryInterface;

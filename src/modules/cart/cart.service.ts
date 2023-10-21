@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { CreateCartItemsDto } from './dto/create-cart.dto';
 import { UpdateCartItemsDto } from './dto/update-cart.dto';
-import { Logger } from '@nestjs/common';
 import { messages } from '@/common/resources';
 import { CartEntity } from './entities/cart.entity';
 import { CartItemEntity } from './entities/cart-items.entity';
