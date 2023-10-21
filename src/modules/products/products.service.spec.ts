@@ -4,6 +4,8 @@ import { ProductsRepository } from './products.repository';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductSpec } from './models/product-spec.model';
 import { ProductNotFoundException } from '@/common/exceptions';
+import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
+import { AsyncLocalStorage } from 'async_hooks';
 import { Logger } from '@nestjs/common';
 
 describe('ProductsService', () => {
@@ -15,6 +17,8 @@ describe('ProductsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         Logger,
+        WinstonContextLogger,
+        AsyncLocalStorage,
         ProductsService,
         {
           provide: ProductsRepository,

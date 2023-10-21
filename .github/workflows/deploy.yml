@@ -17,6 +17,8 @@ env:
   ECR_REPOSITORY_NESTJS: 'hhp-nestjs'
   ECS_SERVICE_NAME: 'nestjs'
   ECS_CLUSTER_NAME: 'hhp-cluster'
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
   DATABASE_CONNECTION: ${{ secrets.DATABASE_CONNECTION }}
   DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
   DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
@@ -26,6 +28,14 @@ env:
   SWAGGER_URL: ${{ secrets.SWAGGER_URL }}
   API_AUTH_USER: ${{ secrets.API_AUTH_USER }}
   API_AUTH_PASSWORD: ${{ secrets.API_AUTH_PASSWORD }}
+  AWS_LOG_GROUP_NAME: ${{ secrets.AWS_LOG_GROUP_NAME }}
+  AWS_LOG_STREAM_NAME: ${{ secrets.AWS_LOG_STREAM_NAME }}
+  AWS_LOG_ACCESS_KEY_ID: ${{ secrets.AWS_LOG_ACCESS_KEY_ID }}
+  AWS_LOG_SECRET_ACCESS_KEY: ${{ secrets.AWS_LOG_SECRET_ACCESS_KEY }}
+  AWS_LOG_REGION: ${{ secrets.AWS_LOG_REGION }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
 
 jobs:
   test:
@@ -139,6 +149,8 @@ jobs:
           tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_NESTJS }}:${{ github.sha }}
           build-args: |
             NODE_ENV=production
+            JWT_SECRET=${{ env.JWT_SECRET }}
+            JWT_EXPIRES_IN=${{ env.JWT_EXPIRES_IN }}
             DATABASE_CONNECTION=${{ env.DATABASE_CONNECTION }}
             DATABASE_HOST=${{ env.DATABASE_HOST }}
             DATABASE_PORT=${{ env.DATABASE_PORT }}
@@ -148,6 +160,14 @@ jobs:
             SWAGGER_URL=${{ env.SWAGGER_URL }}
             API_AUTH_USER=${{ env.API_AUTH_USER }}
             API_AUTH_PASSWORD=${{ env.API_AUTH_PASSWORD }}
+            AWS_LOG_GROUP_NAME=${{ env.AWS_LOG_GROUP_NAME }}
+            AWS_LOG_STREAM_NAME=${{ env.AWS_LOG_STREAM_NAME }}
+            AWS_LOG_ACCESS_KEY_ID=${{ env.AWS_LOG_ACCESS_KEY_ID }}
+            AWS_LOG_SECRET_ACCESS_KEY=${{ env.AWS_LOG_SECRET_ACCESS_KEY }}
+            AWS_LOG_REGION=${{ env.AWS_LOG_REGION }}
+            AWS_ACCESS_KEY_ID=${{ env.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ env.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION=${{ env.AWS_REGION }}
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def

@@ -39,4 +39,10 @@ describe('AppController (e2e)', () => {
       })
       .expect(201);
   });
+
+  // it('GET /api/vi/favorite', async () => {
+  // // TODO: token 생성 및 첨부 필요
+  //   const res = await request(app.getHttpServer).get('/api/v1/favorite');
+  //   expect(res.statusCode).toBe(200);
+  // });
 });

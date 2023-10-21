@@ -1,6 +1,11 @@
 import * as winston from 'winston';
 import { WinstonModule } from 'nest-winston';
 import { isDevelopment } from '.';
+import * as WinstonCloudwatch from 'winston-cloudwatch';
+import * as dotenv from 'dotenv';
+
+// main.ts에서 winstonLogger를 app보다 먼저 호출하므로, configService를 사용할 수 없다.
+dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
 const { combine, timestamp, printf, colorize } = winston.format;
 
@@ -34,10 +39,15 @@ winston.addColors(color);
 const customLogFormat = combine(
   timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   printf((aLog) => {
-    if (aLog.stack && aLog.stack[0] !== undefined) {
-      return `[${aLog.timestamp}] [${aLog.level}]: ${aLog.message} \n ${aLog.stack}`;
-    }
-    return `[${aLog.timestamp}] [${aLog.level}]: ${aLog.message}`;
+    const nestReqId = aLog.alsCtx?.nestReqId;
+    const nestReqIdStr = nestReqId //
+      ? `[${nestReqId}]`
+      : '';
+    const stackStr =
+      aLog.stack && aLog.stack[0] !== undefined //
+        ? ` \n ${aLog.stack}`
+        : '';
+    return `[${aLog.timestamp}] [${aLog.level}] ${nestReqIdStr}: ${aLog.message}${stackStr}`;
   }),
 );
 
@@ -47,7 +57,32 @@ const consoleOnlyOptions = {
   format: combine(colorize({ all: true })),
 };
 
+const cloudwatchConfig = {
+  logGroupName: process.env.AWS_LOG_GROUP_NAME,
+  logStreamName: process.env.AWS_LOG_STREAM_NAME,
+  awsOptions: {
+    credentials: {
+      accessKeyId: process.env.AWS_LOG_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_LOG_SECRET_ACCESS_KEY,
+      region: process.env.AWS_LOG_REGION,
+    },
+  },
+  messageFormatter: (aLog) => {
+    const { level, message, additionalInfo, alsCtx } = aLog;
+    const nestReqId = alsCtx?.nestReqId;
+    const nestReqIdStr = nestReqId //
+      ? `[${nestReqId}]`
+      : '[]';
+    return `[${level}] ${nestReqIdStr}: ${message} \nAdditional Info: ${JSON.stringify(
+      additionalInfo,
+    )}`;
+  },
+};
+
+const cloudwatchHelper = new WinstonCloudwatch(cloudwatchConfig);
+
 const transports = [
+  cloudwatchHelper,
   new winston.transports.Console(consoleOnlyOptions),
   new winston.transports.File({
     level: 'error',
