@@ -1,4 +1,4 @@
-import { Column, Entity, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { CommonColumns } from '@/common/entities/common-columns';
 import { OrderEntity } from '@/modules/orders/entities/order.entity';
 import { PaymentMethod } from '@/modules/payments/enum/payment-method.enum';
@@ -16,7 +16,8 @@ export class Payments extends CommonColumns {
   @Column()
   amount: number;
 
-  @OneToOne(() => OrderEntity, (order) => order.payment)
+  @OneToOne(() => OrderEntity)
+  @JoinColumn()
   order: OrderEntity;
 
   @Column({ name: 'canceled_amount', nullable: true })
