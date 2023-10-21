@@ -3,10 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderEntity } from './entities/order.entity';
 import { OrderModel } from './models/order.model';
-import { orderEntityToModel } from './mappers/order.mapper';
+import { orderEntityToModel, orderModelToEntity } from './mappers/order.mapper';
 import { OrderNotFoundException } from '@/common/exceptions';
 import { COURIER_LIST, PAYMENT_METHOD } from '@/common/resources';
-import { AsyncLocalStorage } from 'async_hooks';
 
 let ORDER_ENTITIES: OrderEntity[] = [
   {
@@ -50,31 +49,13 @@ let ORDER_ENTITIES: OrderEntity[] = [
 @Injectable()
 export class OrdersRepository {
   constructor(
-    private readonly als: AsyncLocalStorage<any>,
     @InjectRepository(OrderEntity)
     private readonly model: Repository<OrderEntity>,
   ) {}
 
   async create(orderModel: OrderModel): Promise<OrderModel> {
-    ORDER_ENTITIES.push({
-      id: orderModel.id,
-      customer_id: orderModel.customerId,
-      payment_method: orderModel.payment.method,
-      payment_amount: orderModel.payment.amount,
-      paid_at: orderModel.payment.paidAt,
-      courier_name: orderModel.shipping.courierName,
-      invoice_number: orderModel.shipping.invoiceNumber,
-      shipping_address: orderModel.shipping.address,
-      shipping_receiver: orderModel.shipping.receiver,
-      shipping_receiver_phone: orderModel.shipping.receiverPhone,
-      departed_at: orderModel.shipping.departedAt,
-      arrived_at: orderModel.shipping.arrivedAt,
-      canceled_at: orderModel.canceledAt,
-      created_at: new Date(),
-      updated_at: new Date(),
-      deleted_at: null,
-    } as OrderEntity);
-    return orderEntityToModel(ORDER_ENTITIES[ORDER_ENTITIES.length - 1]);
+    const orderEntity = OrderEntity.create(orderModelToEntity(orderModel));
+    return orderEntityToModel(await orderEntity.save());
   }
 
   async all(): Promise<OrderModel[]> {

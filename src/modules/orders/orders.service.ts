@@ -33,43 +33,16 @@ export class OrdersService {
     shippingInfo: CreateShippingDto,
     orderItems: CreateOrderItemDto[],
   ) {
-    const orderId = createNumericId();
+    // const orderId = createNumericId();
 
     if (orderItems.length === 0) throw new Error('Order items must be exist');
 
-    const orderItemModels = await this.orderItemRepo.createManyWithOrderId(
-      orderId,
-      await Promise.all(
-        orderItems.map(async (item) => {
-          const productModel = await this.productsService.findOne(
-            item.productId,
-          );
-          if (!productModel) throw new ProductNotFoundException();
-          if (item.quantity <= 0)
-            throw new Error('Quantity must be greater than 0');
-          if (productModel.stock < item.quantity)
-            throw new Error('Quantity must be less than product quantity');
-          this.productsService.subStock(item.productId, item.quantity);
-          return {
-            id: createNumericId(),
-            orderId: orderId,
-            productId: item.productId,
-            quantity: item.quantity,
-            price: productModel.price,
-          } as OrderItemModel;
-        }),
-      ),
-    );
-
     const orderModel = await this.orderRepo.create({
-      id: orderId,
+      id: null,
       customerId: customerId,
       payment: {
         method: paymentInfo.method,
-        amount: orderItemModels.reduce(
-          (acc, cur) => acc + cur.price * cur.quantity,
-          0,
-        ),
+        amount: 11,
         paidAt: null,
         canceledAt: null,
       },
@@ -85,6 +58,30 @@ export class OrdersService {
       },
       canceledAt: null,
     } as OrderModel);
+
+    const orderItemModels = await this.orderItemRepo.createManyWithOrderId(
+      orderModel.id,
+      await Promise.all(
+        orderItems.map(async (item) => {
+          const productModel = await this.productsService.findOne(
+            item.productId,
+          );
+          if (!productModel) throw new ProductNotFoundException();
+          if (item.quantity <= 0)
+            throw new Error('Quantity must be greater than 0');
+          if (productModel.stock < item.quantity)
+            throw new Error('Quantity must be less than product quantity');
+          this.productsService.subStock(item.productId, item.quantity);
+          return {
+            id: createNumericId(),
+            orderId: orderModel.id,
+            productId: item.productId,
+            quantity: item.quantity,
+            price: productModel.price,
+          } as OrderItemModel;
+        }),
+      ),
+    );
 
     return { ...orderModel, orderItems: orderItemModels };
   }

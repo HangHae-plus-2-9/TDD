@@ -3,7 +3,10 @@ import { OrderItemEntity } from './entities/order-item.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderItemModel } from './models/order-item.model';
-import { orderItemEntityToModel } from './mappers/order.mapper';
+import {
+  orderItemEntityToModel,
+  orderItemModelToEntity,
+} from './mappers/order.mapper';
 
 let ORDER_ITEM_ENTITIES = [];
 
@@ -18,20 +21,18 @@ export class OrderItemsRepository {
     orderId: number,
     orderItemModels: OrderItemModel[],
   ): Promise<OrderItemModel[]> {
-    return await orderItemModels.map((item) => {
-      const orderItemEntity = {
-        id: item.id,
-        order_id: orderId,
-        product_id: item.productId,
-        quantity: item.quantity,
-        price: item.price,
-        created_at: new Date(),
-        updated_at: new Date(),
-        deleted_at: null,
-      } as OrderItemEntity;
-      ORDER_ITEM_ENTITIES.push({ ...orderItemEntity });
-      return orderItemEntityToModel(orderItemEntity);
-    });
+    console.log('here2');
+    const orderItemEntities = orderItemModels.map((item) =>
+      orderItemModelToEntity(item),
+    );
+    return await Promise.all(
+      orderItemEntities
+        .map(async (item) => {
+          item.order_id = orderId;
+          return await this.model.save(item);
+        })
+        .map(async (item) => orderItemEntityToModel(await item)),
+    );
   }
 
   async getByOrderId(orderId: number): Promise<OrderItemModel[]> {

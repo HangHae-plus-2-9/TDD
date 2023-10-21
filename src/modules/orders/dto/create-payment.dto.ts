@@ -1,8 +1,8 @@
 import { PAYMENT_METHOD } from '@/common/resources';
-import { IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsNumber, IsOptional } from 'class-validator';
 
 export class CreatePaymentDto {
-  @IsString()
+  @IsNumber()
   method: PAYMENT_METHOD;
 
   @IsOptional()

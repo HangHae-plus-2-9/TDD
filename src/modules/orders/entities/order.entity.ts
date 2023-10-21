@@ -13,16 +13,16 @@ export class OrderEntity extends CommonColumns {
   @Column()
   payment_amount: number;
 
-  @Column()
+  @Column({ nullable: true })
   paid_at?: Date;
 
   @Column({ nullable: true })
   canceled_at?: Date;
 
-  @Column()
+  @Column({ nullable: true })
   courier_name?: number;
 
-  @Column()
+  @Column({ nullable: true })
   invoice_number?: string;
 
   @Column()
@@ -34,12 +34,12 @@ export class OrderEntity extends CommonColumns {
   @Column()
   shipping_receiver_phone: string;
 
-  @Column()
+  @Column({ nullable: true })
   departed_at?: Date;
 
-  @Column()
+  @Column({ nullable: true })
   arrived_at?: Date;
 
-  @OneToMany(() => OrderItemEntity, (orderItem) => orderItem.order_id)
+  @OneToMany(() => OrderItemEntity, (orderItem) => orderItem.order)
   order_items: OrderItemEntity[];
 }
