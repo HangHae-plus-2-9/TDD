@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { Payments } from '@/modules/payments/entity/payments.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaymentMethod } from '@/modules/payments/enum/payment-method.enum';
+import { PaymentStatus } from '@/modules/payments/enum/payment-status.enum';
 
 @Injectable()
 export class PaymentsService {
@@ -43,5 +44,11 @@ export class PaymentsService {
       throw new NotFoundException('Payment not found');
     }
     return payment;
+  }
+
+  async cancel(id: number) {
+    const payment = await this.findOne(id);
+    payment.status = PaymentStatus.CANCELED;
+    return this.paymentsRepository.save(payment);
   }
 }

@@ -6,6 +6,7 @@ import { PaymentMethod } from '@/modules/payments/enum/payment-method.enum';
 import { OrderEntity } from '@/modules/orders/entities/order.entity';
 import { Repository } from 'typeorm';
 import { ConflictException, NotFoundException } from '@nestjs/common';
+import { PaymentStatus } from '@/modules/payments/enum/payment-status.enum';
 
 describe('PaymentsService', () => {
   let sut: PaymentsService;
@@ -79,6 +80,34 @@ describe('PaymentsService', () => {
       await expect(findOneOperation).rejects.toThrowError(NotFoundException);
     });
   });
+
+  describe('cancel', () => {
+    it('결제 ID로 결제를 취소한다', async () => {
+      const payment = createPayment(1, 2, 50_000);
+      const canceledPayment = createPayment(
+        1,
+        2,
+        50_000,
+        PaymentMethod.CreditCard,
+        PaymentStatus.CANCELED,
+      );
+      paymentsRepository.findOneBy.mockResolvedValue(payment);
+      paymentsRepository.save.mockResolvedValue(canceledPayment);
+
+      const actual = await sut.cancel(1);
+
+      expect(actual.status).toEqual(PaymentStatus.CANCELED);
+    });
+
+    it('존재하지 않는 결제 ID로 결제를 취소하려 하면, NotFoundException을 던진다', async () => {
+      const cancelOperation = sut.cancel(99);
+      await expect(cancelOperation).rejects.toThrowError(NotFoundException);
+    });
+  });
+
+  describe('approve', () => {
+    test.todo('empty');
+  });
 });
 
 function createPayment(
@@ -86,15 +115,19 @@ function createPayment(
   orderId: number,
   amount: number,
   method: PaymentMethod = PaymentMethod.CreditCard,
+  status: PaymentStatus = PaymentStatus.PENDING,
 ) {
   // order
   const order = new OrderEntity();
   order.id = orderId;
+
   // payment
   const payment = new Payments();
   payment.id = id;
-  payment.method = method;
-  payment.amount = amount;
   payment.order = order;
+  payment.amount = amount;
+  payment.method = method;
+  payment.status = status;
+
   return payment;
 }
