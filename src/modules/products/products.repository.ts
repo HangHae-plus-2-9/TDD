@@ -3,57 +3,23 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { ProductSpec } from './models/product-spec.model';
-import { ProductMapper } from './mappers/product.mapper';
+import {
+  ProductMapper,
+  productEntityToModel,
+  productModelToEntity,
+} from './mappers/product.mapper';
 import { ProductModel } from './models/product.model';
-import { PRODUCT_STATUS } from '@/common/resources';
 import { ProductSpecWithStatus } from './models/product-spec-status.model';
 import { ProductNotFoundException } from '@/common/exceptions';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 
+type Seller = {
+  id: number;
+  name: string;
+};
 const SELLERS = [
   { id: 1, name: 'Apple' },
   { id: 2, name: 'Microsoft' },
-];
-let PRODUCTS: ProductEntity[] = [
-  {
-    id: 1,
-    seller_id: 1,
-    name: 'iPhone 15',
-    cat_name: 'Smartphone',
-    desc: 'The latest iPhone',
-    price: 2000,
-    stock: 10,
-    status: PRODUCT_STATUS.ACTIVE,
-    created_at: new Date(),
-    updated_at: new Date(),
-    deleted_at: null,
-  } as ProductEntity,
-  {
-    id: 2,
-    seller_id: 1,
-    name: 'iPhone 14',
-    cat_name: 'Smartphone',
-    desc: 'The latest iPhone',
-    price: 1000,
-    stock: 10,
-    status: PRODUCT_STATUS.ACTIVE,
-    created_at: new Date(),
-    updated_at: new Date(),
-    deleted_at: null,
-  } as ProductEntity,
-  {
-    id: 3,
-    seller_id: 2,
-    name: 'Surface Pro 8',
-    cat_name: 'Laptop',
-    desc: 'The latest Surface Pro',
-    price: 2000,
-    stock: 10,
-    status: PRODUCT_STATUS.ACTIVE,
-    created_at: new Date(),
-    updated_at: new Date(),
-    deleted_at: null,
-  } as ProductEntity,
 ];
 
 @Injectable()
@@ -76,24 +42,25 @@ export class ProductsRepository {
     sellerId: number,
     productSpecWithStatus: ProductSpecWithStatus,
   ): Promise<ProductModel> {
-    const seller = SELLERS.find((seller) => seller.id === sellerId);
-
-    const productEntity = {
+    const seller = SELLERS.find((seller) => seller.id === sellerId) as Seller;
+    const productModel = {
+      id: null,
       ...productSpecWithStatus,
-      seller_id: seller.id,
-    } as ProductEntity;
+      sellerId,
+    } as unknown as ProductModel;
+    const productEntity = productModelToEntity(productModel);
 
-    PRODUCTS.push(productEntity);
-
-    return ProductMapper.toModel(productEntity);
+    return productEntityToModel(await this.model.save(productEntity));
   }
 
   async all(): Promise<ProductModel[]> {
-    return PRODUCTS.map((product) => ProductMapper.toModel(product));
+    return (await this.model.find()).map((item) => ProductMapper.toModel(item));
   }
 
   async getByProductId(id: number): Promise<ProductModel> {
-    const product = PRODUCTS.find((product) => product.id === id);
+    const product = await this.model.findOne({
+      where: { id },
+    });
     if (!product) {
       throw new ProductNotFoundException();
     }
@@ -104,30 +71,27 @@ export class ProductsRepository {
     id: number,
     updatedProductSpec: Partial<ProductSpec>,
   ): Promise<ProductModel> {
-    let product = PRODUCTS.find((product) => product.id === id);
-    if (!product) {
+    let productEntity = await this.model.findOne({
+      where: { id },
+    });
+    if (!productEntity) {
       throw new ProductNotFoundException();
     }
-    product = {
-      ...product,
+    productEntity = {
+      ...productEntity,
       ...updatedProductSpec,
     } as ProductEntity;
 
-    PRODUCTS = PRODUCTS.map((item) => {
-      if (item.id === id) {
-        return product;
-      }
-      return item;
-    });
-    return ProductMapper.toModel(product);
+    return productEntityToModel(await this.model.save(productEntity));
   }
 
   async remove(id: number): Promise<ProductModel> {
-    const product = PRODUCTS.find((product) => product.id === id);
-    if (!product) {
+    const productEntity = await this.model.findOne({
+      where: { id },
+    });
+    if (!productEntity) {
       throw new ProductNotFoundException();
     }
-    PRODUCTS.filter((product) => product.id !== id);
-    return ProductMapper.toModel(product);
+    return productEntityToModel(await this.model.remove(productEntity));
   }
 }
