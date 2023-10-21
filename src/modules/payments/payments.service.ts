@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -48,7 +49,19 @@ export class PaymentsService {
 
   async cancel(id: number) {
     const payment = await this.findOne(id);
+    if (payment.status === PaymentStatus.CANCELED) {
+      throw new BadRequestException('Payment already canceled');
+    }
     payment.status = PaymentStatus.CANCELED;
     return this.paymentsRepository.save(payment);
+  }
+
+  async approve(id: number) {
+    const payment = await this.findOne(id);
+    if (payment.status !== PaymentStatus.PENDING) {
+      throw new BadRequestException('Payment status is not "PENDING"');
+    }
+    payment.status = PaymentStatus.COMPLETED;
+    return payment;
   }
 }

@@ -5,7 +5,11 @@ import { Payments } from '@/modules/payments/entity/payments.entity';
 import { PaymentMethod } from '@/modules/payments/enum/payment-method.enum';
 import { OrderEntity } from '@/modules/orders/entities/order.entity';
 import { Repository } from 'typeorm';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PaymentStatus } from '@/modules/payments/enum/payment-status.enum';
 
 describe('PaymentsService', () => {
@@ -103,10 +107,59 @@ describe('PaymentsService', () => {
       const cancelOperation = sut.cancel(99);
       await expect(cancelOperation).rejects.toThrowError(NotFoundException);
     });
+
+    it('이미 [결제취소] 상태이면 BadRequestException을 던진다', async () => {
+      const canceledPayment = createPayment(
+        1,
+        2,
+        50_000,
+        PaymentMethod.CreditCard,
+        PaymentStatus.CANCELED,
+      );
+      paymentsRepository.findOneBy.mockResolvedValue(canceledPayment);
+
+      const cancelOperation = sut.cancel(2);
+
+      await expect(cancelOperation).rejects.toThrowError(BadRequestException);
+    });
   });
 
   describe('approve', () => {
-    test.todo('empty');
+    it('결제 ID로 결제 상태를 [결제완료]로 변경할 수 있다', async () => {
+      const payment = createPayment(
+        1,
+        2,
+        10_000,
+        PaymentMethod.CreditCard,
+        PaymentStatus.PENDING,
+      );
+      paymentsRepository.findOneBy.mockResolvedValue(payment);
+
+      const actual = await sut.approve(1);
+
+      expect(actual.status).toEqual(PaymentStatus.COMPLETED);
+    });
+
+    it('존재하지 않는 ID로 결제 상태를 변경 시, NotFoundException을 던진다', async () => {
+      const approveOperation = sut.approve(99);
+
+      await expect(approveOperation).rejects.toThrowError(NotFoundException);
+    });
+
+    it('결제 상태가 [결제대기]가 아니면 BadRequestException을 던진다', async () => {
+      const payment = createPayment(
+        1,
+        2,
+        10_000,
+        PaymentMethod.CreditCard,
+        PaymentStatus.COMPLETED,
+      );
+      paymentsRepository.findOneBy.mockResolvedValue(payment);
+
+      const approveOperation = sut.approve(1);
+
+      await expect(approveOperation).rejects.toThrowError(BadRequestException);
+    });
   });
 });
 
