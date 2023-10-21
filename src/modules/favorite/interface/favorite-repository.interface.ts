@@ -1,6 +1,5 @@
 import { BaseRepositoryInterface } from '@/common/repositories/base.repository.interface';
 import { FavoriteEntity } from '../entities/favorite.entity';
-import { ProductEntity } from '@/modules/products/entities/product.entity';
 
 export interface FavoriteRepositoryInterface
   extends BaseRepositoryInterface<FavoriteEntity> {
