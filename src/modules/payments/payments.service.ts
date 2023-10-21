@@ -17,11 +17,7 @@ export class PaymentsService {
     private readonly paymentsRepository: Repository<Payments>,
   ) {}
 
-  async create(
-    orderId: number,
-    amount: number,
-    method: PaymentMethod = PaymentMethod.CreditCard,
-  ) {
+  async create(orderId: number, amount: number, method: PaymentMethod) {
     try {
       const newPayments = this.paymentsRepository.create({
         amount,
@@ -53,6 +49,8 @@ export class PaymentsService {
       throw new BadRequestException('Payment already canceled');
     }
     payment.status = PaymentStatus.CANCELED;
+    payment.canceledAmount = payment.amount;
+    payment.canceledAt = new Date();
     return this.paymentsRepository.save(payment);
   }
 

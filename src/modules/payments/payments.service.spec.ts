@@ -42,12 +42,13 @@ describe('PaymentsService', () => {
       const id = 3;
       const orderId = 5;
       const amount = 2_000;
-      const payment = createPayment(id, orderId, amount);
-      const expected = createPayment(id, orderId, amount);
+      const method = PaymentMethod.CreditCard;
+      const payment = createPayment(id, orderId, amount, method);
+      const expected = createPayment(id, orderId, amount, method);
       paymentsRepository.create.mockReturnValue(payment);
 
       // when
-      const actual = await sut.create(orderId, amount);
+      const actual = await sut.create(orderId, amount, method);
 
       // then
       expect(actual).toEqual(expected);
@@ -56,9 +57,10 @@ describe('PaymentsService', () => {
     it('이미 주문에 해당하는 결제 정보가 존재할 때는 ConflictException을 던진다', async () => {
       const orderId = 99;
       const amount = 9_900;
+      const method = PaymentMethod.CreditCard;
       paymentsRepository.save.mockRejectedValue({ code: '23505' });
 
-      const createOperation = sut.create(orderId, amount);
+      const createOperation = sut.create(orderId, amount, method);
 
       await expect(createOperation).rejects.toThrow(ConflictException);
     });
