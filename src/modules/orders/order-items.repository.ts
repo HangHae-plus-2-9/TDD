@@ -21,7 +21,6 @@ export class OrderItemsRepository {
     orderId: number,
     orderItemModels: OrderItemModel[],
   ): Promise<OrderItemModel[]> {
-    console.log('here2');
     const orderItemEntities = orderItemModels.map((item) =>
       orderItemModelToEntity(item),
     );

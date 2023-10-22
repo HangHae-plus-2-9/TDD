@@ -33,12 +33,11 @@ export class OrdersService {
     shippingInfo: CreateShippingDto,
     orderItems: CreateOrderItemDto[],
   ) {
-    // const orderId = createNumericId();
+    const orderId = createNumericId();
 
     if (orderItems.length === 0) throw new Error('Order items must be exist');
-
     const orderModel = await this.orderRepo.create({
-      id: null,
+      id: orderId,
       customerId: customerId,
       payment: {
         method: paymentInfo.method,
