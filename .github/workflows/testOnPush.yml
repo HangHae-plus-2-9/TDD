@@ -59,8 +59,9 @@ jobs:
       - name: install dependencies
         run: npm install
 
-      - name: run lint
-        run: npm run lint
+      # 테스트 속도를 위해 주석처리
+      # - name: run lint
+      #   run: npm run lint
 
       # 테스트 속도를 위해 주석처리
       # - name: Check database state
@@ -70,6 +71,17 @@ jobs:
 
       - name: run tests
         run: npm run test
+
+      - name: echo envs
+        run: |
+          echo $DATABASE_CONNECTION
+          echo $DATABASE_HOST
+          echo $DATABASE_PORT
+          echo $DATABASE_USERNAME
+          echo $DATABASE_PASSWORD
+          echo $DATABASE_NAME
+          echo $GITHUB_ACTIONS
+          ls -al
       
       - name: migrate database
         run: npm run migration:run
