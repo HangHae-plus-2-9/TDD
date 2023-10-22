@@ -14,12 +14,12 @@ env:
   ECR_REPOSITORY_NESTJS: 'hh-nestjs'
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
   JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
-  DATABASE_CONNECTION: ${{ secrets.DATABASE_CONNECTION }}
-  DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
-  DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
-  DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
-  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-  DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+  DATABASE_CONNECTION: postgres
+  DATABASE_HOST: 127.0.0.1
+  DATABASE_PORT: 5432
+  DATABASE_USERNAME: postgres
+  DATABASE_PASSWORD: postgres
+  DATABASE_NAME: postgres
 
 jobs:
   test:
@@ -75,7 +75,6 @@ jobs:
       - name: run e2e tests
         env:
           GITHUB_ACTIONS: true # TODO: 너무 지저분하다.. Github Actions의 postgres는 ssl을 사용하는듯
-          DATABASE_CONNECTION: 'postgres'
         run: npm run test:e2e
 
       - name: Notify Slack on Failure
