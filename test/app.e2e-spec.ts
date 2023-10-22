@@ -33,15 +33,15 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer()).get('/api/v1/health-check').expect(200);
   });
 
-  // TODO: migration에서 막혀서 주석 처리.. 나중에 해결 필요
-  // it('GET /api/v1/products', () => {
-  //   return request(app.getHttpServer()).get('/api/v1/products').expect(200);
-  // });
+  it('GET /api/v1/products', () => {
+    return request(app.getHttpServer()).get('/api/v1/products').expect(200);
+  });
 
-  // TODO: deploy시 seeder 작업 후 주석 해제
-  // it('GET /api/v1/products/1', () => {
-  //   return request(app.getHttpServer()).get('/api/v1/products/1').expect(200);
-  // });
+  it('GET /api/v1/products/100001', () => {
+    return request(app.getHttpServer())
+      .get('/api/v1/products/100001')
+      .expect(200);
+  });
 
   xit('POST /api/v1/orders', () => {
     return request(app.getHttpServer())

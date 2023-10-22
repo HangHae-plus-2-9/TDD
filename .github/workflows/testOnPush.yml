@@ -39,10 +39,10 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v4.0.0
 
-      - name: setup node
+      - name: Setup node
         uses: actions/setup-node@v3.8.1
         with:
           node-version: '18'
@@ -56,10 +56,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: install dependencies
+      - name: Install dependencies
         run: npm install
 
-      - name: run lint
+      - name: Run lint
         run: npm run lint
 
       - name: Check database state
@@ -67,13 +67,16 @@ jobs:
           sudo apt-get install -y postgresql-client
           PGPASSWORD=postgres psql -h localhost -U postgres -d postgres -c "\dt"
 
-      - name: run tests
+      - name: Run tests
         run: npm run test
       
-      - name: migrate database
+      - name: Migrate database
         run: npm run migration:run
 
-      - name: run e2e tests
+      - name: Seed database
+        run: npm run seed
+
+      - name: Run e2e tests
         run: npm run test:e2e
 
       - name: Notify Slack on Failure

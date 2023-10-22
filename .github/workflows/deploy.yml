@@ -54,10 +54,10 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v4.0.0
 
-      - name: setup node
+      - name: Setup node
         uses: actions/setup-node@v3.8.1
         with:
           node-version: '18'
@@ -71,13 +71,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: install dependencies
+      - name: Install dependencies
         run: npm install
 
-      - name: run lint
+      - name: Run lint
         run: npm run lint
 
-      - name: run tests
+      - name: Run tests
         run: npm run test
 
       - name: Comment with Test Coverage
@@ -86,7 +86,7 @@ jobs:
           github_token: "${{ secrets.GITHUB_TOKEN }}"
           test_command: "npm run test:cov"
 
-      - name: migrate database
+      - name: Migrate database
         env:
           DATABASE_CONNECTION: 'postgres'
           DATABASE_HOST: 'localhost'
@@ -95,8 +95,18 @@ jobs:
           DATABASE_PASSWORD: ${{ env.DATABASE_PASSWORD }}
           DATABASE_NAME: 'postgres'
         run: npm run migration:run
+      
+      - name: Seed database
+        env:
+          DATABASE_CONNECTION: 'postgres'
+          DATABASE_HOST: 'localhost'
+          DATABASE_PORT: '5432'
+          DATABASE_USERNAME: ${{ env.DATABASE_USERNAME }}
+          DATABASE_PASSWORD: ${{ env.DATABASE_PASSWORD }}
+          DATABASE_NAME: 'postgres'
+        run: npm run seed
 
-      - name: run e2e tests
+      - name: Run e2e tests
         env:
           DATABASE_CONNECTION: 'postgres'
           DATABASE_HOST: 'localhost'
