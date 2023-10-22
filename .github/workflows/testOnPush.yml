@@ -14,12 +14,12 @@ env:
   ECR_REPOSITORY_NESTJS: 'hh-nestjs'
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
   JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
-  DATABASE_CONNECTION: postgres
-  DATABASE_HOST: localhost
-  DATABASE_PORT: 5432
-  DATABASE_USERNAME: postgres
-  DATABASE_PASSWORD: postgres
-  DATABASE_NAME: postgres
+  DATABASE_CONNECTION: ${{ secrets.DATABASE_CONNECTION }}
+  DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+  DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+  DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+  DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
 
 jobs:
   test:
@@ -61,7 +61,7 @@ jobs:
       - name: run lint
         run: npm run lint
 
-      # 시간 단축을 위해 주석처리
+      # 테스트 속도를 위해 주석처리
       # - name: Check database state
       #   run: |
       #     sudo apt-get install -y postgresql-client
@@ -69,18 +69,26 @@ jobs:
 
       - name: run tests
         run: npm run test
+
+      - name: echo env
+        run: |
+          echo $JWT_SECRET
+          echo $JWT_EXPIRES_IN
+          echo $DATABASE_CONNECTION
+          echo $DATABASE_HOST
+          echo $DATABASE_PORT
+          echo $DATABASE_USERNAME
+          echo $DATABASE_PASSWORD
+          echo $DATABASE_NAME
+          echo $GITHUB_ACTIONS
+          echo ls -al
       
-      - name: migrate database
-        env:
-          DATABASE_CONNECTION: postgres
-          DATABASE_HOST: localhost
-          DATABASE_PORT: 5432
-          DATABASE_USERNAME: postgres
-          DATABASE_PASSWORD: postgres
-          DATABASE_NAME: postgres
-        run: npm run migration:run
+      # - name: migrate database
+      #   run: npm run migration:run
 
       - name: run e2e tests
+        env:
+          GITHUB_ACTIONS: true # TODO: 너무 지저분하다.. Github Actions의 postgres는 ssl을 사용하는듯
         run: npm run test:e2e
 
       - name: Notify Slack on Failure
