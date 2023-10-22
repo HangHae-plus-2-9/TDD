@@ -13,7 +13,7 @@ import { WinstonContextModule } from './winston-context/winston-context.module';
 import { HttpExceptionFilter } from './common/filters/http.exception.filter';
 import { FavoriteModule } from './modules/favorite/favorite.module';
 import { CartModule } from './modules/cart/cart.module';
-import { PaymentsModule } from './modules/payments/payments.module';
+// import { PaymentsModule } from './modules/payments/payments.module';
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
     OrdersModule,
     UsersModule,
     AuthModule,
-    PaymentsModule,
+    // PaymentsModule,
     WinstonContextModule,
     FavoriteModule,
     CartModule,
