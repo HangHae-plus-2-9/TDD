@@ -95,16 +95,6 @@ jobs:
           DATABASE_PASSWORD: ${{ env.DATABASE_PASSWORD }}
           DATABASE_NAME: 'postgres'
         run: npm run migration:run
-      
-      - name: Seed database
-        env:
-          DATABASE_CONNECTION: 'postgres'
-          DATABASE_HOST: 'localhost'
-          DATABASE_PORT: '5432'
-          DATABASE_USERNAME: ${{ env.DATABASE_USERNAME }}
-          DATABASE_PASSWORD: ${{ env.DATABASE_PASSWORD }}
-          DATABASE_NAME: 'postgres'
-        run: npm run seed
 
       - name: Run e2e tests
         env:

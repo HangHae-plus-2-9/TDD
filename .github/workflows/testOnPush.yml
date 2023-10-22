@@ -73,9 +73,6 @@ jobs:
       - name: Migrate database
         run: npm run migration:run
 
-      - name: Seed database
-        run: npm run seed
-
       - name: Run e2e tests
         run: npm run test:e2e
 
