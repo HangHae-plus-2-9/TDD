@@ -61,7 +61,7 @@ export class OrdersService {
     } as OrderModel);
 
     const orderItemModels = await this.orderItemRepo.createManyWithOrderId(
-      orderModel.id,
+      orderId,
       await Promise.all(
         orderItems.map(async (item) => {
           const productModel = await this.productsService.findOne(
@@ -75,7 +75,7 @@ export class OrdersService {
           this.productsService.subStock(item.productId, item.quantity);
           return {
             id: createNumericId(),
-            orderId: orderModel.id,
+            orderId: orderId,
             productId: item.productId,
             quantity: item.quantity,
             price: productModel.price,

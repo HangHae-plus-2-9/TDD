@@ -16,6 +16,10 @@ import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 import { Logger } from '@nestjs/common';
 import { AsyncLocalStorage } from 'async_hooks';
 
+jest.mock('typeorm-transactional', () => ({
+  Transactional: () => () => ({}),
+}));
+
 const customerId = 1;
 
 const dummyProductModels = [
@@ -338,6 +342,9 @@ describe('OrdersService', () => {
           return { id: idx + 1, orderId: 1, ...item };
         }),
       );
+      stubOrderItemRepo.getByOrderId = jest
+        .fn()
+        .mockReturnValue(orderItemModels);
       stubProductsService.findOne = jest
         .fn()
         .mockReturnValue(dummyProductModels[0]);
@@ -384,6 +391,9 @@ describe('OrdersService', () => {
           return { id: idx + 1, orderId: 1, ...item };
         }),
       );
+      stubOrderItemRepo.getByOrderId = jest
+        .fn()
+        .mockReturnValue(orderItemModels);
       stubProductsService.findOne = jest
         .fn()
         .mockReturnValue(dummyProductModels[0]);
@@ -440,9 +450,13 @@ describe('OrdersService', () => {
       stubOrderItemRepo.updateManyWithOrderId = jest
         .fn()
         .mockReturnValue(newOrderItemModels);
+      stubOrderItemRepo.getByOrderId = jest
+        .fn()
+        .mockReturnValue(orderItemModels);
       stubProductsService.findOne = jest
         .fn()
         .mockReturnValue(dummyProductModels[0]);
+      stubProductsService.addStock = jest.fn();
       stubOrderRepo.getByOrderId = jest
         .fn()
         .mockReturnValue(cloneDeep(orderModel));
@@ -485,6 +499,9 @@ describe('OrdersService', () => {
         ...createOrderDto,
         orderItems: invalidOrderItems,
       };
+      stubOrderItemRepo.getByOrderId = jest
+        .fn()
+        .mockReturnValue(orderItemModels);
 
       // when & then
       await expect(

@@ -2,6 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
+import {
+  initializeTransactionalContext,
+  deleteDataSourceByName,
+} from 'typeorm-transactional';
+
+// typeorm-transactional 사용시 필요
+initializeTransactionalContext();
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -16,6 +23,10 @@ describe('AppController (e2e)', () => {
     app.enableVersioning();
 
     await app.init();
+  });
+  afterEach(async () => {
+    // typeorm-transactional 사용시 필요 - 개별 테스트 후 datasource 삭제
+    deleteDataSourceByName('default');
   });
 
   it('GET /api/v1/health-check', () => {
