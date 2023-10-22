@@ -86,11 +86,13 @@ jobs:
           github_token: "${{ secrets.GITHUB_TOKEN }}"
           test_command: "npm run test:cov"
 
+      - name: migrate database
+        run: npm run migration:run
+
       - name: run e2e tests
         env:
-          GITHUB_ACTIONS: true
           DATABASE_CONNECTION: 'postgres'
-        run: npm run migration:run && npm run test:e2e
+        run: npm run test:e2e
 
       - name: Notify Slack on Failure
         if: failure()

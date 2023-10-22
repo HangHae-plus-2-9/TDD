@@ -26,7 +26,7 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  @Auth([ROLE_TYPE.ADMIN])
+  // @Auth([ROLE_TYPE.ADMIN])
   @ApiOperation({ summary: '상품 등록' })
   @ApiCreatedResponse({
     description: 'The record has been successfully created.',

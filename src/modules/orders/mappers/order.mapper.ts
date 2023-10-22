@@ -36,3 +36,33 @@ export const orderItemEntityToModel = (
     price: entity.price,
   } as OrderItemModel;
 };
+
+export const orderModelToEntity = (model: OrderModel): OrderEntity => {
+  return {
+    id: model.id,
+    customer_id: model.customerId,
+    payment_method: model.payment.method,
+    payment_amount: model.payment.amount,
+    paid_at: model.payment.paidAt,
+    courier_name: model.shipping.courierName,
+    invoice_number: model.shipping.invoiceNumber,
+    shipping_address: model.shipping.address,
+    shipping_receiver: model.shipping.receiver,
+    shipping_receiver_phone: model.shipping.receiverPhone,
+    departed_at: model.shipping.departedAt,
+    arrived_at: model.shipping.arrivedAt,
+    canceled_at: model.canceledAt,
+  } as OrderEntity;
+};
+
+export const orderItemModelToEntity = (
+  model: OrderItemModel,
+): OrderItemEntity => {
+  return {
+    id: model.id,
+    order_id: model.orderId,
+    product_id: model.productId,
+    quantity: model.quantity,
+    price: model.price,
+  } as OrderItemEntity;
+};

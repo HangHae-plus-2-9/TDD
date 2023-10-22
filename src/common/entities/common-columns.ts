@@ -3,13 +3,13 @@ import {
   BaseEntity,
   CreateDateColumn,
   DeleteDateColumn,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 export class CommonColumns extends BaseEntity {
   @ApiProperty({ description: 'id', example: 1 })
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   public id!: number;
 
   @CreateDateColumn()

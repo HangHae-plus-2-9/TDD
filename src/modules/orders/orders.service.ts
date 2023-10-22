@@ -17,6 +17,7 @@ import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { UpdateShippingDto } from './dto/update-shipping.dto';
 import { UpdateOrderItemDto } from './dto/update-order-item.dto';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class OrdersService {
@@ -27,6 +28,7 @@ export class OrdersService {
     private readonly orderItemRepo: OrderItemsRepository,
   ) {}
 
+  @Transactional()
   async create(
     customerId: number,
     paymentInfo: CreatePaymentDto,
@@ -36,6 +38,27 @@ export class OrdersService {
     const orderId = createNumericId();
 
     if (orderItems.length === 0) throw new Error('Order items must be exist');
+    const orderModel = await this.orderRepo.create({
+      id: orderId,
+      customerId: customerId,
+      payment: {
+        method: paymentInfo.method,
+        amount: 0,
+        paidAt: null,
+        canceledAt: null,
+      },
+      shipping: {
+        courierName: null,
+        invoiceNumber: null,
+        address: shippingInfo.address,
+        receiver: shippingInfo.receiver,
+        receiverPhone: shippingInfo.receiverPhone,
+        departedAt: null,
+        arrivedAt: null,
+        canceledAt: null,
+      },
+      canceledAt: null,
+    } as OrderModel);
 
     const orderItemModels = await this.orderItemRepo.createManyWithOrderId(
       orderId,
@@ -61,29 +84,13 @@ export class OrdersService {
       ),
     );
 
-    const orderModel = await this.orderRepo.create({
-      id: orderId,
-      customerId: customerId,
-      payment: {
-        method: paymentInfo.method,
-        amount: orderItemModels.reduce(
-          (acc, cur) => acc + cur.price * cur.quantity,
-          0,
-        ),
-        paidAt: null,
-        canceledAt: null,
-      },
-      shipping: {
-        courierName: null,
-        invoiceNumber: null,
-        address: shippingInfo.address,
-        receiver: shippingInfo.receiver,
-        receiverPhone: shippingInfo.receiverPhone,
-        departedAt: null,
-        arrivedAt: null,
-        canceledAt: null,
-      },
-      canceledAt: null,
+    const amount = orderItemModels.reduce(
+      (acc, cur) => acc + cur.price * cur.quantity,
+      0,
+    );
+    await this.orderRepo.update(orderModel.id, {
+      ...orderModel,
+      payment: { ...orderModel.payment, amount },
     } as OrderModel);
 
     return { ...orderModel, orderItems: orderItemModels };
@@ -109,12 +116,14 @@ export class OrdersService {
     return { ...orderModel, orderItems: orderItemModels };
   }
 
+  @Transactional()
   async update(
     id: number,
     paymentInfo: UpdatePaymentDto,
     shippingInfo: UpdateShippingDto,
     orderItems: UpdateOrderItemDto[],
   ) {
+    const orderItemModels = await this.orderItemRepo.getByOrderId(id);
     const updatedOrderItemModels =
       await this.orderItemRepo.updateManyWithOrderId(
         id,
@@ -135,17 +144,33 @@ export class OrdersService {
           }),
         ),
       );
-    // TODO: Product quantity update
+
+    // update product stock
+    orderItemModels.forEach((item) => {
+      const orderItemModel = updatedOrderItemModels.find(
+        (orderItem) => orderItem.productId === item.productId,
+      );
+      if (!orderItemModel)
+        this.productsService.addStock(item.productId, item.quantity);
+      else if (orderItemModel.quantity !== item.quantity)
+        this.productsService.addStock(
+          item.productId,
+          item.quantity - orderItemModel.quantity,
+        );
+    });
+
+    const amount = updatedOrderItemModels.reduce(
+      (acc, cur) => acc + cur.price * cur.quantity,
+      0,
+    );
+    console.log('amount', amount);
     const newOrderModel = await this.orderRepo.getByOrderId(id);
     _.merge(
       newOrderModel,
       {
         payment: {
           ...paymentInfo,
-          amount: updatedOrderItemModels.reduce(
-            (acc, cur) => acc + cur.price * cur.quantity,
-            0,
-          ),
+          amount,
         },
       },
       { shipping: shippingInfo },
@@ -154,6 +179,7 @@ export class OrdersService {
     return { ...updatedOrderModel, orderItems: updatedOrderItemModels };
   }
 
+  @Transactional()
   async remove(id: number) {
     const orderModel = await this.orderRepo.getByOrderId(id);
     if (!orderModel) throw new OrderNotFoundException();
