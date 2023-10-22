@@ -8,7 +8,6 @@ import {
   orderItemModelToEntity,
 } from './mappers/order.mapper';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
-import _ from 'lodash';
 
 @Injectable()
 export class OrderItemsRepository {
