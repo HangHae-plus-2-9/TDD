@@ -13,9 +13,9 @@ const dataSource = new DataSource(
   databaseConfig() as any, //
 );
 
-// initializeTransactionalContext({
-//   storageDriver: StorageDriver.ASYNC_LOCAL_STORAGE,
-// });
-// addTransactionalDataSource(dataSource);
+initializeTransactionalContext({
+  storageDriver: StorageDriver.ASYNC_LOCAL_STORAGE,
+});
+addTransactionalDataSource(dataSource);
 
 export default dataSource;
