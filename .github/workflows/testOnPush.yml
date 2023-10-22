@@ -63,7 +63,7 @@ jobs:
 
       - name: Check database state
         run: |
-          apt-get install -y postgresql-client
+          sudo apt-get install -y postgresql-client
           PGPASSWORD=postgres psql -h localhost -U postgres -d postgres -c "\dt"
 
       - name: run tests
