@@ -7,12 +7,13 @@ import {
   orderItemEntityToModel,
   orderItemModelToEntity,
 } from './mappers/order.mapper';
-
-let ORDER_ITEM_ENTITIES = [];
+import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
+import _ from 'lodash';
 
 @Injectable()
 export class OrderItemsRepository {
   constructor(
+    private readonly cLogger: WinstonContextLogger,
     @InjectRepository(OrderItemEntity)
     private readonly model: Repository<OrderItemEntity>,
   ) {}
@@ -35,9 +36,9 @@ export class OrderItemsRepository {
   }
 
   async getByOrderId(orderId: number): Promise<OrderItemModel[]> {
-    const orderItemEntities = ORDER_ITEM_ENTITIES.filter(
-      (item) => item.order_id === orderId,
-    );
+    const orderItemEntities = await this.model.find({
+      where: { order_id: orderId },
+    });
     return await orderItemEntities.map((entity) =>
       orderItemEntityToModel(entity),
     );
@@ -45,43 +46,52 @@ export class OrderItemsRepository {
 
   async updateManyWithOrderId(
     orderId: number,
-    orderItemModels: OrderItemModel[],
+    newOrderItemModels: OrderItemModel[],
   ): Promise<OrderItemModel[]> {
-    const orderItemEntities = ORDER_ITEM_ENTITIES.filter(
-      (item) => item.order_id === orderId,
-    );
-
-    // remove order items whose quantity is 0
-    const willBeRemovedOrderItemsProductIds = orderItemModels.map((item) => {
-      if (item.quantity === 0) {
-        return item.productId;
-      }
+    const orderItemEntities = await this.model.find({
+      where: { order_id: orderId },
     });
+    const newOrderItemEntities = newOrderItemModels.map((item) =>
+      orderItemModelToEntity(item),
+    );
+    /**
+     * remove order items whose quantity is 0
+     */
+    const willBeRemovedOrderItemsProductIds = newOrderItemEntities.map(
+      (item) => {
+        if (item.quantity === 0) {
+          return item.product_id;
+        }
+      },
+    );
     const willBeRemovedOrderItemEntities = orderItemEntities.filter((item) =>
       willBeRemovedOrderItemsProductIds.includes(item.product_id),
     );
-    ORDER_ITEM_ENTITIES = ORDER_ITEM_ENTITIES.filter(
-      (item) => !willBeRemovedOrderItemEntities.includes(item),
-    );
+    if (willBeRemovedOrderItemEntities.length > 0)
+      await this.model.softDelete(
+        willBeRemovedOrderItemEntities.map((item) => item.id),
+      );
 
     // update order items whose quantity is not 0
     const willBeUpdatedOrderItemEntities = orderItemEntities.filter(
       (item) => !willBeRemovedOrderItemEntities.includes(item),
     );
-    willBeUpdatedOrderItemEntities.map((item) => {
-      const orderItemModel = orderItemModels.find(
-        (model) => model.productId === item.product_id,
-      );
-      item.quantity = orderItemModel.quantity;
-      return item;
-    });
-
-    return await willBeUpdatedOrderItemEntities.map((item) =>
-      orderItemEntityToModel(item),
+    const updatedOrderItemEntities = await Promise.all(
+      willBeUpdatedOrderItemEntities.map(async (item) => {
+        const updatedItemEntity = await this.model.save({
+          ...newOrderItemEntities.find(
+            (orderItem) => orderItem.product_id === item.product_id,
+          ),
+          id: item.id,
+        });
+        return updatedItemEntity;
+      }),
     );
+
+    return updatedOrderItemEntities.map((item) => orderItemEntityToModel(item));
   }
 
   async removeByOrderId(orderId: number): Promise<void> {
-    ORDER_ITEM_ENTITIES.filter((item) => item.order_id !== orderId);
+    await this.model.softDelete({ order_id: orderId });
   }
 }
