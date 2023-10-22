@@ -38,11 +38,11 @@ describe('AppController (e2e)', () => {
   });
 
   // TODO: deploy시 seeder 작업 후 주석 해제
-  it('GET /api/v1/products/100001', () => {
-    return request(app.getHttpServer())
-      .get('/api/v1/products/100001')
-      .expect(200);
-  });
+  // it('GET /api/v1/products/100001', () => {
+  //   return request(app.getHttpServer())
+  //     .get('/api/v1/products/100001')
+  //     .expect(200);
+  // });
 
   xit('POST /api/v1/orders', () => {
     return request(app.getHttpServer())
