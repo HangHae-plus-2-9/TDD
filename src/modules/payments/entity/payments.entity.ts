@@ -10,6 +10,7 @@ export class Payments extends CommonColumns {
     type: 'enum',
     enum: PaymentMethod,
     default: PaymentMethod.CreditCard,
+    name: 'payment_method_enum',
   })
   method: PaymentMethod;
 
@@ -26,6 +27,11 @@ export class Payments extends CommonColumns {
   @Column({ name: 'canceled_at', nullable: true })
   canceledAt: Date;
 
-  @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
+  @Column({
+    type: 'enum',
+    enum: PaymentStatus,
+    default: PaymentStatus.PENDING,
+    name: 'payment_status_enum',
+  })
   status: PaymentStatus;
 }
