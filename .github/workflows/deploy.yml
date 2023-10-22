@@ -91,8 +91,8 @@ jobs:
           DATABASE_CONNECTION: 'postgres'
           DATABASE_HOST: 'localhost'
           DATABASE_PORT: '5432'
-          DATABASE_USERNAME: 'postgres'
-          DATABASE_PASSWORD: 'postgres'
+          DATABASE_USERNAME: ${{ env.DATABASE_USERNAME }}
+          DATABASE_PASSWORD: ${{ env.DATABASE_PASSWORD }}
           DATABASE_NAME: 'postgres'
         run: npm run migration:run
 
@@ -101,8 +101,8 @@ jobs:
           DATABASE_CONNECTION: 'postgres'
           DATABASE_HOST: 'localhost'
           DATABASE_PORT: '5432'
-          DATABASE_USERNAME: 'postgres'
-          DATABASE_PASSWORD: 'postgres'
+          DATABASE_USERNAME: ${{ env.DATABASE_USERNAME }}
+          DATABASE_PASSWORD: ${{ env.DATABASE_PASSWORD }}
           DATABASE_NAME: 'postgres'
         run: npm run test:e2e
 
