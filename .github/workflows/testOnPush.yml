@@ -59,38 +59,21 @@ jobs:
       - name: install dependencies
         run: npm install
 
-      # 테스트 속도를 위해 주석처리
-      # - name: run lint
-      #   run: npm run lint
+      - name: run lint
+        run: npm run lint
 
-      # 테스트 속도를 위해 주석처리
-      # - name: Check database state
-      #   run: |
-      #     sudo apt-get install -y postgresql-client
-      #     PGPASSWORD=postgres psql -h localhost -U postgres -d postgres -c "\dt"
-
-      # - name: run tests
-      #   run: npm run test
-
-      - name: echo envs
-        env:
-          GITHUB_ACTIONS: false
+      - name: Check database state
         run: |
-          echo $DATABASE_CONNECTION
-          echo $DATABASE_HOST
-          echo $DATABASE_PORT
-          echo $DATABASE_USERNAME
-          echo $DATABASE_PASSWORD
-          echo $DATABASE_NAME
-          echo $GITHUB_ACTIONS
-          ls -al
+          sudo apt-get install -y postgresql-client
+          PGPASSWORD=postgres psql -h localhost -U postgres -d postgres -c "\dt"
+
+      - name: run tests
+        run: npm run test
       
       - name: migrate database
         run: npm run migration:run
 
       - name: run e2e tests
-        # env:
-        #   GITHUB_ACTIONS: true # TODO: 너무 지저분하다.. Github Actions의 postgres는 ssl을 사용하는듯
         run: npm run test:e2e
 
       - name: Notify Slack on Failure

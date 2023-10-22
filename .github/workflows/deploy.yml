@@ -91,7 +91,6 @@ jobs:
 
       - name: run e2e tests
         env:
-          GITHUB_ACTIONS: true
           DATABASE_CONNECTION: 'postgres'
         run: npm run test:e2e
 
