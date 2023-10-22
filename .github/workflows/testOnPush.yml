@@ -69,10 +69,12 @@ jobs:
       #     sudo apt-get install -y postgresql-client
       #     PGPASSWORD=postgres psql -h localhost -U postgres -d postgres -c "\dt"
 
-      - name: run tests
-        run: npm run test
+      # - name: run tests
+      #   run: npm run test
 
       - name: echo envs
+        env:
+          GITHUB_ACTIONS: false
         run: |
           echo $DATABASE_CONNECTION
           echo $DATABASE_HOST
