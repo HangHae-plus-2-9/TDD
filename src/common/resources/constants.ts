@@ -21,10 +21,18 @@ export enum PRODUCT_STATUS {
   INACTIVE = 3,
 }
 
-export enum PAYMENT_METHOD {
-  CREDIT_CARD = 1,
-  BANK_TRANSFER = 2,
-}
+// export enum PAYMENT_METHOD {
+//   CREDIT_CARD = 1,
+//   BANK_TRANSFER = 2,
+// }
+
+export const PAYMENT_METHOD = {
+  CREDIT_CARD: 1,
+  BANK_TRANSFER: 2,
+};
+
+export type PAYMENT_METHOD =
+  (typeof PAYMENT_METHOD)[keyof typeof PAYMENT_METHOD];
 
 export enum COURIER_LIST {
   CJ = 1,

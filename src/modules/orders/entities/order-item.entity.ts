@@ -1,5 +1,5 @@
 import { CommonColumns } from '@/common/entities/common-columns';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { OrderEntity } from './order.entity';
 
 @Entity('order_items')
@@ -17,5 +17,6 @@ export class OrderItemEntity extends CommonColumns {
   price: number;
 
   @ManyToOne(() => OrderEntity, (order) => order.order_items)
+  @JoinColumn({ name: 'order_id' })
   order: OrderEntity;
 }
