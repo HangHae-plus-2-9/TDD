@@ -13,6 +13,8 @@ import { WinstonContextModule } from './winston-context/winston-context.module';
 import { HttpExceptionFilter } from './common/filters/http.exception.filter';
 import { FavoriteModule } from './modules/favorite/favorite.module';
 import { CartModule } from './modules/cart/cart.module';
+import { HttpLoggerInterceptor } from './common/interceptors';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 // import { PaymentsModule } from './modules/payments/payments.module';
 
 @Module({
@@ -33,7 +35,13 @@ import { CartModule } from './modules/cart/cart.module';
     FavoriteModule,
     CartModule,
   ],
-  providers: [HttpExceptionFilter],
+  providers: [
+    HttpExceptionFilter,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpLoggerInterceptor,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   constructor(private readonly als: AsyncLocalStorage<any>) {}

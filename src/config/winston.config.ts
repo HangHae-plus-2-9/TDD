@@ -41,13 +41,13 @@ const customLogFormat = combine(
   printf((aLog) => {
     const nestReqId = aLog.alsCtx?.nestReqId;
     const nestReqIdStr = nestReqId //
-      ? `[${nestReqId}]`
+      ? `${nestReqId}`
       : '';
     const stackStr =
       aLog.stack && aLog.stack[0] !== undefined //
         ? ` \n ${aLog.stack}`
         : '';
-    return `[${aLog.timestamp}] [${aLog.level}] ${nestReqIdStr}: ${aLog.message}${stackStr}`;
+    return `[${aLog.timestamp}] [${aLog.level}] [${nestReqIdStr}]: ${aLog.message}${stackStr}`;
   }),
 );
 
@@ -71,9 +71,9 @@ const cloudwatchConfig = {
     const { level, message, additionalInfo, alsCtx } = aLog;
     const nestReqId = alsCtx?.nestReqId;
     const nestReqIdStr = nestReqId //
-      ? `[${nestReqId}]`
-      : '[]';
-    return `[${level}] ${nestReqIdStr}: ${message} \nAdditional Info: ${JSON.stringify(
+      ? `${nestReqId}`
+      : '';
+    return `[${level}] [${nestReqIdStr}]: ${message} \nAdditional Info: ${JSON.stringify(
       additionalInfo,
     )}`;
   },
