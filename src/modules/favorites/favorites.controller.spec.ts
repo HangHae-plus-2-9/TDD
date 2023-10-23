@@ -1,28 +1,28 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FavoriteController } from './favorite.controller';
-import { FavoriteService } from './favorite.service';
+import { FavoritesController } from './favorites.controller';
+import { FavoritesService } from './favorites.service';
 import { AuthService } from '../auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 
-describe('FavoriteController', () => {
-  let controller: FavoriteController;
-  let mockService: Partial<FavoriteService>;
+describe('FavoritesController', () => {
+  let controller: FavoritesController;
+  let mockService: Partial<FavoritesService>;
 
   beforeEach(async () => {
     mockService = {};
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [FavoriteController],
+      controllers: [FavoritesController],
       providers: [
         AuthService,
         JwtService,
         {
-          provide: FavoriteService,
+          provide: FavoritesService,
           useValue: mockService,
         },
       ],
     }).compile();
 
-    controller = module.get<FavoriteController>(FavoriteController);
+    controller = module.get<FavoritesController>(FavoritesController);
   });
 
   it('should be defined', () => {

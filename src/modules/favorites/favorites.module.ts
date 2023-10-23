@@ -1,11 +1,11 @@
 import { Logger, Module } from '@nestjs/common';
-import { FavoriteController } from './favorite.controller';
+import { FavoritesController } from './favorites.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FavoriteEntity } from './entities/favorite.entity';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
-import { FavoriteRepository } from './favorite.repository';
-import { FavoriteService } from './favorite.service';
+import { FavoritesRepository } from './favorites.repository';
+import { FavoritesService } from './favorites.service';
 
 @Module({
   imports: [
@@ -13,7 +13,7 @@ import { FavoriteService } from './favorite.service';
     AuthModule,
     UsersModule,
   ],
-  controllers: [FavoriteController],
-  providers: [Logger, FavoriteService, FavoriteRepository],
+  controllers: [FavoritesController],
+  providers: [Logger, FavoritesService, FavoritesRepository],
 })
-export class FavoriteModule {}
+export class FavoritesModule {}

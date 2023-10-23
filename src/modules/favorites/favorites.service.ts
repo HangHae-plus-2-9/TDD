@@ -3,13 +3,13 @@ import { FavoriteProductDto } from './dto/favorite-request.dto';
 import { FavoriteEntity } from './entities/favorite.entity';
 import { messages } from '@/common/resources';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
-import { FavoriteRepository } from './favorite.repository';
+import { FavoritesRepository } from './favorites.repository';
 
 @Injectable()
-export class FavoriteService {
+export class FavoritesService {
   constructor(
     private readonly cLogger: WinstonContextLogger,
-    private readonly repo: FavoriteRepository,
+    private readonly repo: FavoritesRepository,
   ) {}
 
   async getAllFavoriteList(id: number) {

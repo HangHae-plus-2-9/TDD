@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FavoriteService } from './favorite.service';
+import { FavoritesService } from './favorites.service';
 import { Logger } from '@nestjs/common';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 import { AsyncLocalStorage } from 'async_hooks';
-import { FavoriteRepository } from './favorite.repository';
+import { FavoritesRepository } from './favorites.repository';
 
-describe('FavoriteService', () => {
-  let favoriteService: FavoriteService;
-  let mockRepo: Partial<FavoriteRepository>;
+describe('FavoritesService', () => {
+  let favoriteService: FavoritesService;
+  let mockRepo: Partial<FavoritesRepository>;
 
   beforeEach(async () => {
     mockRepo = {};
@@ -16,15 +16,15 @@ describe('FavoriteService', () => {
         Logger,
         WinstonContextLogger,
         AsyncLocalStorage,
-        FavoriteService,
+        FavoritesService,
         {
-          provide: FavoriteRepository,
+          provide: FavoritesRepository,
           useValue: mockRepo,
         },
       ],
     }).compile();
 
-    favoriteService = module.get<FavoriteService>(FavoriteService);
+    favoriteService = module.get<FavoritesService>(FavoritesService);
   });
 
   it('should be defined', () => {
