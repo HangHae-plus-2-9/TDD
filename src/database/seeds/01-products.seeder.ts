@@ -53,5 +53,6 @@ export default class ProductsSeeder implements Seeder {
         deleted_at: null,
       } as ProductEntity,
     ]);
+    console.log('ProductsSeeder done');
   }
 }

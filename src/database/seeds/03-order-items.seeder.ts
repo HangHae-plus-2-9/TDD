@@ -46,5 +46,6 @@ export default class OrderItemsSeeder implements Seeder {
         price: 3000,
       },
     ]);
+    console.log('OrderItemsSeeder done');
   }
 }

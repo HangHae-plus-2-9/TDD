@@ -48,5 +48,6 @@ export default class OrdersSeeder implements Seeder {
         deleted_at: null,
       } as OrderEntity,
     ]);
+    console.log('OrdersSeeder done');
   }
 }
