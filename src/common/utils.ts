@@ -48,3 +48,5 @@ export const getEndOfDay = (date: Date) => {
 export const createNumericId = () => {
   return Math.floor(Math.random() * 2000000000);
 };
+
+export const formattedString = (str: string) => JSON.stringify(str, null, 2);
