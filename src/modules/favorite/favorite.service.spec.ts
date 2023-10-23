@@ -3,14 +3,14 @@ import { FavoriteService } from './favorite.service';
 import { Logger } from '@nestjs/common';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 import { AsyncLocalStorage } from 'async_hooks';
-import { FavoriteRepositoryInterface } from './interface/favorite-repository.interface';
+import { FavoriteRepository } from './favorite.repository';
 
 describe('FavoriteService', () => {
   let favoriteService: FavoriteService;
-  let mockRepo: FavoriteRepositoryInterface;
+  let mockRepo: Partial<FavoriteRepository>;
 
   beforeEach(async () => {
-    mockRepo = {} as any;
+    mockRepo = {};
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         Logger,
@@ -18,7 +18,7 @@ describe('FavoriteService', () => {
         AsyncLocalStorage,
         FavoriteService,
         {
-          provide: 'FavoriteRepositoryInterface',
+          provide: FavoriteRepository,
           useValue: mockRepo,
         },
       ],
@@ -33,12 +33,12 @@ describe('FavoriteService', () => {
 
   describe('findFavorite function', () => {
     it('should be defined', () => {
-      expect(favoriteService.getAllfavoriteList).toBeDefined();
+      expect(favoriteService.getAllFavoriteList).toBeDefined();
     });
 
     // it('id로 DB에 있는 즐겨찾기 목록을 찾는다.', async () => {
     //   await expect(
-    //     favoriteService.getAllfavoriteList(mockUserId),
+    //     favoriteService.getAllFavoriteList(mockUserId),
     //   ).resolves.toEqual(mockFavorite);
     // });
   });

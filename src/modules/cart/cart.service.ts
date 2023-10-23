@@ -1,31 +1,24 @@
-import {
-  Inject,
-  Injectable,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { CreateCartItemsDto } from './dto/create-cart.dto';
 import { UpdateCartItemsDto } from './dto/update-cart.dto';
 import { messages } from '@/common/resources';
 import { CartEntity } from './entities/cart.entity';
 import { CartItemEntity } from './entities/cart-items.entity';
-import { CartRepositoryInterface } from './interface/cart-repository.interface';
-import { CartItemRepositoryInterface } from './interface/cart-item-repository.interface';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
+import { CartRepository } from './cart.repository';
+import { CartItemRepository } from './cart-item.repository';
 
 @Injectable()
 export class CartService {
   constructor(
     private readonly cLogger: WinstonContextLogger,
-    @Inject('CartRepositoryInterface')
-    private readonly repo: CartRepositoryInterface,
-    @Inject('CartItemRepositoryInterface')
-    private readonly cartItemRepo: CartItemRepositoryInterface,
+    private readonly repo: CartRepository,
+    private readonly cartItemRepo: CartItemRepository,
   ) {}
 
   async create(userId: number, createCartItemsDto: CreateCartItemsDto) {
     try {
       let cartId: number | null;
-      // eslint-disable-next-line prefer-const
       const cart = await this.repo.findCart(userId);
       if (!cart) {
         const newCart = await this.createCart(userId);
