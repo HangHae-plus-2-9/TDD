@@ -14,7 +14,7 @@ import { HttpExceptionFilter } from './common/filters/http.exception.filter';
 import { FavoriteModule } from './modules/favorite/favorite.module';
 import { CartModule } from './modules/cart/cart.module';
 import { HttpLoggerInterceptor } from './common/interceptors';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 // import { PaymentsModule } from './modules/payments/payments.module';
 
 @Module({
@@ -36,7 +36,10 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     CartModule,
   ],
   providers: [
-    HttpExceptionFilter,
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: HttpLoggerInterceptor,

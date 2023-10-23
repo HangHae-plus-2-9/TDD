@@ -6,7 +6,7 @@ import {
   CallHandler,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { formattedString } from '../utils';
 
 @Injectable()
@@ -15,32 +15,47 @@ export class HttpLoggerInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const now = Date.now();
-    const httpContext = context.switchToHttp();
-    const req = httpContext.getRequest();
-    const res = httpContext.getResponse();
-    const { method, originalUrl, ip, headers: reqHeaders, body: reqBody } = req;
 
     return next.handle().pipe(
       tap(() => {
-        const { statusCode } = res;
-        const contentLength = res.get('content-length') || 0;
-        const userAgent = req.get('user-agent') || '';
-        const logMessage = `${method} ${originalUrl} ${statusCode} ${contentLength} ${
-          Date.now() - now
-        }ms - ${userAgent} ${ip}`;
-
-        if (statusCode >= 500) {
-          this.cLogger.error(formattedString(logMessage));
-        } else if (statusCode >= 400) {
-          this.cLogger.warn(formattedString(logMessage));
-        } else {
-          this.cLogger.log(formattedString(logMessage));
-        }
-
-        // 추가적으로 reqHeaders, reqBody를 로깅하고 싶다면 아래 주석을 해제하세요.
-        // this.cLogger.verbose(`Headers: ${formattedString(reqHeaders)}`);
-        // this.cLogger.verbose(`Body: ${formattedString(reqBody)}`);
+        this.logRequest(context, now);
+      }),
+      catchError((error) => {
+        this.logRequest(context, now, error);
+        throw error;
       }),
     );
+  }
+
+  private logRequest(
+    context: ExecutionContext,
+    startTime: number,
+    error?: any,
+  ) {
+    const httpContext = context.switchToHttp();
+    const req = httpContext.getRequest();
+    const res = httpContext.getResponse();
+    const { method, originalUrl, ip } = req;
+    const { statusCode } = res;
+    const contentLength = res.get('content-length') || 0;
+    const userAgent = req.get('user-agent') || '';
+
+    const duration = Date.now() - startTime;
+    const logMessage = `${method} ${originalUrl} ${statusCode} ${contentLength} ${duration}ms - ${userAgent} ${ip}`;
+
+    // 오류 발생 시에는 에러 메세지도 같이 로깅
+    if (error) {
+      this.cLogger.error(formattedString(`${logMessage} ${error.message}`));
+    } else if (statusCode >= 500) {
+      this.cLogger.error(formattedString(logMessage));
+    } else if (statusCode >= 400) {
+      this.cLogger.warn(formattedString(logMessage));
+    } else {
+      this.cLogger.log(formattedString(logMessage));
+    }
+
+    // 추가적으로 reqHeaders, reqBody를 로깅하고 싶다면 아래 주석을 해제하세요.
+    // this.cLogger.verbose(`Headers: ${formattedString(reqHeaders)}`);
+    // this.cLogger.verbose(`Body: ${formattedString(reqBody)}`);
   }
 }
