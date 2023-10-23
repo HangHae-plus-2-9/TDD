@@ -1,15 +1,19 @@
-import { COURIER_LIST, PAYMENT_METHOD } from '@/common/resources';
+import { COURIER_LIST, PAYMENT_METHOD, SEEDER } from '@/common/resources';
 import { OrderEntity } from '@/modules/orders/entities/order.entity';
 import { DataSource } from 'typeorm';
 import { Seeder } from 'typeorm-extension';
+
+const orderId1 = SEEDER.orderId1;
+const orderId2 = SEEDER.orderId2;
+const customerId = SEEDER.customerId;
 
 export default class OrdersSeeder implements Seeder {
   async run(dataSource: DataSource): Promise<any> {
     const repository = dataSource.getRepository(OrderEntity);
     await repository.insert([
       {
-        id: '93fd5c73-6992-4973-bdf2-15872518057a',
-        customer_id: 'bc4806f0-8668-4998-b610-27a046b9c4cd',
+        id: orderId1,
+        customer_id: customerId,
         payment_method: PAYMENT_METHOD.CREDIT_CARD,
         payment_amount: 10000,
         paid_at: new Date(),
@@ -26,8 +30,8 @@ export default class OrdersSeeder implements Seeder {
         deleted_at: null,
       } as OrderEntity,
       {
-        id: 'ec930a41-392a-4f75-83fc-9bc6cadd05a0',
-        customer_id: 'bc4806f0-8668-4998-b610-27a046b9c4cd',
+        id: orderId2,
+        customer_id: customerId,
         payment_method: PAYMENT_METHOD.CREDIT_CARD,
         payment_amount: 10000,
         paid_at: new Date(),

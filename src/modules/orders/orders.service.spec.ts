@@ -15,7 +15,6 @@ import { cloneDeep } from 'lodash';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 import { Logger } from '@nestjs/common';
 import { AsyncLocalStorage } from 'async_hooks';
-import { v4 as uuidv4 } from 'uuid';
 import { generateUUIDs } from '@/common/utils';
 
 jest.mock('typeorm-transactional', () => ({
