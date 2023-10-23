@@ -4,7 +4,7 @@ import { UserEntity } from './user.entity';
 import { ProductEntity } from '@/modules/products/entities/product.entity';
 
 export interface SellerWithoutPassword {
-  id: number;
+  id: string;
   business_num: string;
   store_name: string;
   account_num: string;
@@ -14,7 +14,7 @@ export interface SellerWithoutPassword {
 export class SellerEntity extends CommonColumns {
   @Column({ type: 'int', nullable: false })
   @OneToOne(() => UserEntity, (user: UserEntity) => user.id)
-  user_id: number;
+  user_id: string;
 
   @Column()
   business_num: string;

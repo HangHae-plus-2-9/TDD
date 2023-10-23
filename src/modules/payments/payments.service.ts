@@ -17,7 +17,7 @@ export class PaymentsService {
     private readonly paymentsRepository: Repository<Payments>,
   ) {}
 
-  async create(orderId: number, amount: number, method: PaymentMethod) {
+  async create(orderId: string, amount: number, method: PaymentMethod) {
     try {
       const newPayments = this.paymentsRepository.create({
         amount,
@@ -35,7 +35,7 @@ export class PaymentsService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const payment = await this.paymentsRepository.findOneBy({ id });
     if (!payment) {
       throw new NotFoundException('Payment not found');
@@ -43,7 +43,7 @@ export class PaymentsService {
     return payment;
   }
 
-  async cancel(id: number) {
+  async cancel(id: string) {
     const payment = await this.findOne(id);
     if (payment.status === PaymentStatus.CANCELED) {
       throw new BadRequestException('Payment already canceled');
@@ -54,7 +54,7 @@ export class PaymentsService {
     return this.paymentsRepository.save(payment);
   }
 
-  async approve(id: number) {
+  async approve(id: string) {
     const payment = await this.findOne(id);
     if (payment.status !== PaymentStatus.PENDING) {
       throw new BadRequestException('Payment status is not "PENDING"');

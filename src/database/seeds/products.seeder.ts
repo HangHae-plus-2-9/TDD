@@ -8,8 +8,8 @@ export default class ProductsSeeder implements Seeder {
     const repository = dataSource.getRepository(ProductEntity);
     await repository.insert([
       {
-        id: 100001,
-        seller_id: 1,
+        id: 'e58ebbc1-6d85-46c2-8c1b-183ded15f9bc',
+        seller_id: '0fbfde54-4d15-490f-8653-899236631d9e',
         name: 'iPhone 15',
         cat_name: 'Smartphone',
         desc: 'The latest iPhone',
@@ -21,8 +21,8 @@ export default class ProductsSeeder implements Seeder {
         deleted_at: null,
       } as ProductEntity,
       {
-        id: 100002,
-        seller_id: 1,
+        id: 'dc620d83-f58b-4109-ac34-9467a71c4117',
+        seller_id: '0fbfde54-4d15-490f-8653-899236631d9e',
         name: 'iPhone 14',
         cat_name: 'Smartphone',
         desc: 'The latest iPhone',
@@ -34,8 +34,8 @@ export default class ProductsSeeder implements Seeder {
         deleted_at: null,
       } as ProductEntity,
       {
-        id: 100003,
-        seller_id: 2,
+        id: '90bfe00d-832d-4459-9537-ebc47418965a',
+        seller_id: 'd699cb8f-cb9e-4301-ad12-d7d859cc6f3f',
         name: 'Surface Pro 8',
         cat_name: 'Laptop',
         desc: 'The latest Surface Pro',

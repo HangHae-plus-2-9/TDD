@@ -3,8 +3,8 @@ import { CreateShippingDto } from '../dto/create-shipping.dto';
 import { OrderItemModel } from './order-item.model';
 
 export type OrderModel = {
-  id?: number;
-  customerId: number;
+  id: string;
+  customerId: string;
   payment: CreatePaymentDto;
   shipping: CreateShippingDto;
   canceledAt?: Date;

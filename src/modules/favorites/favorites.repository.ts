@@ -15,8 +15,8 @@ export class FavoritesRepository {
   }
 
   async findFavoriteByUserId(
-    userId: number,
-    productId: number,
+    userId: string,
+    productId: string,
   ): Promise<FavoriteEntity> {
     if (!userId || !productId) return null;
     return await this.model.findOne({
@@ -27,14 +27,14 @@ export class FavoritesRepository {
     });
   }
 
-  async findAllFavoriteByUserId(userId: number): Promise<FavoriteEntity[]> {
+  async findAllFavoriteByUserId(userId: string): Promise<FavoriteEntity[]> {
     if (!userId) return null;
     return await this.model.find({
       where: { user_id: userId },
     });
   }
 
-  async deleteFavoriteByUserId(userId: number, productId: number) {
+  async deleteFavoriteByUserId(userId: string, productId: string) {
     return await this.model.delete({
       user_id: userId,
       product_id: productId,

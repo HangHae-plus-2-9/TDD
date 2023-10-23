@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   Req,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -44,23 +43,20 @@ export class OrdersController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get order by id' })
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id') id: string) {
     return this.ordersService.findOne(id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update order by id' })
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateOrderDto: UpdateOrderDto,
-  ) {
+  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
     const { paymentInfo, shippingInfo, orderItems } = updateOrderDto;
     return this.ordersService.update(id, paymentInfo, shippingInfo, orderItems);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete order by id' })
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id') id: string) {
     return this.ordersService.remove(id);
   }
 }

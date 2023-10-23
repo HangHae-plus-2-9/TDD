@@ -18,7 +18,7 @@ export class OrderItemsRepository {
   ) {}
 
   async createManyWithOrderId(
-    orderId: number,
+    orderId: string,
     orderItemModels: OrderItemModel[],
   ): Promise<OrderItemModel[]> {
     const orderItemEntities = orderItemModels.map((item) =>
@@ -34,7 +34,7 @@ export class OrderItemsRepository {
     );
   }
 
-  async getByOrderId(orderId: number): Promise<OrderItemModel[]> {
+  async getByOrderId(orderId: string): Promise<OrderItemModel[]> {
     const orderItemEntities = await this.model.find({
       where: { order_id: orderId },
     });
@@ -44,7 +44,7 @@ export class OrderItemsRepository {
   }
 
   async updateManyWithOrderId(
-    orderId: number,
+    orderId: string,
     newOrderItemModels: OrderItemModel[],
   ): Promise<OrderItemModel[]> {
     const orderItemEntities = await this.model.find({
@@ -90,7 +90,7 @@ export class OrderItemsRepository {
     return updatedOrderItemEntities.map((item) => orderItemEntityToModel(item));
   }
 
-  async removeByOrderId(orderId: number): Promise<void> {
+  async removeByOrderId(orderId: string): Promise<void> {
     await this.model.softDelete({ order_id: orderId });
   }
 }

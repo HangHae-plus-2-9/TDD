@@ -3,14 +3,16 @@ import {
   BaseEntity,
   CreateDateColumn,
   DeleteDateColumn,
+  Generated,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 export class CommonColumns extends BaseEntity {
   @ApiProperty({ description: 'id', example: 1 })
-  @PrimaryColumn()
-  public id!: number;
+  @PrimaryColumn('uuid')
+  @Generated('uuid')
+  public id!: string;
 
   @CreateDateColumn()
   public readonly created_at!: Date | string;

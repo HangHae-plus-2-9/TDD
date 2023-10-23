@@ -8,8 +8,8 @@ export default class OrdersSeeder implements Seeder {
     const repository = dataSource.getRepository(OrderEntity);
     await repository.insert([
       {
-        id: 1,
-        customer_id: 1,
+        id: '93fd5c73-6992-4973-bdf2-15872518057a',
+        customer_id: 'bc4806f0-8668-4998-b610-27a046b9c4cd',
         payment_method: PAYMENT_METHOD.CREDIT_CARD,
         payment_amount: 10000,
         paid_at: new Date(),
@@ -26,8 +26,8 @@ export default class OrdersSeeder implements Seeder {
         deleted_at: null,
       } as OrderEntity,
       {
-        id: 2,
-        customer_id: 1,
+        id: 'ec930a41-392a-4f75-83fc-9bc6cadd05a0',
+        customer_id: 'bc4806f0-8668-4998-b610-27a046b9c4cd',
         payment_method: PAYMENT_METHOD.CREDIT_CARD,
         payment_amount: 10000,
         paid_at: new Date(),

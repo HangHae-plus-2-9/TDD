@@ -6,7 +6,6 @@ import { OrderItemModel } from './models/order-item.model';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { CreateShippingDto } from './dto/create-shipping.dto';
 import { CreateOrderItemDto } from './dto/create-order-item.dto';
-import { createNumericId } from '@/common/utils';
 import * as _ from 'lodash';
 import { ProductsService } from '../products/products.service';
 import {
@@ -18,6 +17,7 @@ import { UpdateShippingDto } from './dto/update-shipping.dto';
 import { UpdateOrderItemDto } from './dto/update-order-item.dto';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 import { Transactional } from 'typeorm-transactional';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class OrdersService {
@@ -30,12 +30,12 @@ export class OrdersService {
 
   @Transactional()
   async create(
-    customerId: number,
+    customerId: string,
     paymentInfo: CreatePaymentDto,
     shippingInfo: CreateShippingDto,
     orderItems: CreateOrderItemDto[],
   ) {
-    const orderId = createNumericId();
+    const orderId = uuidv4();
 
     if (orderItems.length === 0) throw new Error('Order items must be exist');
     const orderModel = await this.orderRepo.create({
@@ -74,7 +74,7 @@ export class OrdersService {
             throw new Error('Quantity must be less than product quantity');
           this.productsService.subStock(item.productId, item.quantity);
           return {
-            id: createNumericId(),
+            id: uuidv4(),
             orderId: orderId,
             productId: item.productId,
             quantity: item.quantity,
@@ -110,7 +110,7 @@ export class OrdersService {
     return orders;
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const orderModel = await this.orderRepo.getByOrderId(id);
     const orderItemModels = await this.orderItemRepo.getByOrderId(id);
     return { ...orderModel, orderItems: orderItemModels };
@@ -118,7 +118,7 @@ export class OrdersService {
 
   @Transactional()
   async update(
-    id: number,
+    id: string,
     paymentInfo: UpdatePaymentDto,
     shippingInfo: UpdateShippingDto,
     orderItems: UpdateOrderItemDto[],
@@ -180,7 +180,7 @@ export class OrdersService {
   }
 
   @Transactional()
-  async remove(id: number) {
+  async remove(id: string) {
     const orderModel = await this.orderRepo.getByOrderId(id);
     if (!orderModel) throw new OrderNotFoundException();
     const orderItemModels = await this.orderItemRepo.getByOrderId(id);

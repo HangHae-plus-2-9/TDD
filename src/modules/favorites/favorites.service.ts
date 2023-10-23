@@ -12,7 +12,7 @@ export class FavoritesService {
     private readonly repo: FavoritesRepository,
   ) {}
 
-  async getAllFavoriteList(id: number) {
+  async getAllFavoriteList(id: string) {
     try {
       const favoriteList = this.repo.findAllFavoriteByUserId(id);
       return favoriteList || [];
@@ -22,7 +22,7 @@ export class FavoritesService {
     }
   }
 
-  async upload(id: number, { product_id }: FavoriteProductDto) {
+  async upload(id: string, { product_id }: FavoriteProductDto) {
     try {
       const favorite = await this.saveFavorite(id, product_id);
       return favorite;
@@ -32,15 +32,15 @@ export class FavoritesService {
     }
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} favorite`;
   }
 
-  update(id: number) {
+  update(id: string) {
     return `This action updates a #${id} favorite`;
   }
 
-  async saveFavorite(userId: number, productId: number) {
+  async saveFavorite(userId: string, productId: string) {
     try {
       const favorite = FavoriteEntity.create({
         user_id: userId,
@@ -56,7 +56,7 @@ export class FavoritesService {
     }
   }
 
-  async removeFavorite(id: number, product_id: number) {
+  async removeFavorite(id: string, product_id: string) {
     try {
       const favorite = await this.repo.findFavoriteByUserId(id, product_id);
       if (!favorite) {
