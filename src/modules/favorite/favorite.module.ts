@@ -14,13 +14,6 @@ import { FavoriteService } from './favorite.service';
     UsersModule,
   ],
   controllers: [FavoriteController],
-  providers: [
-    Logger,
-    FavoriteService,
-    {
-      provide: 'FavoriteRepositoryInterface',
-      useClass: FavoriteRepository,
-    },
-  ],
+  providers: [Logger, FavoriteService, FavoriteRepository],
 })
 export class FavoriteModule {}
