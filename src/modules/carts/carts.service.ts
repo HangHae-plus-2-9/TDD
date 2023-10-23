@@ -3,17 +3,17 @@ import { CreateCartItemsDto } from './dto/create-cart.dto';
 import { UpdateCartItemsDto } from './dto/update-cart.dto';
 import { messages } from '@/common/resources';
 import { CartEntity } from './entities/cart.entity';
-import { CartItemEntity } from './entities/cart-items.entity';
+import { CartItemEntity } from './entities/cart-item.entity';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
-import { CartRepository } from './cart.repository';
-import { CartItemRepository } from './cart-item.repository';
+import { CartsRepository } from './carts.repository';
+import { CartItemsRepository } from './cart-items.repository';
 
 @Injectable()
-export class CartService {
+export class CartsService {
   constructor(
     private readonly cLogger: WinstonContextLogger,
-    private readonly repo: CartRepository,
-    private readonly cartItemRepo: CartItemRepository,
+    private readonly repo: CartsRepository,
+    private readonly cartItemRepo: CartItemsRepository,
   ) {}
 
   async create(userId: number, createCartItemsDto: CreateCartItemsDto) {

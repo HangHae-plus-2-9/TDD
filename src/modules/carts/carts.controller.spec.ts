@@ -1,28 +1,28 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CartController } from './cart.controller';
-import { CartService } from './cart.service';
+import { CartsController } from './carts.controller';
+import { CartsService } from './carts.service';
 import { AuthService } from '../auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 
-describe('CartController', () => {
-  let controller: CartController;
-  let mockService: Partial<CartService>;
+describe('CartsController', () => {
+  let controller: CartsController;
+  let mockService: Partial<CartsService>;
 
   beforeEach(async () => {
     mockService = {};
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [CartController],
+      controllers: [CartsController],
       providers: [
         AuthService,
         JwtService,
         {
-          provide: CartService,
+          provide: CartsService,
           useValue: mockService,
         },
       ],
     }).compile();
 
-    controller = module.get<CartController>(CartController);
+    controller = module.get<CartsController>(CartsController);
   });
 
   it('should be defined', () => {

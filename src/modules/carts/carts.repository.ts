@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CartEntity } from './entities/cart.entity';
 
 @Injectable()
-export class CartRepository {
+export class CartsRepository {
   constructor(
     @InjectRepository(CartEntity)
     private readonly model: Repository<CartEntity>,

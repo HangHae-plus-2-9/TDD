@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CartItemEntity } from './entities/cart-items.entity';
+import { CartItemEntity } from './entities/cart-item.entity';
 
 @Injectable()
-export class CartItemRepository {
+export class CartItemsRepository {
   constructor(
     @InjectRepository(CartItemEntity)
     private readonly model: Repository<CartItemEntity>,
