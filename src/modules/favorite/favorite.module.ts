@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { FavoriteEntity } from './entities/favorite.entity';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
-import { FavoirteRepository } from './favorite.repository';
+import { FavoriteRepository } from './favorite.repository';
 import { FavoriteService } from './favorite.service';
 
 @Module({
@@ -14,13 +14,6 @@ import { FavoriteService } from './favorite.service';
     UsersModule,
   ],
   controllers: [FavoriteController],
-  providers: [
-    Logger,
-    FavoriteService,
-    {
-      provide: 'FavoriteRepositoryInterface',
-      useClass: FavoirteRepository,
-    },
-  ],
+  providers: [Logger, FavoriteService, FavoriteRepository],
 })
 export class FavoriteModule {}

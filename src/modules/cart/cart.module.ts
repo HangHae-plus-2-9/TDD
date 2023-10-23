@@ -16,17 +16,6 @@ import { CartRepository } from './cart.repository';
     UsersModule,
   ],
   controllers: [CartController],
-  providers: [
-    Logger,
-    CartService,
-    {
-      provide: 'CartRepositoryInterface',
-      useClass: CartRepository,
-    },
-    {
-      provide: 'CartItemRepositoryInterface',
-      useClass: CartItemRepository,
-    },
-  ],
+  providers: [Logger, CartService, CartRepository, CartItemRepository],
 })
 export class CartModule {}

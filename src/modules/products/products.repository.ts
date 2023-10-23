@@ -43,6 +43,9 @@ export class ProductsRepository {
     productSpecWithStatus: ProductSpecWithStatus,
   ): Promise<ProductModel> {
     const seller = SELLERS.find((seller) => seller.id === sellerId) as Seller;
+    if (!seller) {
+      throw new Error('Seller not found');
+    }
     const productModel = {
       id: null,
       ...productSpecWithStatus,

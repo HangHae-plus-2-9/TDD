@@ -20,8 +20,8 @@ export class FavoriteController {
 
   @Get('/:id')
   @Auth([ROLE_TYPE.ADMIN])
-  async getAllfavorite(@AuthUser() toeknPayload: AccessTokenPayload) {
-    return this.favoriteService.getAllfavoriteList(toeknPayload.userId);
+  async getAllFavorite(@AuthUser() tokenPayload: AccessTokenPayload) {
+    return this.favoriteService.getAllFavoriteList(tokenPayload.userId);
   }
 
   @Delete('/:productId')
