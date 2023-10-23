@@ -15,21 +15,56 @@ import { cloneDeep } from 'lodash';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 import { Logger } from '@nestjs/common';
 import { AsyncLocalStorage } from 'async_hooks';
+import { generateUUIDs } from '@/common/utils';
 
 jest.mock('typeorm-transactional', () => ({
   Transactional: () => () => ({}),
 }));
 
-const customerId = 1;
+const uuids = generateUUIDs([
+  'customerId',
+  'orderId',
+  'orderItemId1',
+  'orderItemId2',
+  'productId1',
+  'productId2',
+]);
 
-const dummyProductModels = [
-  { id: 1, name: '테스트 상품 1', price: 30000, stock: 10 },
-  { id: 2, name: '테스트 상품 2', price: 40000, stock: 10 },
+const {
+  customerId,
+  orderId,
+  orderItemId1,
+  orderItemId2,
+  productId1,
+  productId2,
+} = uuids;
+
+const productModels = [
+  {
+    id: productId1,
+    name: '테스트 상품 1',
+    price: 30000,
+    stock: 10,
+  },
+  {
+    id: productId2,
+    name: '테스트 상품 2',
+    price: 40000,
+    stock: 10,
+  },
 ];
 
 const orderItems: CreateOrderItemDto[] = [
-  { productId: 1, quantity: 1, price: 30000 },
-  { productId: 2, quantity: 2, price: 40000 },
+  {
+    productId: productId1,
+    quantity: 1,
+    price: 30000,
+  },
+  {
+    productId: productId2,
+    quantity: 2,
+    price: 40000,
+  },
 ];
 
 const createPaymentDto = {
@@ -47,62 +82,90 @@ const createShippingDto = {
   receiverPhone: '010-1234-5678',
   departedAt: null,
   arrivedAt: null,
-} as unknown as CreateShippingDto;
+} as CreateShippingDto;
 
 const createOrderDto = {
-  customerId: 1,
+  customerId: customerId,
   createPaymentDto,
   createShippingDto,
   canceledAt: null,
   orderItems,
 };
-const orderItemEntities = [
-  { id: 1, order_id: 1, product_id: 1, quantity: 1, price: 30000 },
-  { id: 2, order_id: 1, product_id: 2, quantity: 2, price: 40000 },
-];
+
 const orderItemModels: OrderItemModel[] = [
-  { id: 1, orderId: 1, productId: 1, quantity: 1, price: 30000 },
-  { id: 2, orderId: 1, productId: 2, quantity: 2, price: 40000 },
+  {
+    id: orderItemId1,
+    orderId: orderId,
+    productId: productId1,
+    quantity: 1,
+    price: 30000,
+  },
+  {
+    id: orderItemId2,
+    orderId: orderId,
+    productId: productId2,
+    quantity: 2,
+    price: 40000,
+  },
 ];
+
+const orderItemEntities = [
+  {
+    id: orderItemId1,
+    order_id: orderId,
+    product_id: productId1,
+    quantity: 1,
+    price: 30000,
+  },
+  {
+    id: orderItemId2,
+    order_id: orderId,
+    product_id: productId2,
+    quantity: 2,
+    price: 40000,
+  },
+];
+
+const orderModel = {
+  id: orderId,
+  customerId: createOrderDto.customerId,
+  payment: {
+    method: createOrderDto.createPaymentDto.method,
+    amount: createOrderDto.createPaymentDto.amount,
+    paidAt: createOrderDto.createPaymentDto.paidAt,
+    canceledAt: createOrderDto.createPaymentDto.canceledAt,
+  },
+  shipping: {
+    courierName: createOrderDto.createShippingDto.courierName,
+    invoiceNumber: createOrderDto.createShippingDto.invoiceNumber,
+    address: createOrderDto.createShippingDto.address,
+    receiver: createOrderDto.createShippingDto.receiver,
+    receiverPhone: createOrderDto.createShippingDto.receiverPhone,
+    departedAt: createOrderDto.createShippingDto.departedAt,
+    arrivedAt: createOrderDto.createShippingDto.arrivedAt,
+    canceledAt: createOrderDto.createShippingDto.canceledAt,
+  },
+  canceledAt: createOrderDto.canceledAt,
+  orderItems: orderItemModels,
+};
+
 const orderEntity = {
-  id: 1,
-  customer_id: createOrderDto.customerId,
-  payment_method: createOrderDto.createPaymentDto.method,
-  amount: createOrderDto.createPaymentDto.amount,
-  paid_at: createOrderDto.createPaymentDto.paidAt,
-  courier_name: createOrderDto.createShippingDto.courierName,
-  invoice_number: createOrderDto.createShippingDto.invoiceNumber,
-  shipping_address: createOrderDto.createShippingDto.address,
-  shipping_receiver: createOrderDto.createShippingDto.receiver,
-  shipping_receiver_phone: createOrderDto.createShippingDto.receiverPhone,
-  departed_at: createOrderDto.createShippingDto.departedAt,
-  arrived_at: createOrderDto.createShippingDto.arrivedAt,
-  canceled_at: createOrderDto.canceledAt,
+  id: orderId,
+  customer_id: orderModel.customerId,
+  payment_method: orderModel.payment.method,
+  amount: orderModel.payment.amount,
+  paid_at: orderModel.payment.paidAt,
+  courier_name: orderModel.shipping.courierName,
+  invoice_number: orderModel.shipping.invoiceNumber,
+  shipping_address: orderModel.shipping.address,
+  shipping_receiver: orderModel.shipping.receiver,
+  shipping_receiver_phone: orderModel.shipping.receiverPhone,
+  departed_at: orderModel.shipping.departedAt,
+  arrived_at: orderModel.shipping.arrivedAt,
+  canceled_at: orderModel.canceledAt,
   created_at: new Date(),
   updated_at: new Date(),
   deleted_at: null,
-};
-const orderModel = {
-  id: 1,
-  customerId: orderEntity.customer_id,
-  payment: {
-    method: orderEntity.payment_method,
-    amount: orderEntity.amount,
-    paidAt: orderEntity.paid_at,
-    canceledAt: orderEntity.canceled_at,
-  },
-  shipping: {
-    courierName: orderEntity.courier_name,
-    invoiceNumber: orderEntity.invoice_number,
-    address: orderEntity.shipping_address,
-    receiver: orderEntity.shipping_receiver,
-    receiverPhone: orderEntity.shipping_receiver_phone,
-    departedAt: orderEntity.departed_at,
-    arrivedAt: orderEntity.arrived_at,
-    canceledAt: orderEntity.canceled_at,
-  },
-  canceledAt: orderEntity.canceled_at,
-  orderItems: orderItemModels,
 };
 
 describe('OrdersService', () => {
@@ -114,7 +177,7 @@ describe('OrdersService', () => {
   beforeEach(async () => {
     stubProductsService = {
       findOne: jest.fn().mockImplementation((id) => {
-        return dummyProductModels.find((product) => product.id === id);
+        return productModels.find((product) => product.id === id);
       }),
     };
     stubOrderRepo = {
@@ -195,7 +258,7 @@ describe('OrdersService', () => {
     it('주문 상품의 ID를 찾을 수 없을 때, 주문이 생성되지 않아야 한다.', async () => {
       // given
       const invalidOrderItems = [
-        { productId: 9999999999, quantity: 1, price: 30000 },
+        { productId: '9999999999', quantity: 1, price: 30000 },
       ];
       const invalidCreateOrderDto = {
         ...createOrderDto,
@@ -215,7 +278,9 @@ describe('OrdersService', () => {
 
     it('주문 수량이 올바르지 않을 때, 주문이 생성되지 않아야 한다.', async () => {
       // given
-      const invalidOrderItems = [{ productId: 1, quantity: -1, price: 30000 }];
+      const invalidOrderItems = [
+        { productId: orderItemModels[0].productId, quantity: -1, price: 30000 },
+      ];
       const invalidCreateOrderDto = {
         ...createOrderDto,
         orderItems: invalidOrderItems,
@@ -235,7 +300,7 @@ describe('OrdersService', () => {
     it('주문 수량이 재고 수량보다 많을 때, 주문이 생성되지 않아야 한다.', async () => {
       // given
       const invalidOrderItems = [
-        { productId: 1, quantity: 999999, price: 30000 },
+        { productId: productModels[0].id, quantity: 999999, price: 30000 },
       ];
       const invalidCreateOrderDto = {
         ...createOrderDto,
@@ -282,7 +347,7 @@ describe('OrdersService', () => {
         .mockReturnValue(orderItemEntities);
 
       // when
-      const result = await service.findOne(1);
+      const result = await service.findOne(orderId);
 
       // then
       // implementation details
@@ -339,15 +404,17 @@ describe('OrdersService', () => {
       const newPaymentMethod = PAYMENT_METHOD.BANK_TRANSFER;
       stubOrderItemRepo.updateManyWithOrderId = jest.fn().mockReturnValue(
         orderItems.map((item, idx) => {
-          return { id: idx + 1, orderId: 1, ...item };
+          return {
+            id: [orderItemId1, orderItemId2][idx],
+            orderId: orderId,
+            ...item,
+          };
         }),
       );
       stubOrderItemRepo.getByOrderId = jest
         .fn()
         .mockReturnValue(orderItemModels);
-      stubProductsService.findOne = jest
-        .fn()
-        .mockReturnValue(dummyProductModels[0]);
+      stubProductsService.findOne = jest.fn().mockReturnValue(productModels[0]);
       stubOrderRepo.getByOrderId = jest
         .fn()
         .mockReturnValue(cloneDeep(orderModel));
@@ -388,15 +455,17 @@ describe('OrdersService', () => {
       const newShippingReceiverPhone = '010-0000-0000';
       stubOrderItemRepo.updateManyWithOrderId = jest.fn().mockReturnValue(
         orderItems.map((item, idx) => {
-          return { id: idx + 1, orderId: 1, ...item };
+          return {
+            id: [orderItemId1, orderItemId2][idx],
+            orderId: orderId,
+            ...item,
+          };
         }),
       );
       stubOrderItemRepo.getByOrderId = jest
         .fn()
         .mockReturnValue(orderItemModels);
-      stubProductsService.findOne = jest
-        .fn()
-        .mockReturnValue(dummyProductModels[0]);
+      stubProductsService.findOne = jest.fn().mockReturnValue(productModels[0]);
       stubOrderRepo.getByOrderId = jest
         .fn()
         .mockReturnValue(cloneDeep(orderModel));
@@ -441,8 +510,8 @@ describe('OrdersService', () => {
     it('주문의 상품 수량을 수정할 수 있어야 한다.', async () => {
       // given
       const newOrderItems = [
-        { productId: 1, quantity: 2, price: 30000 },
-        { productId: 2, quantity: 3, price: 40000 },
+        { productId: orderItemModels[0].productId, quantity: 2, price: 30000 },
+        { productId: orderItemModels[1].productId, quantity: 3, price: 40000 },
       ];
       const newOrderItemModels = newOrderItems.map((item, idx) => {
         return { id: idx + 1, orderId: 1, ...item };
@@ -453,9 +522,7 @@ describe('OrdersService', () => {
       stubOrderItemRepo.getByOrderId = jest
         .fn()
         .mockReturnValue(orderItemModels);
-      stubProductsService.findOne = jest
-        .fn()
-        .mockReturnValue(dummyProductModels[0]);
+      stubProductsService.findOne = jest.fn().mockReturnValue(productModels[0]);
       stubProductsService.addStock = jest.fn();
       stubOrderRepo.getByOrderId = jest
         .fn()
@@ -493,7 +560,11 @@ describe('OrdersService', () => {
     it('주문 수량이 재고 수량보다 많을 때, 주문을 수정할 수 없어야 한다.', async () => {
       // given
       const invalidOrderItems = [
-        { productId: 1, quantity: 999999, price: 30000 },
+        {
+          productId: orderItemModels[0].productId,
+          quantity: 999999,
+          price: 30000,
+        },
       ];
       const invalidCreateOrderDto = {
         ...createOrderDto,
@@ -528,7 +599,7 @@ describe('OrdersService', () => {
         .mockReturnValue(orderItemEntities);
 
       // when
-      const result = await service.remove(1);
+      const result = await service.remove(orderId);
 
       // then
       // implementation details
@@ -548,7 +619,7 @@ describe('OrdersService', () => {
       stubOrderRepo.getByOrderId = jest.fn().mockReturnValue(undefined);
 
       // when & then
-      await expect(service.remove(1)).rejects.toThrowError(
+      await expect(service.remove(orderId)).rejects.toThrowError(
         OrderNotFoundException,
       );
     });

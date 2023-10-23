@@ -1,6 +1,8 @@
-import { ProductSpecWithStatus } from './product-spec-status.model';
+import { PRODUCT_STATUS } from '@/common/resources';
+import { ProductSpec } from './product-spec.model';
 
-export interface ProductModel extends ProductSpecWithStatus {
-  id: number;
-  sellerId: number;
+export interface ProductModel extends ProductSpec {
+  id: string;
+  sellerId: string;
+  status: PRODUCT_STATUS;
 }

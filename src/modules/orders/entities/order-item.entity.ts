@@ -5,10 +5,10 @@ import { OrderEntity } from './order.entity';
 @Entity('order_items')
 export class OrderItemEntity extends CommonColumns {
   @Column()
-  order_id: number;
+  order_id: string;
 
   @Column()
-  product_id: number;
+  product_id: string;
 
   @Column()
   quantity: number;

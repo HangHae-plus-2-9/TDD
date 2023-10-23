@@ -3,9 +3,9 @@ import { CommonColumns } from '@/common/entities/common-columns';
 import { CartEntity } from './cart.entity';
 
 export interface CartItem {
-  id: number;
-  cart_id: number;
-  product: number;
+  id: string;
+  cart_id: string;
+  product: string;
   quantity: number;
 }
 
@@ -13,10 +13,10 @@ export interface CartItem {
 export class CartItemEntity extends CommonColumns {
   @Column({ type: 'int', nullable: false })
   @ManyToOne(() => CartEntity, (cart: CartEntity) => cart.id)
-  cart_id: number;
+  cart_id: string;
 
-  @Column({ type: 'int', nullable: false })
-  product: number;
+  @Column({ nullable: false })
+  product: string;
 
   @Column({ type: 'int', nullable: false })
   quantity: number;

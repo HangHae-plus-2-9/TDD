@@ -14,7 +14,7 @@ export class UsersRepository {
     return await this.model.save(user);
   }
 
-  async findById(id: number): Promise<UserEntity> {
+  async findById(id: string): Promise<UserEntity> {
     if (!id) return null;
     return await this.model.findOne({
       where: { id },

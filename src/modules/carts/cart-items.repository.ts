@@ -14,7 +14,7 @@ export class CartItemsRepository {
     return await this.model.save(cartItemEntity);
   }
 
-  async findAllCartData(cartId: number): Promise<CartItemEntity[]> {
+  async findAllCartData(cartId: string): Promise<CartItemEntity[]> {
     if (!cartId) return null;
     return await this.model.find({
       where: { cart_id: cartId },
@@ -22,8 +22,8 @@ export class CartItemsRepository {
   }
 
   async findCartItemByCartId(
-    cartId: number,
-    productId: number,
+    cartId: string,
+    productId: string,
   ): Promise<CartItemEntity> {
     if (!cartId) return null;
     return await this.model.findOne({

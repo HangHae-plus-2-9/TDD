@@ -1,7 +1,7 @@
 export class OrderItemModel {
-  id?: number;
-  orderId: number;
-  productId: number;
+  id: string;
+  orderId: string;
+  productId: string;
   quantity: number;
   price?: number;
 }

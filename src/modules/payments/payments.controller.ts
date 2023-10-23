@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { PaymentsService } from '@/modules/payments/payments.service';
 import { CreatePaymentDto } from '@/modules/payments/dto/request/create-payment.dto';
@@ -23,17 +15,17 @@ export class PaymentsController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id') id: string) {
     return this.paymentsService.findOne(id);
   }
 
   @Patch(':id/cancel')
-  cancel(@Param('id', ParseIntPipe) id: number) {
+  cancel(@Param('id') id: string) {
     return this.paymentsService.cancel(id);
   }
 
   @Patch(':id/approve')
-  approve(@Param('id', ParseIntPipe) id: number) {
+  approve(@Param('id') id: string) {
     return this.paymentsService.approve(id);
   }
 }
