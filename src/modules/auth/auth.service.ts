@@ -24,7 +24,7 @@ export class AuthService {
 
   async createAccessToken(data: {
     role: ROLE_TYPE;
-    userId: number;
+    userId: string;
   }): Promise<TokenPayloadDto> {
     return new TokenPayloadDto({
       expiresIn: toSeconds(required('JWT_EXPIRES_IN') as string),

@@ -16,9 +16,9 @@ export class CartsService {
     private readonly cartItemRepo: CartItemsRepository,
   ) {}
 
-  async create(userId: number, createCartItemsDto: CreateCartItemsDto) {
+  async create(userId: string, createCartItemsDto: CreateCartItemsDto) {
     try {
-      let cartId: number | null;
+      let cartId: string | null;
       const cart = await this.repo.findCart(userId);
       if (!cart) {
         const newCart = await this.createCart(userId);
@@ -40,7 +40,7 @@ export class CartsService {
     }
   }
 
-  async getCartData(id: number) {
+  async getCartData(id: string) {
     try {
       const cartData = await this.repo.findCart(id);
       const cartId = cartData.id;
@@ -58,8 +58,8 @@ export class CartsService {
   }
 
   async update(
-    userId: number,
-    productId: number,
+    userId: string,
+    productId: string,
     updateCartItemsDto: UpdateCartItemsDto,
   ) {
     try {
@@ -85,7 +85,7 @@ export class CartsService {
     }
   }
 
-  async remove(userId: number, productId: number) {
+  async remove(userId: string, productId: string) {
     try {
       const cartData = await this.repo.findCart(userId);
       const cartId = cartData.id;
@@ -104,7 +104,7 @@ export class CartsService {
     }
   }
 
-  private async createCart(id: number) {
+  private async createCart(id: string) {
     try {
       const cart = CartEntity.create({
         customer_id: id,
@@ -118,8 +118,8 @@ export class CartsService {
   }
 
   private async createCartItem(
-    cart_id: number,
-    product_id: number,
+    cart_id: string,
+    product_id: string,
     quantity: number,
   ) {
     try {

@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class AccessTokenPayload {
   @ApiProperty()
-  userId: number;
+  userId: string;
 
   @ApiProperty()
   type: TOKEN_TYPE;

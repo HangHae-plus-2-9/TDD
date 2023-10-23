@@ -14,7 +14,7 @@ export class CartsRepository {
     return await this.model.save(cartEntity);
   }
 
-  async findCart(userId: number): Promise<CartEntity> {
+  async findCart(userId: string): Promise<CartEntity> {
     if (!userId) return null;
     return await this.model.findOne({
       where: { customer_id: userId },

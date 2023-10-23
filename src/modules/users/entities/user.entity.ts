@@ -3,7 +3,7 @@ import { USER_STATUS } from '@/common/resources';
 import { Column, Entity } from 'typeorm';
 
 export interface UserWithoutPassword {
-  id: number;
+  id: string;
   name: string;
   email: string;
 }

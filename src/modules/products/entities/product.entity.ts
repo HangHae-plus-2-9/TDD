@@ -3,8 +3,8 @@ import { SellerEntity } from '@/modules/users/entities/seller.entity';
 import { Column, Entity } from 'typeorm';
 
 export interface Product {
-  id: number;
-  seller: SellerEntity | number;
+  id: string;
+  seller: SellerEntity | string;
   name: string;
   product_type: string;
   category_name: string;
@@ -17,7 +17,7 @@ export interface Product {
 @Entity({ name: 'products' })
 export class ProductEntity extends CommonColumns {
   @Column()
-  seller_id: number;
+  seller_id: string;
 
   @Column()
   name: string;

@@ -9,17 +9,16 @@ import {
   productModelToEntity,
 } from './mappers/product.mapper';
 import { ProductModel } from './models/product.model';
-import { ProductSpecWithStatus } from './models/product-spec-status.model';
 import { ProductNotFoundException } from '@/common/exceptions';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 
 type Seller = {
-  id: number;
+  id: string;
   name: string;
 };
 const SELLERS = [
-  { id: 1, name: 'Apple' },
-  { id: 2, name: 'Microsoft' },
+  { id: '4bbd014c-ff24-486f-852a-33f29d729dee', name: 'Apple' },
+  { id: '0ecdc3a5-421e-4f21-ba1e-58024e4e85c3', name: 'Microsoft' },
 ];
 
 @Injectable()
@@ -30,7 +29,7 @@ export class ProductsRepository {
     private readonly model: Repository<ProductEntity>,
   ) {}
 
-  async getBySellerId(sellerId: number): Promise<any> {
+  async getBySellerId(sellerId: string): Promise<any> {
     const seller = SELLERS.find((seller) => seller.id === sellerId);
     if (!seller) {
       throw new Error('Seller not found');
@@ -38,19 +37,7 @@ export class ProductsRepository {
     return seller;
   }
 
-  async create(
-    sellerId: number,
-    productSpecWithStatus: ProductSpecWithStatus,
-  ): Promise<ProductModel> {
-    const seller = SELLERS.find((seller) => seller.id === sellerId) as Seller;
-    if (!seller) {
-      throw new Error('Seller not found');
-    }
-    const productModel = {
-      id: null,
-      ...productSpecWithStatus,
-      sellerId,
-    } as unknown as ProductModel;
+  async create(productModel: ProductModel): Promise<ProductModel> {
     const productEntity = productModelToEntity(productModel);
 
     return productEntityToModel(await this.model.save(productEntity));
@@ -60,7 +47,7 @@ export class ProductsRepository {
     return (await this.model.find()).map((item) => ProductMapper.toModel(item));
   }
 
-  async getByProductId(id: number): Promise<ProductModel> {
+  async getByProductId(id: string): Promise<ProductModel> {
     const product = await this.model.findOne({
       where: { id },
     });
@@ -71,7 +58,7 @@ export class ProductsRepository {
   }
 
   async update(
-    id: number,
+    id: string,
     updatedProductSpec: Partial<ProductSpec>,
   ): Promise<ProductModel> {
     let productEntity = await this.model.findOne({
@@ -88,7 +75,7 @@ export class ProductsRepository {
     return productEntityToModel(await this.model.save(productEntity));
   }
 
-  async remove(id: number): Promise<ProductModel> {
+  async remove(id: string): Promise<ProductModel> {
     const productEntity = await this.model.findOne({
       where: { id },
     });

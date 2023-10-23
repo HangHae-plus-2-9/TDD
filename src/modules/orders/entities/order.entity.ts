@@ -5,7 +5,7 @@ import { OrderItemEntity } from './order-item.entity';
 @Entity('orders')
 export class OrderEntity extends CommonColumns {
   @Column()
-  customer_id: number;
+  customer_id: string;
 
   @Column()
   payment_method: number;

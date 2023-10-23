@@ -7,6 +7,11 @@ import { ProductNotFoundException } from '@/common/exceptions';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 import { AsyncLocalStorage } from 'async_hooks';
 import { Logger } from '@nestjs/common';
+import { v4 as uuidv4 } from 'uuid';
+
+const sellerId = uuidv4();
+const nonExistProductId = uuidv4();
+const productId = uuidv4();
 
 describe('ProductsService', () => {
   let service: ProductsService;
@@ -38,7 +43,7 @@ describe('ProductsService', () => {
     it('모든 값이 정상적으로 주어진 경우 상품을 생성하고 생성된 상품을 반환한다.', async () => {
       // given
       const createProductDto = new CreateProductDto();
-      createProductDto.sellerId = 1;
+      createProductDto.sellerId = sellerId;
       createProductDto.name = 'product1';
       createProductDto.catName = 'category';
       createProductDto.desc = 'description';
@@ -118,7 +123,7 @@ describe('ProductsService', () => {
       mockRepo.getByProductId = jest.fn().mockResolvedValue(undefined);
 
       // when
-      const product = await service.findOne(1);
+      const product = await service.findOne(nonExistProductId);
 
       // then
       expect(product).toBeUndefined();
@@ -138,7 +143,7 @@ describe('ProductsService', () => {
       mockRepo.getByProductId = jest.fn().mockResolvedValue(productModel);
 
       // when
-      const foundProduct = await service.findOne(1);
+      const foundProduct = await service.findOne(productId);
 
       // then
       expect(foundProduct).toEqual(productModel);
@@ -156,7 +161,7 @@ describe('ProductsService', () => {
       });
 
       // when
-      const updateProduct = service.update(1, updateProductDto);
+      const updateProduct = service.update(nonExistProductId, updateProductDto);
 
       // then
       await expect(updateProduct).rejects.toThrowError(
@@ -184,7 +189,7 @@ describe('ProductsService', () => {
       });
 
       // when
-      const updatedProduct = await service.update(1, updateProductDto);
+      const updatedProduct = await service.update(productId, updateProductDto);
 
       // then
       expect(updatedProduct).toEqual({
@@ -202,7 +207,7 @@ describe('ProductsService', () => {
       });
 
       // when
-      const removeProduct = service.remove(1);
+      const removeProduct = service.remove(nonExistProductId);
 
       // then
       await expect(removeProduct).rejects.toThrowError(
@@ -225,7 +230,7 @@ describe('ProductsService', () => {
       mockRepo.remove = jest.fn().mockResolvedValue(productModel);
 
       // when
-      const removedProduct = await service.remove(1);
+      const removedProduct = await service.remove(productId);
 
       // then
       expect(removedProduct).toEqual(productModel);
@@ -238,7 +243,7 @@ describe('ProductsService', () => {
       mockRepo.getByProductId = jest.fn().mockResolvedValue(undefined);
 
       // when
-      const subStock = service.subStock(1, 10);
+      const subStock = service.subStock(nonExistProductId, 10);
 
       // then
       await expect(subStock).rejects.toThrowError(ProductNotFoundException);
@@ -262,7 +267,7 @@ describe('ProductsService', () => {
       });
 
       // when
-      const subStock = await service.subStock(1, 10);
+      const subStock = await service.subStock(productId, 10);
 
       // then
       expect(subStock).toEqual({
@@ -285,7 +290,7 @@ describe('ProductsService', () => {
       mockRepo.getByProductId = jest.fn().mockResolvedValue(productModel);
 
       // when
-      const subStock = service.subStock(1, 1000);
+      const subStock = service.subStock(productId, 1000);
 
       // then
       await expect(subStock).rejects.toThrowError('재고가 부족합니다.');
@@ -298,7 +303,7 @@ describe('ProductsService', () => {
       mockRepo.getByProductId = jest.fn().mockResolvedValue(undefined);
 
       // when
-      const addStock = service.addStock(1, 10);
+      const addStock = service.addStock(nonExistProductId, 10);
 
       // then
       await expect(addStock).rejects.toThrowError(ProductNotFoundException);
@@ -322,7 +327,7 @@ describe('ProductsService', () => {
       });
 
       // when
-      const addStock = await service.addStock(1, 10);
+      const addStock = await service.addStock(productId, 10);
 
       // then
       expect(addStock).toEqual({

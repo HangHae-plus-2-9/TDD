@@ -24,7 +24,7 @@ export class OrdersRepository {
     );
   }
 
-  async getByOrderId(id: number): Promise<OrderModel> {
+  async getByOrderId(id: string): Promise<OrderModel> {
     const orderEntity = await this.model.findOne({
       where: { id },
     });
@@ -34,7 +34,7 @@ export class OrdersRepository {
     return orderEntityToModel(orderEntity);
   }
 
-  async update(id: number, newOrderModel: OrderModel): Promise<OrderModel> {
+  async update(id: string, newOrderModel: OrderModel): Promise<OrderModel> {
     const orderEntity = await this.model.findOne({
       where: { id },
     });
@@ -48,7 +48,7 @@ export class OrdersRepository {
     return orderEntityToModel(newOrderEntity);
   }
 
-  async removeByOrderId(id: number): Promise<OrderModel> {
+  async removeByOrderId(id: string): Promise<OrderModel> {
     const orderEntity = await this.model.findOne({
       where: { id },
     });

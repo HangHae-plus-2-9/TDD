@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export const toSeconds = (input: string) => {
   const units = {
     s: 1, // seconds
@@ -45,8 +47,11 @@ export const getEndOfDay = (date: Date) => {
   );
 };
 
-export const createNumericId = () => {
-  return Math.floor(Math.random() * 2000000000);
+export const generateUUIDs = (keys) => {
+  return keys.reduce((acc, key) => {
+    acc[key] = uuidv4();
+    return acc;
+  }, {});
 };
 
 export const formattedString = (str: string) => JSON.stringify(str, null, 2);
