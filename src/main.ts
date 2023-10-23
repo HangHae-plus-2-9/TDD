@@ -18,8 +18,8 @@ async function bootstrap() {
   app.enableVersioning();
   app.enableCors({ origin: '*' });
 
-  const httpExceptionFilter = app.get(HttpExceptionFilter);
-  app.useGlobalFilters(httpExceptionFilter);
+  // const httpExceptionFilter = app.get(HttpExceptionFilter);
+  // app.useGlobalFilters(httpExceptionFilter);
   app.useGlobalInterceptors(new TransformInterceptor());
   app.useGlobalPipes(
     new ValidationPipe({
