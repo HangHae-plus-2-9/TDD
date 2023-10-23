@@ -1,20 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { BaseRepository } from '@/common/repositories/base.repository';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartItemEntity } from './entities/cart-items.entity';
-import { CartItemRepositoryInterface } from './interface/cart-item-repository.interface';
 
 @Injectable()
-export class CartItemRepository
-  extends BaseRepository<CartItemEntity>
-  implements CartItemRepositoryInterface
-{
+export class CartItemRepository {
   constructor(
     @InjectRepository(CartItemEntity)
     private readonly model: Repository<CartItemEntity>,
-  ) {
-    super(model);
+  ) {}
+
+  async create(cartItemEntity: CartItemEntity): Promise<CartItemEntity> {
+    return await this.model.save(cartItemEntity);
   }
 
   async findAllCartData(cartId: number): Promise<CartItemEntity[]> {

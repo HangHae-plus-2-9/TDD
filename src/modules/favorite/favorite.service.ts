@@ -1,23 +1,18 @@
-import {
-  Inject,
-  Injectable,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { FavoriteProductDto } from './dto/favorite-request.dto';
 import { FavoriteEntity } from './entities/favorite.entity';
 import { messages } from '@/common/resources';
-import { FavoriteRepositoryInterface } from './interface/favorite-repository.interface';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
+import { FavoriteRepository } from './favorite.repository';
 
 @Injectable()
 export class FavoriteService {
   constructor(
     private readonly cLogger: WinstonContextLogger,
-    @Inject('FavoriteRepositoryInterface')
-    private readonly repo: FavoriteRepositoryInterface,
+    private readonly repo: FavoriteRepository,
   ) {}
 
-  async getAllfavoriteList(id: number) {
+  async getAllFavoriteList(id: number) {
     try {
       const favoriteList = this.repo.findAllFavoriteByUserId(id);
       return favoriteList || [];
@@ -63,7 +58,7 @@ export class FavoriteService {
 
   async removeFavorite(id: number, product_id: number) {
     try {
-      const favorite = await this.repo.findfavoriteByUserId(id, product_id);
+      const favorite = await this.repo.findFavoriteByUserId(id, product_id);
       if (!favorite) {
         throw new UnprocessableEntityException(
           messages.FAVORITE_NOT_FOUND_EXCEPTION,

@@ -1,18 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CartService } from './cart.service';
-import { CartRepositoryInterface } from './interface/cart-repository.interface';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 import { AsyncLocalStorage } from 'async_hooks';
 import { Logger } from '@nestjs/common';
+import { CartItemRepository } from './cart-item.repository';
+import { CartRepository } from './cart.repository';
 
 describe('CartService', () => {
   let service: CartService;
-  let mockRepo: CartRepositoryInterface;
-  let mockCartItemRepo: CartRepositoryInterface;
+  let mockRepo: Partial<CartRepository>;
+  let mockCartItemRepo: Partial<CartItemRepository>;
 
   beforeEach(async () => {
-    mockRepo = {} as any;
-    mockCartItemRepo = {} as any;
+    mockRepo = {};
+    mockCartItemRepo = {};
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         Logger,
@@ -20,11 +21,11 @@ describe('CartService', () => {
         AsyncLocalStorage,
         CartService,
         {
-          provide: 'CartRepositoryInterface',
+          provide: CartRepository,
           useValue: mockRepo,
         },
         {
-          provide: 'CartItemRepositoryInterface',
+          provide: CartItemRepository,
           useValue: mockCartItemRepo,
         },
       ],

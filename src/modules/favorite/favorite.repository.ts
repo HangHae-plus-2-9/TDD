@@ -1,22 +1,20 @@
-import { BaseRepository } from '@/common/repositories/base.repository';
 import { Injectable } from '@nestjs/common';
 import { FavoriteEntity } from './entities/favorite.entity';
-import { FavoriteRepositoryInterface } from './interface/favorite-repository.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class FavoirteRepository
-  extends BaseRepository<FavoriteEntity>
-  implements FavoriteRepositoryInterface
-{
+export class FavoriteRepository {
   constructor(
     @InjectRepository(FavoriteEntity)
     private readonly model: Repository<FavoriteEntity>,
-  ) {
-    super(model);
+  ) {}
+
+  async create(favoriteEntity: FavoriteEntity): Promise<FavoriteEntity> {
+    return await this.model.save(favoriteEntity);
   }
-  async findfavoriteByUserId(
+
+  async findFavoriteByUserId(
     userId: number,
     productId: number,
   ): Promise<FavoriteEntity> {
