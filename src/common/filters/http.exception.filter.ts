@@ -8,7 +8,6 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { formattedString } from '../utils';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -28,9 +27,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       params: req.params,
     };
     this.cLogger.error(
-      `[FILTERED] ${req.method} ${req.url} \n ${
-        exception.stack
-      } \n ${JSON.stringify(errorReq)}`,
+      `${req.method} ${req.url} \n ${exception.stack} \n ${JSON.stringify(
+        errorReq,
+      )}`,
     );
 
     const status =

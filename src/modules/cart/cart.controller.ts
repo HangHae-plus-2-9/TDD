@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CreateCartItemsDto } from './dto/create-cart.dto';
@@ -42,13 +43,13 @@ export class CartController {
   @Patch(':id')
   @Auth([ROLE_TYPE.ADMIN])
   async updateQuantity(
-    @Param('id') productId: number,
+    @Param('id', ParseIntPipe) productId: number,
     @AuthUser() tokenPayload: AccessTokenPayload,
     @Body() UpdateCartItemsDto: UpdateCartItemsDto,
   ) {
     return this.cartService.update(
       tokenPayload.userId,
-      +productId,
+      productId,
       UpdateCartItemsDto,
     );
   }
@@ -56,9 +57,9 @@ export class CartController {
   @Delete(':id')
   @Auth([ROLE_TYPE.ADMIN])
   async removeCart(
-    @Param('id') productId: string,
+    @Param('id', ParseIntPipe) productId: number,
     @AuthUser() tokenPayload: AccessTokenPayload,
   ) {
-    return this.cartService.remove(tokenPayload.userId, +productId);
+    return this.cartService.remove(tokenPayload.userId, productId);
   }
 }

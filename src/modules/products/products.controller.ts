@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -46,28 +47,37 @@ export class ProductsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.productsService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateProductDto: UpdateProductDto,
+  ) {
     const updatedProductSpec = dtoToSpec(updateProductDto);
-    return this.productsService.update(+id, updatedProductSpec);
+    return this.productsService.update(id, updatedProductSpec);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.productsService.remove(id);
   }
 
   @Patch(':id/sub')
-  subtractStock(@Param('id') id: string, @Body() body: { quantity: number }) {
-    return this.productsService.subStock(+id, body.quantity);
+  subtractStock(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { quantity: number },
+  ) {
+    return this.productsService.subStock(id, body.quantity);
   }
 
   @Patch(':id/add')
-  addStock(@Param('id') id: string, @Body() body: { quantity: number }) {
-    return this.productsService.addStock(+id, body.quantity);
+  addStock(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { quantity: number },
+  ) {
+    return this.productsService.addStock(id, body.quantity);
   }
 }
