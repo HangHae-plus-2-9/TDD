@@ -11,11 +11,11 @@ import { AsyncLocalStorage } from 'async_hooks';
 import { RequestIdMiddleware } from './common/middlewares/request-id.middleware';
 import { WinstonContextModule } from './winston-context/winston-context.module';
 import { HttpExceptionFilter } from './common/filters/http.exception.filter';
-import { FavoriteModule } from './modules/favorite/favorite.module';
-import { CartModule } from './modules/cart/cart.module';
+import { FavoritesModule } from './modules/favorites/favorites.module';
+import { CartsModule } from './modules/carts/carts.module';
 import { HttpLoggerInterceptor } from './common/interceptors';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
-// import { PaymentsModule } from './modules/payments/payments.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 
 @Module({
   imports: [
@@ -30,10 +30,10 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
     OrdersModule,
     UsersModule,
     AuthModule,
-    // PaymentsModule,
+    PaymentsModule,
     WinstonContextModule,
-    FavoriteModule,
-    CartModule,
+    FavoritesModule,
+    CartsModule,
   ],
   providers: [
     {

@@ -1,4 +1,4 @@
-import { CartItemEntity } from './../entities/cart-items.entity';
+import { CartItemEntity } from '../entities/cart-item.entity';
 import { PickType } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber } from 'class-validator';
 

@@ -1,37 +1,37 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CartService } from './cart.service';
+import { CartsService } from './carts.service';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 import { AsyncLocalStorage } from 'async_hooks';
 import { Logger } from '@nestjs/common';
-import { CartItemRepository } from './cart-item.repository';
-import { CartRepository } from './cart.repository';
+import { CartItemsRepository } from './cart-items.repository';
+import { CartsRepository } from './carts.repository';
 
-describe('CartService', () => {
-  let service: CartService;
-  let mockRepo: Partial<CartRepository>;
-  let mockCartItemRepo: Partial<CartItemRepository>;
+describe('CartsService', () => {
+  let service: CartsService;
+  let mockRepo: Partial<CartsRepository>;
+  let mockCartsItemRepo: Partial<CartItemsRepository>;
 
   beforeEach(async () => {
     mockRepo = {};
-    mockCartItemRepo = {};
+    mockCartsItemRepo = {};
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         Logger,
         WinstonContextLogger,
         AsyncLocalStorage,
-        CartService,
+        CartsService,
         {
-          provide: CartRepository,
+          provide: CartsRepository,
           useValue: mockRepo,
         },
         {
-          provide: CartItemRepository,
-          useValue: mockCartItemRepo,
+          provide: CartItemsRepository,
+          useValue: mockCartsItemRepo,
         },
       ],
     }).compile();
 
-    service = module.get<CartService>(CartService);
+    service = module.get<CartsService>(CartsService);
   });
 
   it('should be defined', () => {

@@ -6,7 +6,7 @@ export interface Cart {
   customer_id: number;
 }
 
-@Entity('cart')
+@Entity('carts')
 export class CartEntity extends CommonColumns {
   @Column({ type: 'int', nullable: false })
   // @OneToOne(() => Customer)

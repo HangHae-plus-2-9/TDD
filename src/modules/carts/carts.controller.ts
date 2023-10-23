@@ -6,8 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
-import { CartService } from './cart.service';
+import { CartsService } from './carts.service';
 import { CreateCartItemsDto } from './dto/create-cart.dto';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { UpdateCartItemsDto } from './dto/update-cart.dto';
@@ -16,8 +17,8 @@ import { ROLE_TYPE } from '@/common/resources';
 import { AccessTokenPayload } from '../auth/dto/access-token-payload.dto';
 
 @Controller({ version: '1', path: 'carts' })
-export class CartController {
-  constructor(private readonly cartService: CartService) {}
+export class CartsController {
+  constructor(private readonly cartsService: CartsService) {}
 
   @Post()
   @Auth([ROLE_TYPE.ADMIN])
@@ -25,30 +26,30 @@ export class CartController {
     @AuthUser() tokenPayload: AccessTokenPayload,
     @Body() createCartItemsDto: CreateCartItemsDto,
   ) {
-    return this.cartService.create(tokenPayload.userId, createCartItemsDto);
+    return this.cartsService.create(tokenPayload.userId, createCartItemsDto);
   }
 
   // @Get()
   // findAll() {
-  //   return this.cartService.findAll();
+  //   return this.cartsService.findAll();
   // }
 
   @Get()
   @Auth([ROLE_TYPE.ADMIN])
   async getCart(@AuthUser() tokenPayload: AccessTokenPayload) {
-    return this.cartService.getCartData(tokenPayload.userId);
+    return this.cartsService.getCartData(tokenPayload.userId);
   }
 
   @Patch(':id')
   @Auth([ROLE_TYPE.ADMIN])
   async updateQuantity(
-    @Param('id') productId: number,
+    @Param('id', ParseIntPipe) productId: number,
     @AuthUser() tokenPayload: AccessTokenPayload,
     @Body() UpdateCartItemsDto: UpdateCartItemsDto,
   ) {
-    return this.cartService.update(
+    return this.cartsService.update(
       tokenPayload.userId,
-      +productId,
+      productId,
       UpdateCartItemsDto,
     );
   }
@@ -56,9 +57,9 @@ export class CartController {
   @Delete(':id')
   @Auth([ROLE_TYPE.ADMIN])
   async removeCart(
-    @Param('id') productId: string,
+    @Param('id', ParseIntPipe) productId: number,
     @AuthUser() tokenPayload: AccessTokenPayload,
   ) {
-    return this.cartService.remove(tokenPayload.userId, +productId);
+    return this.cartsService.remove(tokenPayload.userId, productId);
   }
 }

@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { formattedString } from '../utils';
 
 @Injectable()
 export class HttpLoggerInterceptor implements NestInterceptor {
@@ -35,27 +34,27 @@ export class HttpLoggerInterceptor implements NestInterceptor {
     const httpContext = context.switchToHttp();
     const req = httpContext.getRequest();
     const res = httpContext.getResponse();
-    const { method, originalUrl, ip } = req;
-    const { statusCode } = res;
+
+    const { method, originalUrl, ip, headers: reqHeaders, body: reqBody } = req;
+    const statusCode = error?.status || res.statusCode;
     const contentLength = res.get('content-length') || 0;
     const userAgent = req.get('user-agent') || '';
 
     const duration = Date.now() - startTime;
     const logMessage = `${method} ${originalUrl} ${statusCode} ${contentLength} ${duration}ms - ${userAgent} ${ip}`;
 
-    // 오류 발생 시에는 에러 메세지도 같이 로깅
     if (error) {
-      this.cLogger.error(formattedString(`${logMessage} ${error.message}`));
-    } else if (statusCode >= 500) {
-      this.cLogger.error(formattedString(logMessage));
-    } else if (statusCode >= 400) {
-      this.cLogger.warn(formattedString(logMessage));
+      this.cLogger.log(JSON.stringify(`${logMessage} ${error.message}`));
     } else {
-      this.cLogger.log(formattedString(logMessage));
+      this.cLogger.log(JSON.stringify(logMessage));
     }
 
     // 추가적으로 reqHeaders, reqBody를 로깅하고 싶다면 아래 주석을 해제하세요.
-    // this.cLogger.verbose(`Headers: ${formattedString(reqHeaders)}`);
-    // this.cLogger.verbose(`Body: ${formattedString(reqBody)}`);
+    // this.cLogger.log(
+    //   JSON.stringify({
+    //     Headers: reqHeaders,
+    //     Body: reqBody,
+    //   }),
+    // );
   }
 }
