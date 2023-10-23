@@ -15,7 +15,7 @@ import { FavoritesModule } from './modules/favorites/favorites.module';
 import { CartsModule } from './modules/carts/carts.module';
 import { HttpLoggerInterceptor } from './common/interceptors';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
-// import { PaymentsModule } from './modules/payments/payments.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 
 @Module({
   imports: [
@@ -30,7 +30,7 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
     OrdersModule,
     UsersModule,
     AuthModule,
-    // PaymentsModule,
+    PaymentsModule,
     WinstonContextModule,
     FavoritesModule,
     CartsModule,
