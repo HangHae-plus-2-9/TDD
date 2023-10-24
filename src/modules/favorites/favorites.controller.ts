@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
 import { Auth, AuthUser } from '@/common/decorators';
 import { ROLE_TYPE } from '@/common/resources';
@@ -31,7 +39,7 @@ export class FavoritesController {
   @Auth([ROLE_TYPE.ADMIN])
   async deleteFavorite(
     @AuthUser() tokenPayload: AccessTokenPayload,
-    @Param('productId') productId: string,
+    @Param('productId', ParseUUIDPipe) productId: string,
   ) {
     return this.favoritesService.removeFavorite(tokenPayload.userId, productId);
   }
