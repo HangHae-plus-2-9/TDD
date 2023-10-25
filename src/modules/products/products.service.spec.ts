@@ -72,10 +72,12 @@ describe('ProductsService', () => {
   describe('findAll', () => {
     it('상품이 하나도 없는 경우 빈 배열을 반환한다.', async () => {
       // given
-      mockRepo.all = jest.fn().mockResolvedValue({ total: 0, data: [] });
+      mockRepo.findAllWithSearchAndPagination = jest
+        .fn()
+        .mockResolvedValue({ total: 0, data: [] });
 
       // when
-      const products = await service.findAll();
+      const products = await service.findAll({});
 
       // then
       expect(products).toEqual({ data: [], total: 0 });
@@ -102,12 +104,12 @@ describe('ProductsService', () => {
         stock: 100,
       };
       const productsList = [productModel1, productModel2];
-      mockRepo.all = jest
+      mockRepo.findAllWithSearchAndPagination = jest
         .fn()
         .mockResolvedValue({ total: productsList.length, data: productsList });
 
       // when
-      const products = await service.findAll();
+      const products = await service.findAll({});
 
       // then
       expect(products).toEqual({
