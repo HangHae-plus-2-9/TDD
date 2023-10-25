@@ -33,6 +33,10 @@ export class ProductsService {
     return await this.repo.create(productModel);
   }
 
+  async all(): Promise<ProductModel[]> {
+    return await this.repo.all();
+  }
+
   async findAll(
     IndexProductDto: IndexProductDto,
   ): Promise<PaginatedResult<ProductModel>> {
