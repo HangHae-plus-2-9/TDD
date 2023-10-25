@@ -1,5 +1,6 @@
 import { PRODUCT_STATUS, SEEDER } from '@/common/resources';
 import { ProductEntity } from '@/modules/products/entities/product.entity';
+import { ProductFactory } from '@/modules/products/factory/products.factory';
 import { DataSource } from 'typeorm';
 import { Seeder } from 'typeorm-extension';
 
@@ -12,7 +13,7 @@ const sellerId2 = SEEDER.sellerId2;
 export default class ProductsSeeder implements Seeder {
   async run(dataSource: DataSource): Promise<any> {
     const repository = dataSource.getRepository(ProductEntity);
-    await repository.insert([
+    const baseProducts = [
       {
         id: productId1,
         seller_id: sellerId1,
@@ -52,7 +53,19 @@ export default class ProductsSeeder implements Seeder {
         updated_at: new Date(),
         deleted_at: null,
       } as ProductEntity,
-    ]);
+    ];
+    const additionalProducts = ProductFactory.createMany(100000);
+    const productChunks = additionalProducts.reduce(
+      (acc, cur, i) =>
+        (i % 1000 ? acc[acc.length - 1].push(cur) : acc.push([cur])) && acc,
+      [] as ProductEntity[][],
+    );
+
+    await repository.insert(baseProducts);
+    for (const chunk of productChunks) {
+      await repository.insert(chunk);
+    }
+    // await repository.insert([...baseProducts, ...additionalProducts]);
     console.log('ProductsSeeder done');
   }
 }

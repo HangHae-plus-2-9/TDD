@@ -43,6 +43,7 @@ export enum COURIER_LIST {
 export const SEEDER = {
   sellerId1: '0fbfde54-4d15-490f-8653-899236631d9e',
   sellerId2: 'd699cb8f-cb9e-4301-ad12-d7d859cc6f3f',
+  sellerId3: '52b2d39c-47b4-4d2f-97ee-4fd135870cb9',
 
   customerId: 'bc4806f0-8668-4998-b610-27a046b9c4cd',
 

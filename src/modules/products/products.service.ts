@@ -6,6 +6,8 @@ import { ProductNotFoundException } from '@/common/exceptions';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
 import { v4 as uuidv4 } from 'uuid';
 import { PRODUCT_STATUS } from '@/common/resources';
+import { IndexProductDto } from './dto/index-product.dto';
+import { PaginatedResult } from '@/common/interfaces/paginated-result.interface';
 
 @Injectable()
 export class ProductsService {
@@ -31,8 +33,28 @@ export class ProductsService {
     return await this.repo.create(productModel);
   }
 
-  async findAll(): Promise<ProductModel[]> {
+  async all(): Promise<ProductModel[]> {
     return await this.repo.all();
+  }
+
+  async findAll(
+    IndexProductDto: IndexProductDto,
+  ): Promise<PaginatedResult<ProductModel>> {
+    const { page, perPage } = IndexProductDto;
+    const { isDesc, orderBy } = IndexProductDto;
+    const { searchText, startDate, endDate } = IndexProductDto;
+    const filters = {
+      searchText,
+      startDate,
+      endDate,
+      isDesc,
+      orderBy,
+    };
+    return await this.repo.findAllWithSearchAndPagination(
+      filters,
+      page,
+      perPage,
+    );
   }
 
   async findOne(id: string): Promise<ProductModel> {
