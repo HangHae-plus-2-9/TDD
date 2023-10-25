@@ -54,8 +54,18 @@ export default class ProductsSeeder implements Seeder {
         deleted_at: null,
       } as ProductEntity,
     ];
-    const additionalProducts = ProductFactory.createMany(10000);
-    await repository.insert([...baseProducts, ...additionalProducts]);
+    const additionalProducts = ProductFactory.createMany(100000);
+    const productChunks = additionalProducts.reduce(
+      (acc, cur, i) =>
+        (i % 1000 ? acc[acc.length - 1].push(cur) : acc.push([cur])) && acc,
+      [] as ProductEntity[][],
+    );
+
+    await repository.insert(baseProducts);
+    for (const chunk of productChunks) {
+      await repository.insert(chunk);
+    }
+    // await repository.insert([...baseProducts, ...additionalProducts]);
     console.log('ProductsSeeder done');
   }
 }
