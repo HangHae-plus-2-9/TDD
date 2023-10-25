@@ -46,8 +46,6 @@ curl --location 'http://localhost:3000/health-check'
 ## Live DB Migration
 
 ```bash
-# production env 사용
-# database.config.ts의 isProduction true로 변경해주어야 함 - ssl 설정때문
-npm run typeorm:migration:generate
-npm run typeorm:migration:run
+npm run typeorm:migration:run:prod
+npm run seed:prod
 ```
