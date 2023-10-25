@@ -1,4 +1,4 @@
-version: "3"
+version: "2.2"
 services:
   app:
     env_file:
@@ -17,6 +17,14 @@ services:
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 128M
 
   postgres:
     image: postgres
@@ -31,6 +39,14 @@ services:
       - ./init-data.sh:/docker-entrypoint-initdb.d/init-data.sh
     env_file:
       - .env.development
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 1G
 
 volumes:
   app:
