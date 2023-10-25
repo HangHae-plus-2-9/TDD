@@ -11,6 +11,7 @@ import {
 import { ProductModel } from './models/product.model';
 import { ProductNotFoundException } from '@/common/exceptions';
 import { WinstonContextLogger } from '@/winston-context/winston-context.logger';
+import { PaginatedResult } from '../../common/interfaces/paginated-result.interface';
 
 type Seller = {
   id: string;
@@ -45,6 +46,48 @@ export class ProductsRepository {
 
   async all(): Promise<ProductModel[]> {
     return (await this.model.find()).map((item) => ProductMapper.toModel(item));
+  }
+
+  async findAllWithSearchAndPagination(
+    filters: any,
+    page = 20,
+    perPage = 1,
+  ): Promise<PaginatedResult<ProductModel>> {
+    const query = this.createQueryBuilder();
+    const { searchText, startDate, endDate, orderBy, isDesc } = filters;
+    if (searchText) {
+      query
+        .andWhere('product.name LIKE :searchText', {
+          searchText: `%${searchText}%`,
+        })
+        .orWhere('product.desc LIKE :searchText', {
+          searchText: `%${searchText}%`,
+        })
+        .orWhere('product.cat_name LIKE :searchText', {
+          searchText: `%${searchText}%`,
+        });
+    }
+    if (startDate) {
+      query.andWhere('product.created_at >= :startDate', { startDate });
+    }
+    if (endDate) {
+      query.andWhere('product.created_at <= :endDate', { endDate });
+    }
+    if (orderBy) {
+      query.orderBy(`product.${orderBy}`, isDesc ? 'DESC' : 'ASC');
+    } else {
+      query.orderBy('product.id', 'DESC');
+    }
+    const [items, total] = await query
+      .skip((page - 1) * perPage)
+      .take(perPage)
+      .getManyAndCount();
+    return {
+      total: total,
+      page: page,
+      perPage: perPage,
+      data: items.map((item) => ProductMapper.toModel(item)),
+    };
   }
 
   async getByProductId(id: string): Promise<ProductModel> {
@@ -83,5 +126,9 @@ export class ProductsRepository {
       throw new ProductNotFoundException();
     }
     return productEntityToModel(await this.model.remove(productEntity));
+  }
+
+  private createQueryBuilder() {
+    return this.model.createQueryBuilder('product');
   }
 }

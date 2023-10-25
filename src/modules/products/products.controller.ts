@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -20,6 +21,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { dtoToSpec } from './mappers/product.mapper';
 import { Auth } from '@/common/decorators';
 import { ROLE_TYPE } from '@/common/resources';
+import { IndexProductDto } from './dto/index-product.dto';
 
 @ApiTags('products')
 @Controller({ version: '1', path: 'products' })
@@ -42,8 +44,8 @@ export class ProductsController {
   }
 
   @Get()
-  findAll() {
-    return this.productsService.findAll();
+  findAll(@Query() indexProductDto: IndexProductDto) {
+    return this.productsService.findAll(indexProductDto);
   }
 
   @Get(':id')
