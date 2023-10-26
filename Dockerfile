@@ -27,6 +27,7 @@ ARG AWS_LOG_REGION
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
 ARG AWS_REGION
+ARG MOCK_PAYMENT_API_URL
 
 RUN echo "JWT_SECRET=$JWT_SECRET" >> .env.production
 RUN echo "JWT_EXPIRES_IN=$JWT_EXPIRES_IN" >> .env.production
@@ -47,6 +48,7 @@ RUN echo "AWS_LOG_REGION=$AWS_LOG_REGION" >> .env.production
 RUN echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> .env.production
 RUN echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> .env.production
 RUN echo "AWS_REGION=$AWS_REGION" >> .env.production
+RUN echo "MOCK_PAYMENT_API_URL=$MOCK_PAYMENT_API_URL" >> .env.production
 
 COPY . .
 
