@@ -35,6 +35,10 @@ export class PaymentsService {
     }
   }
 
+  async findAll() {
+    return this.paymentsRepository.find();
+  }
+
   async findOne(id: string) {
     const payment = await this.paymentsRepository.findOneBy({ id });
     if (!payment) {
