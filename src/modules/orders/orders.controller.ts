@@ -38,7 +38,6 @@ export class OrdersController {
   @Get()
   @ApiOperation({ summary: 'Get all orders' })
   findAll(@Req() req: Request) {
-    console.log('RequestId:', req.headers['request-id']);
     return this.ordersService.findAll();
   }
 

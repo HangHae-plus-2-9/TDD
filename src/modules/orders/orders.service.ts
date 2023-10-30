@@ -97,7 +97,6 @@ export class OrdersService {
   }
 
   async findAll() {
-    this.cLogger.log('Context Logger');
     const orderModels = await this.orderRepo.all();
     const orders = await Promise.all(
       orderModels.map(async (orderModel) => {
