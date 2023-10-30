@@ -41,12 +41,20 @@ export class HttpLoggerInterceptor implements NestInterceptor {
     const userAgent = req.get('user-agent') || '';
 
     const duration = Date.now() - startTime;
-    const logMessage = `${method} ${originalUrl} ${statusCode} ${contentLength} ${duration}ms - ${userAgent} ${ip}`;
+    const logJson = {
+      method,
+      originalUrl,
+      statusCode,
+      contentLength,
+      duration,
+      userAgent,
+      ip,
+    };
 
     if (error) {
-      this.cLogger.log(JSON.stringify(`${logMessage} ${error.message}`));
+      this.cLogger.log(JSON.stringify({ ...logJson, error: error.message }));
     } else {
-      this.cLogger.log(JSON.stringify(logMessage));
+      this.cLogger.log(JSON.stringify(logJson));
     }
 
     // 추가적으로 reqHeaders, reqBody를 로깅하고 싶다면 아래 주석을 해제하세요.

@@ -69,14 +69,10 @@ const cloudwatchConfig = {
   },
   retentionInDays: 14,
   messageFormatter: (aLog) => {
-    const { level, message, additionalInfo, alsCtx } = aLog;
+    const { level, message, alsCtx } = aLog;
     const nestReqId = alsCtx?.nestReqId;
-    const nestReqIdStr = nestReqId //
-      ? `[${nestReqId}]`
-      : '[]';
-    return `[${level}] ${nestReqIdStr}: ${message} \nAdditional Info: ${JSON.stringify(
-      additionalInfo,
-    )}`;
+    const nestReqIdStr = nestReqId ? `[${nestReqId}]` : '[]';
+    return `[${level}] ${nestReqIdStr}: ${message}`;
   },
 };
 
