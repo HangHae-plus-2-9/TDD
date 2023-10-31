@@ -68,13 +68,13 @@ describe('HealthCheckController', () => {
 
   it('should run general health checks', async () => {
     // Arrange
-    const httpResult = { status: 'up' };
+    // const httpResult = { status: 'up' };
     const dbResult = { status: 'up' };
     const sampleResult = { status: 'up' };
 
-    const httpSpy = jest
-      .spyOn(mockHttp, 'pingCheck')
-      .mockResolvedValue(httpResult as unknown as HealthIndicatorResult);
+    // const httpSpy = jest
+    //   .spyOn(mockHttp, 'pingCheck')
+    //   .mockResolvedValue(httpResult as unknown as HealthIndicatorResult);
     const dbSpy = jest
       .spyOn(mockTypeOrm, 'pingCheck')
       .mockResolvedValue(dbResult as unknown as HealthIndicatorResult);
@@ -99,12 +99,13 @@ describe('HealthCheckController', () => {
 
     // Assert
     expect(healthSpy).toHaveBeenCalled();
-    expect(httpSpy).toHaveBeenCalledWith('google', 'https://google.com');
+    // expect(httpSpy).toHaveBeenCalledWith('google', 'https://google.com');
     expect(dbSpy).toHaveBeenCalledWith('database', { timeout: 300 });
     expect(sampleSpy).toHaveBeenCalledWith('sample');
     expect(result).toEqual({
       status: 'up',
-      info: [httpResult, dbResult, sampleResult],
+      info: [dbResult, sampleResult],
+      // info: [httpResult, dbResult, sampleResult],
     });
   });
 });

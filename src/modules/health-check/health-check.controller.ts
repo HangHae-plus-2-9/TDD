@@ -23,7 +23,7 @@ export class HealthCheckController {
   @HealthCheck()
   check() {
     return this.health.check([
-      () => this.http.pingCheck('google', 'https://google.com'),
+      // () => this.http.pingCheck('google', 'https://google.com'),
       () => this.db.pingCheck('database', { timeout: 300 }),
       () => this.sampleHealthIndicator.isHealthy('sample'),
     ]);
