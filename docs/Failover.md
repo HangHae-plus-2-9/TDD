@@ -4,8 +4,10 @@
 
 ### 1. 트래픽 부하
 
-- GET 상품 조회 api
-- POST 상품 구매 api
+- Artillery 활용
+  - GET 상품 조회 api
+    - Parameterized API call: 10,000 RPS
+  - POST 상품 구매 api
 
 ### 2. 외부서비스
 
@@ -15,9 +17,17 @@
 
 ### 3. 휴먼 에러 - 비즈니스 로직 상 실수
 
+- 관리자에 의한 DB table drop
+
 ### 4. 배포 시 Migration Error
 
+- Migration을 고려하지 않은 column 변경
+  - column name 변경
+  - NULL -> NOT NULL 변경
+
 ### 5. 코드 에러
+
+- 
 
 ## 장애대응 시나리오
 
