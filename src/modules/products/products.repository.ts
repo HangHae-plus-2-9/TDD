@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from './entities/product.entity';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { ProductSpec } from './models/product-spec.model';
 import {
   ProductMapper,
@@ -48,46 +48,70 @@ export class ProductsRepository {
     return (await this.model.find()).map((item) => ProductMapper.toModel(item));
   }
 
+  private getFilteredQuery(filters: any): SelectQueryBuilder<ProductEntity> {
+    const { searchText, startDate, endDate } = filters;
+    let query = this.model.createQueryBuilder('product');
+
+    if (searchText) {
+      query = query.where('product.name LIKE :searchText', {
+        searchText: `%${searchText}%`,
+      });
+    }
+
+    if (startDate) {
+      query = query.andWhere('product.created_at >= :startDate', { startDate });
+    }
+
+    if (endDate) {
+      query = query.andWhere('product.created_at <= :endDate', { endDate });
+    }
+
+    return query;
+  }
+
+  private addOrderBy(
+    query: SelectQueryBuilder<ProductEntity>,
+    orderBy: string,
+    isDesc: boolean,
+  ): SelectQueryBuilder<ProductEntity> {
+    const whitelist = ['name', 'createdAt', 'price']; // 예를 들어 허용된 정렬 필드
+    if (whitelist.includes(orderBy)) {
+      return query.orderBy(`product.${orderBy}`, isDesc ? 'DESC' : 'ASC');
+    } else {
+      throw new Error('Invalid order by field');
+    }
+  }
+
   async findAllWithSearchAndPagination(
     filters: any,
-    page = 20,
-    perPage = 1,
+    page = 1, // Page default to 1
+    perPage = 10, // Per page default to 10
   ): Promise<PaginatedResult<ProductModel>> {
-    const query = this.createQueryBuilder();
-    const { searchText, startDate, endDate, orderBy, isDesc } = filters;
-    if (searchText) {
-      query
-        .andWhere('product.name LIKE :searchText', {
-          searchText: `%${searchText}%`,
-        })
-        .orWhere('product.desc LIKE :searchText', {
-          searchText: `%${searchText}%`,
-        })
-        .orWhere('product.cat_name LIKE :searchText', {
-          searchText: `%${searchText}%`,
-        });
+    try {
+      // Input validation can be added here
+      let query = this.getFilteredQuery(filters);
+
+      if (filters.orderBy) {
+        query = this.addOrderBy(query, filters.orderBy, filters.isDesc);
+      } else {
+        query = query.orderBy('product.id', 'DESC');
+      }
+
+      const [items, total] = await query
+        .skip((page - 1) * perPage)
+        .take(perPage)
+        .getManyAndCount();
+
+      return {
+        total: total,
+        page: page,
+        perPage: perPage,
+        data: items.map((item) => ProductMapper.toModel(item)),
+      };
+    } catch (error) {
+      // Error handling logic here
+      throw new Error(`Failed to fetch products: ${error.message}`);
     }
-    if (startDate) {
-      query.andWhere('product.created_at >= :startDate', { startDate });
-    }
-    if (endDate) {
-      query.andWhere('product.created_at <= :endDate', { endDate });
-    }
-    if (orderBy) {
-      query.orderBy(`product.${orderBy}`, isDesc ? 'DESC' : 'ASC');
-    } else {
-      query.orderBy('product.id', 'DESC');
-    }
-    const [items, total] = await query
-      .skip((page - 1) * perPage)
-      .take(perPage)
-      .getManyAndCount();
-    return {
-      total: total,
-      page: page,
-      perPage: perPage,
-      data: items.map((item) => ProductMapper.toModel(item)),
-    };
   }
 
   async getByProductId(id: string): Promise<ProductModel> {
