@@ -55,18 +55,18 @@ export class ProductsRepository {
   ): Promise<PaginatedResult<ProductModel>> {
     const query = this.createQueryBuilder();
     const { searchText, startDate, endDate, orderBy, isDesc } = filters;
-    if (searchText) {
-      query
-        .andWhere('product.name LIKE :searchText', {
-          searchText: `%${searchText}%`,
-        })
-        .orWhere('product.desc LIKE :searchText', {
-          searchText: `%${searchText}%`,
-        })
-        .orWhere('product.cat_name LIKE :searchText', {
-          searchText: `%${searchText}%`,
-        });
-    }
+    // if (searchText) {
+    //   query
+    //     .andWhere('product.name LIKE :searchText', {
+    //       searchText: `%${searchText}%`,
+    //     })
+    //     .orWhere('product.desc LIKE :searchText', {
+    //       searchText: `%${searchText}%`,
+    //     })
+    //     .orWhere('product.cat_name LIKE :searchText', {
+    //       searchText: `%${searchText}%`,
+    //     });
+    // }
     if (startDate) {
       query.andWhere('product.created_at >= :startDate', { startDate });
     }
