@@ -74,12 +74,7 @@ export class ProductsRepository {
     orderBy: string,
     isDesc: boolean,
   ): SelectQueryBuilder<ProductEntity> {
-    const whitelist = ['name', 'createdAt', 'price']; // 예를 들어 허용된 정렬 필드
-    if (whitelist.includes(orderBy)) {
-      return query.orderBy(`product.${orderBy}`, isDesc ? 'DESC' : 'ASC');
-    } else {
-      throw new Error('Invalid order by field');
-    }
+    return query.orderBy(`product.${orderBy}`, isDesc ? 'DESC' : 'ASC');
   }
 
   async findAllWithSearchAndPagination(
