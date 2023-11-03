@@ -1,25 +1,42 @@
-name: ci-cd-pipeline
+name: Test and Deploy
 
 on:
   pull_request:
     branches:
       - stage
       - main
+    types:
+      - closed
 
 permissions:
   id-token: write
   contents: read
+  pull-requests: write
 
 env:
   ECR_REPOSITORY_NESTJS: 'hhp-nestjs'
-  ECS_SERVICE_NAME: 'hhp-nestjs'
+  ECS_SERVICE_NAME: 'nestjs'
   ECS_CLUSTER_NAME: 'hhp-cluster'
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
   DATABASE_CONNECTION: ${{ secrets.DATABASE_CONNECTION }}
   DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
   DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
   DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
   DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
   DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+  SWAGGER_URL: ${{ secrets.SWAGGER_URL }}
+  API_AUTH_USER: ${{ secrets.API_AUTH_USER }}
+  API_AUTH_PASSWORD: ${{ secrets.API_AUTH_PASSWORD }}
+  AWS_LOG_GROUP_NAME: ${{ secrets.AWS_LOG_GROUP_NAME }}
+  AWS_LOG_STREAM_NAME: ${{ secrets.AWS_LOG_STREAM_NAME }}
+  AWS_LOG_ACCESS_KEY_ID: ${{ secrets.AWS_LOG_ACCESS_KEY_ID }}
+  AWS_LOG_SECRET_ACCESS_KEY: ${{ secrets.AWS_LOG_SECRET_ACCESS_KEY }}
+  AWS_LOG_REGION: ${{ secrets.AWS_LOG_REGION }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  MOCK_PAYMENT_API_URL: ${{ secrets.MOCK_PAYMENT_API_URL }}
 
 jobs:
   test:
@@ -38,10 +55,10 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v4.0.0
 
-      - name: setup node
+      - name: Setup node
         uses: actions/setup-node@v3.8.1
         with:
           node-version: '18'
@@ -55,19 +72,39 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: install dependencies
+      - name: Install dependencies
         run: npm install
 
-      - name: run lint
+      - name: Run lint
         run: npm run lint
 
-      - name: run tests
+      - name: Run tests
         run: npm run test
 
-      - name: run e2e tests
+      - name: Comment with Test Coverage
+        uses: dkershner6/jest-coverage-commenter-action@v1
+        with:
+          github_token: "${{ secrets.GITHUB_TOKEN }}"
+          test_command: "npm run test:cov"
+
+      - name: Migrate database
         env:
-          GITHUB_ACTIONS: true
           DATABASE_CONNECTION: 'postgres'
+          DATABASE_HOST: 'localhost'
+          DATABASE_PORT: '5432'
+          DATABASE_USERNAME: ${{ env.DATABASE_USERNAME }}
+          DATABASE_PASSWORD: ${{ env.DATABASE_PASSWORD }}
+          DATABASE_NAME: 'postgres'
+        run: npm run migration:run
+
+      - name: Run e2e tests
+        env:
+          DATABASE_CONNECTION: 'postgres'
+          DATABASE_HOST: 'localhost'
+          DATABASE_PORT: '5432'
+          DATABASE_USERNAME: ${{ env.DATABASE_USERNAME }}
+          DATABASE_PASSWORD: ${{ env.DATABASE_PASSWORD }}
+          DATABASE_NAME: 'postgres'
         run: npm run test:e2e
 
       - name: Notify Slack on Failure
@@ -82,9 +119,23 @@ jobs:
           text: 'Tests failed! :x:'
         env: 
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      
+      - name: Notify Slack on Success
+        if: success()
+        uses: 8398a7/action-slack@v3.15.1
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+          author_name: ${{ github.actor }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
+          username: ${{ secrets.SLACK_USERNAME }}
+          text: 'Tests passed! :white_check_mark:'
+        env: 
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 
   build_and_deploy:
+    if: github.event.pull_request.merged == true
     name: build docker image and ecs deploy
     runs-on: ubuntu-22.04
     needs: test
@@ -97,8 +148,8 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-region: ap-northeast-2
-          role-to-assume: arn:aws:iam::332034673285:role/MyGithubOIDC
-          role-session-name: MyGithubOIDC
+          role-to-assume: arn:aws:iam::332034673285:role/HHP-Org
+          role-session-name: HHP-Org
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -113,12 +164,26 @@ jobs:
           tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_NESTJS }}:${{ github.sha }}
           build-args: |
             NODE_ENV=production
+            JWT_SECRET=${{ env.JWT_SECRET }}
+            JWT_EXPIRES_IN=${{ env.JWT_EXPIRES_IN }}
             DATABASE_CONNECTION=${{ env.DATABASE_CONNECTION }}
             DATABASE_HOST=${{ env.DATABASE_HOST }}
             DATABASE_PORT=${{ env.DATABASE_PORT }}
             DATABASE_USERNAME=${{ env.DATABASE_USERNAME }}
             DATABASE_PASSWORD=${{ env.DATABASE_PASSWORD }}
             DATABASE_NAME=${{ env.DATABASE_NAME }}
+            SWAGGER_URL=${{ env.SWAGGER_URL }}
+            API_AUTH_USER=${{ env.API_AUTH_USER }}
+            API_AUTH_PASSWORD=${{ env.API_AUTH_PASSWORD }}
+            AWS_LOG_GROUP_NAME=${{ env.AWS_LOG_GROUP_NAME }}
+            AWS_LOG_STREAM_NAME=${{ env.AWS_LOG_STREAM_NAME }}
+            AWS_LOG_ACCESS_KEY_ID=${{ env.AWS_LOG_ACCESS_KEY_ID }}
+            AWS_LOG_SECRET_ACCESS_KEY=${{ env.AWS_LOG_SECRET_ACCESS_KEY }}
+            AWS_LOG_REGION=${{ env.AWS_LOG_REGION }}
+            AWS_ACCESS_KEY_ID=${{ env.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ env.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION=${{ env.AWS_REGION }}
+            MOCK_PAYMENT_API_URL=${{ env.MOCK_PAYMENT_API_URL }}
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
@@ -132,8 +197,8 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-region: ap-northeast-2
-          role-to-assume: arn:aws:iam::332034673285:role/MyGithubOIDC
-          role-session-name: MyGithubOIDC
+          role-to-assume: arn:aws:iam::332034673285:role/HHP-Org
+          role-session-name: HHP-Org
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
@@ -142,3 +207,29 @@ jobs:
           service: ${{ env.ECS_SERVICE_NAME }}
           cluster: ${{ env.ECS_CLUSTER_NAME }}
           wait-for-service-stability: false
+
+      - name: Notify Slack on Failure
+        if: failure()
+        uses: 8398a7/action-slack@v3.15.1
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+          author_name: ${{ github.actor }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
+          username: ${{ secrets.SLACK_USERNAME }}
+          text: 'Deploy failed! :x:'
+        env: 
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Notify Slack on Success
+        if: success()
+        uses: 8398a7/action-slack@v3.15.1
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+          author_name: ${{ github.actor }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
+          username: ${{ secrets.SLACK_USERNAME }}
+          text: 'Deploy success! :white_check_mark:'
+        env: 
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -38,3 +38,14 @@
 ```bash
 curl --location 'http://localhost:3000/health-check'
 ```
+
+## API
+
+스웨거 문서 참조 [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+
+## Live DB Migration
+
+```bash
+npm run typeorm:migration:run:prod
+npm run seed:prod
+```
