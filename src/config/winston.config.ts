@@ -81,19 +81,23 @@ const cloudwatchHelper = new WinstonCloudwatch(cloudwatchConfig);
 const transports = [
   cloudwatchHelper,
   new winston.transports.Console(consoleOnlyOptions),
-  new winston.transports.File({
-    level: 'error',
-    filename: 'storage/logs/nest-error.log',
-    maxsize: 5 * 1024 * 1024,
-    tailable: true,
-  }),
-  new winston.transports.File({
-    // level: 'info',
-    level: 'silly',
-    filename: 'storage/logs/nest-all.log',
-    maxsize: 5 * 1024 * 1024,
-    tailable: true,
-  }),
+  // new winston.transports.File({
+  //   level: 'error',
+  //   filename: 'storage/logs/nest-error.log',
+  //   maxsize: 20 * 1024 * 1024,
+  //   tailable: true,
+  //   zippedArchive: true,
+  //   maxFiles: 14,
+  // }),
+  // new winston.transports.File({
+  //   // level: 'info',
+  //   level: 'silly',
+  //   filename: 'storage/logs/nest-all.log',
+  //   maxsize: 20 * 1024 * 1024,
+  //   tailable: true,
+  //   zippedArchive: true,
+  //   maxFiles: 14,
+  // }),
 ];
 
 export const WinstonLogger = WinstonModule.createLogger({
